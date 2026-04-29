@@ -2,11 +2,12 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { LayoutDashboard, Layers, Settings, CreditCard } from 'lucide-react'
+import { LayoutDashboard, Layers, BarChart2, Settings, CreditCard } from 'lucide-react'
 
 const nav = [
   { label: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
   { label: 'My Widgets', href: '/dashboard/widgets', icon: Layers },
+  { label: 'Analytics', href: '/dashboard/analytics', icon: BarChart2 },
   { label: 'Settings', href: '/dashboard/settings', icon: Settings },
   { label: 'Billing', href: '/dashboard/billing', icon: CreditCard },
 ]

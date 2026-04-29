@@ -216,6 +216,33 @@
     `
   }
 
+  // Fire-and-forget load beacon
+  function trackLoad(widgetId: string, apiBase: string) {
+    try {
+      const domain = window.location.hostname
+      const payload = JSON.stringify({
+        widget_id: widgetId,
+        domain: domain,
+        event_type: 'load',
+      })
+      if (navigator.sendBeacon) {
+        navigator.sendBeacon(
+          `${apiBase}/api/track`,
+          new Blob([payload], { type: 'application/json' })
+        )
+      } else {
+        fetch(`${apiBase}/api/track`, {
+          method: 'POST',
+          body: payload,
+          headers: { 'Content-Type': 'application/json' },
+          keepalive: true,
+        }).catch(() => {})
+      }
+    } catch {
+      // Never throw — tracking must never break the widget
+    }
+  }
+
   // Main render router
   function renderWidget(shadow: ShadowRoot, widget: { type: string; config: Record<string, unknown>; show_branding: boolean }) {
     switch (widget.type) {
@@ -251,6 +278,7 @@
 
       const shadow = createContainer(targetEl)
       renderWidget(shadow, widget)
+      trackLoad(widgetId, API_BASE)
     } catch (err) {
       console.warn('[Devixus] Widget failed to load:', err)
     }
