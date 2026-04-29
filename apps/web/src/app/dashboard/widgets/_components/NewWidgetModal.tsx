@@ -101,6 +101,9 @@ export function NewWidgetModal({ onClose }: Props) {
 
       if (!res.ok) {
         const data = await res.json()
+        if (data.code === 'PLAN_LIMIT_REACHED') {
+          throw new Error('Widget limit reached. Upgrade your plan at Dashboard → Billing.')
+        }
         throw new Error(data.error ?? 'Failed to create widget')
       }
 

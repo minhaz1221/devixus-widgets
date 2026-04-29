@@ -12,6 +12,7 @@
   "dependencies": {
     "@devixus/ui": "*",
     "@devixus/widgets": "*",
+    "@lemonsqueezy/lemonsqueezy.js": "^4.0.0",
     "@supabase/ssr": "^0.10.2",
     "@supabase/supabase-js": "^2.105.1",
     "lucide-react": "^1.14.0",

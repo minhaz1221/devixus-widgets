@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
+import { canCreateWidget } from '@/lib/plan-limits'
 
 export async function GET() {
   try {
@@ -36,6 +37,17 @@ export async function POST(request: NextRequest) {
 
     if (authError || !user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+
+    const allowed = await canCreateWidget(user.id)
+    if (!allowed) {
+      return NextResponse.json(
+        {
+          error: 'Widget limit reached. Please upgrade your plan.',
+          code: 'PLAN_LIMIT_REACHED',
+        },
+        { status: 403 }
+      )
     }
 
     const body = await request.json()
