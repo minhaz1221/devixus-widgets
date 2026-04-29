@@ -1,0 +1,13 @@
+{
+  "name": "@devixus/embed",
+  "version": "0.1.0",
+  "private": true,
+  "main": "dist/widget.js",
+  "scripts": {
+    "build": "node build.js",
+    "dev": "node build.js --watch"
+  },
+  "devDependencies": {
+    "esbuild": "^0.20.0"
+  }
+}
