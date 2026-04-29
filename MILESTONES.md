@@ -3,9 +3,9 @@
 ## Phase 1 — Foundation
 - [x] 1.1 Tech stack finalized
 - [x] 1.2 Monorepo structure
-- [ ] 1.3 Database schema (Supabase)
-- [ ] 1.4 Auth setup
-- [ ] 1.5 CI/CD pipeline
+- [x] 1.3 Database schema (Supabase)
+- [x] 1.4 Auth setup
+- [x] 1.5 CI/CD pipeline
 
 ## Phase 2 — Widget Engine
 - [ ] 2.1 Widget config API
