@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createAdminClient } from '@/lib/supabase/admin'
+import { sendUpgradeEmail } from '@/lib/email'
 import crypto from 'crypto'
 
 export async function POST(request: NextRequest) {
@@ -59,6 +60,20 @@ export async function POST(request: NextRequest) {
             .from('widgets')
             .update({ show_branding: false })
             .eq('user_id', userId)
+        }
+
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('email, full_name')
+          .eq('id', userId)
+          .single()
+
+        if (profile?.email) {
+          await sendUpgradeEmail(
+            profile.email,
+            plan.charAt(0).toUpperCase() + plan.slice(1),
+            profile.full_name
+          )
         }
         break
       }

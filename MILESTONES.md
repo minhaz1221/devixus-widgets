@@ -8,28 +8,27 @@
 - [x] 1.5 CI/CD pipeline
 
 ## Phase 2 — Widget Engine
-- [ ] 2.1 Widget config API
-- [ ] 2.2 Embed loader script
-- [ ] 2.3 First 2 widgets (WhatsApp + Testimonials)
-- [ ] 2.4 CSS isolation
-- [ ] 2.5 Cloudflare caching
+- [x] 2.1 Widget config API
+- [x] 2.2 Embed loader script
+- [x] 2.3 First 2 widgets (WhatsApp + Testimonials)
+- [x] 2.4 CSS isolation
+- [x] 2.5 Cloudflare caching
 
 ## Phase 3 — Dashboard
-- [ ] 3.1 Widget configurator UI
-- [ ] 3.2 Marketplace page
-- [ ] 3.3 User dashboard
-- [ ] 3.4 Install tracking
-- [ ] 3.5 4 more widgets
+- [x] 3.1 Widget configurator UI
+- [x] 3.2 Marketplace page
+- [x] 3.3 User dashboard
+- [x] 3.4 Install tracking
+- [x] 3.5 4 more widgets
 
 ## Phase 4 — Billing
-- [ ] 4.1 Pricing plans
-- [ ] 4.2 Stripe integration
-- [ ] 4.3 Plan limit enforcement
-- [ ] 4.4 Billing portal
+- [x] 4.1 Pricing plans
+- [x] 4.2 Lemon Squeezy integration
+- [x] 4.3 Plan limit enforcement
+- [x] 4.4 Billing portal
 
 ## Phase 5 — Launch
-- [ ] 5.1 Marketing landing page
-- [ ] 5.2 SEO widget pages
-- [ ] 5.3 Transactional emails
-- [ ] 5.4 Error monitoring
-- [ ] 5.5 Beta launch
+- [x] 5.1 Marketing landing page
+- [x] 5.2 Transactional emails
+- [x] 5.3 Error monitoring
+- [ ] 5.4 Beta launch (manual step)

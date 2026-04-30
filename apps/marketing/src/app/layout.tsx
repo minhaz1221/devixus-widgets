@@ -6,9 +6,21 @@ import "./globals.css";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "Devixus Widgets — Embed beautiful widgets on any website",
-  description:
-    "Add stunning, customizable widgets to your website in minutes. No code required.",
+  title: 'Devixus Widgets — Free Website Widgets for Any Website',
+  description: 'Add WhatsApp chat buttons, testimonials sliders, Google reviews and more to your website in 60 seconds. Free plan available. No code required.',
+  keywords: 'website widgets, whatsapp chat button, testimonials widget, free website widgets, embed widgets, no code widgets',
+  openGraph: {
+    title: 'Devixus Widgets — Free Website Widgets',
+    description: 'Add beautiful widgets to any website in 60 seconds.',
+    url: 'https://devixus-widgets-marketing.vercel.app',
+    siteName: 'Devixus Widgets',
+    type: 'website',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Devixus Widgets — Free Website Widgets',
+    description: 'Add beautiful widgets to any website in 60 seconds.',
+  },
 };
 
 export default function RootLayout({
