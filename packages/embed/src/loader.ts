@@ -1057,6 +1057,123 @@
     }
   }
 
+  // Render upgrade overlay when monthly view limit is reached
+  function renderUpgradeOverlay(
+    shadow: ShadowRoot,
+    widget: any,
+    apiBase: string
+  ) {
+    const upgradeUrl = `${apiBase}/dashboard/billing`
+
+    shadow.innerHTML = `
+      <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        .dv-overlay {
+          font-family: -apple-system, BlinkMacSystemFont,
+            'Segoe UI', sans-serif;
+          position: relative;
+          border-radius: 12px;
+          overflow: hidden;
+          min-height: 120px;
+          background: #f8f9fa;
+          border: 2px dashed #dee2e6;
+        }
+        .dv-blur {
+          filter: blur(6px);
+          pointer-events: none;
+          user-select: none;
+          opacity: 0.4;
+          padding: 20px;
+          background: #f0f0f0;
+          min-height: 120px;
+          color: #ccc;
+          font-size: 14px;
+          line-height: 2;
+          word-break: break-all;
+        }
+        .dv-message {
+          position: absolute;
+          top: 50%;
+          left: 50%;
+          transform: translate(-50%, -50%);
+          background: white;
+          border-radius: 12px;
+          padding: 20px 24px;
+          text-align: center;
+          box-shadow: 0 4px 24px rgba(0,0,0,0.12);
+          width: 90%;
+          max-width: 320px;
+          z-index: 10;
+        }
+        .dv-icon {
+          font-size: 28px;
+          margin-bottom: 8px;
+        }
+        .dv-title {
+          font-size: 15px;
+          font-weight: 600;
+          color: #1a1a1a;
+          margin-bottom: 6px;
+        }
+        .dv-subtitle {
+          font-size: 12px;
+          color: #666;
+          margin-bottom: 16px;
+          line-height: 1.5;
+        }
+        .dv-btn {
+          display: inline-block;
+          background: #ff6914;
+          color: white;
+          padding: 10px 20px;
+          border-radius: 8px;
+          text-decoration: none;
+          font-size: 13px;
+          font-weight: 600;
+          transition: opacity 0.2s;
+        }
+        .dv-btn:hover { opacity: 0.9; }
+        .dv-powered {
+          margin-top: 10px;
+          font-size: 10px;
+          color: #999;
+        }
+        .dv-powered a {
+          color: #999;
+          text-decoration: none;
+        }
+      </style>
+      <div class="dv-overlay">
+        <div class="dv-blur">
+          ████████████████████████████████
+          ████████████████████████████████
+          ██████████████████████
+          ████████████████████████████████
+        </div>
+        <div class="dv-message">
+          <div class="dv-icon">⚡</div>
+          <div class="dv-title">
+            Monthly view limit reached
+          </div>
+          <div class="dv-subtitle">
+            This widget has used all its free views
+            for this month. Upgrade to keep it running.
+          </div>
+          <a href="${upgradeUrl}"
+             target="_blank"
+             class="dv-btn">
+            Upgrade plan →
+          </a>
+          <div class="dv-powered">
+            <a href="${apiBase}" target="_blank">
+              Powered by Devixus Widgets
+            </a>
+          </div>
+        </div>
+      </div>
+    `
+  }
+
   // Fire-and-forget load beacon
   function trackLoad(widgetId: string, apiBase: string) {
     try {
@@ -1128,6 +1245,12 @@
       const targetEl = mountSelector
         ? document.querySelector(mountSelector) || document.body
         : document.body
+
+      if (widget.limit_reached) {
+        const shadow = createContainer(targetEl)
+        renderUpgradeOverlay(shadow, widget, API_BASE)
+        return
+      }
 
       const shadow = createContainer(targetEl)
       renderWidget(shadow, widget)

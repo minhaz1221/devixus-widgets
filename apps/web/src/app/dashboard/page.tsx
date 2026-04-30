@@ -1,7 +1,8 @@
 import Link from 'next/link'
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
-import { Plus, Layers, Download, Zap } from 'lucide-react'
+import { getUserPlan } from '@/lib/plan-limits'
+import { Plus, Layers, Download, Zap, Eye } from 'lucide-react'
 
 export default async function DashboardPage() {
   const supabase = await createClient()
@@ -10,14 +11,22 @@ export default async function DashboardPage() {
 
   const { data: widgets } = await supabase
     .from('widgets')
-    .select('id, name, type, is_active, install_count, created_at')
+    .select('id, name, type, is_active, install_count, monthly_views, created_at')
     .eq('user_id', user.id)
     .order('created_at', { ascending: false })
 
+  const plan = await getUserPlan(user.id)
+
   const allWidgets = widgets ?? []
   const totalInstalls = allWidgets.reduce((sum, w) => sum + (w.install_count ?? 0), 0)
+  const totalMonthlyViews = allWidgets.reduce((sum, w) => sum + (w.monthly_views ?? 0), 0)
   const activeCount = allWidgets.filter(w => w.is_active).length
   const recent = allWidgets.slice(0, 3)
+
+  const monthlyViewLimit: number = plan?.monthly_view_limit ?? 200
+  const widgetsAtLimit = monthlyViewLimit !== -1
+    ? allWidgets.filter(w => (w.monthly_views ?? 0) >= monthlyViewLimit)
+    : []
 
   const displayName = user.user_metadata?.full_name ?? user.email
 
@@ -46,12 +55,30 @@ export default async function DashboardPage() {
         </Link>
       </div>
 
+      {/* Limit warning */}
+      {widgetsAtLimit.length > 0 && (
+        <div className="bg-orange-50 border border-orange-200 rounded-xl px-5 py-4 flex items-center justify-between gap-4">
+          <p className="text-sm text-orange-800">
+            <span className="font-semibold">{widgetsAtLimit.length} widget{widgetsAtLimit.length > 1 ? 's have' : ' has'} reached</span> the monthly view limit and is no longer showing.
+          </p>
+          <Link href="/dashboard/billing" className="text-sm font-semibold text-orange-700 hover:underline whitespace-nowrap">
+            Upgrade plan →
+          </Link>
+        </div>
+      )}
+
       {/* Stats */}
-      <div className="grid grid-cols-3 gap-4">
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
         {[
           { label: 'Total Widgets', value: allWidgets.length, icon: Layers, color: 'text-blue-600' },
           { label: 'Total Installs', value: totalInstalls, icon: Download, color: 'text-green-600' },
           { label: 'Active Widgets', value: activeCount, icon: Zap, color: 'text-purple-600' },
+          {
+            label: 'Views this month',
+            value: totalMonthlyViews.toLocaleString(),
+            icon: Eye,
+            color: 'text-orange-600',
+          },
         ].map(stat => (
           <div key={stat.label} className="bg-white rounded-xl border border-gray-200 p-5 flex items-center gap-4">
             <div className={`${stat.color} bg-gray-50 rounded-lg p-2.5`}>

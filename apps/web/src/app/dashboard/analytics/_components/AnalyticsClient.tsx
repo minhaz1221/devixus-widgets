@@ -1,11 +1,13 @@
 'use client'
 
+import Link from 'next/link'
 import { useRouter, usePathname } from 'next/navigation'
 import { BarChart2, Globe, Zap } from 'lucide-react'
 
 interface TopWidget { id: string; name: string; count: number }
 interface TopDomain { domain: string; count: number }
 interface RecentEvent { id: string; widgetName: string; domain: string; createdAt: string }
+interface WidgetView { id: string; name: string; monthly_views: number; views_reset_at: string }
 
 interface Props {
   range: number | null
@@ -16,6 +18,10 @@ interface Props {
   recentEvents: RecentEvent[]
   maxWidgetCount: number
   maxDomainCount: number
+  viewLimitPlan: string
+  viewLimitTotal: number
+  viewLimitMax: number
+  widgetViews: WidgetView[]
 }
 
 function timeAgo(iso: string): string {
@@ -26,6 +32,13 @@ function timeAgo(iso: string): string {
   const hrs = Math.floor(mins / 60)
   if (hrs < 24) return `${hrs}h ago`
   return `${Math.floor(hrs / 24)}d ago`
+}
+
+function barColor(pct: number): string {
+  if (pct >= 100) return 'bg-red-500'
+  if (pct >= 80) return 'bg-orange-500'
+  if (pct >= 50) return 'bg-yellow-500'
+  return 'bg-green-500'
 }
 
 const RANGES = [
@@ -43,10 +56,18 @@ export function AnalyticsClient({
   recentEvents,
   maxWidgetCount,
   maxDomainCount,
+  viewLimitPlan,
+  viewLimitTotal,
+  viewLimitMax,
+  widgetViews,
 }: Props) {
   const router = useRouter()
   const pathname = usePathname()
   const currentRange = range === 30 ? '30d' : range === null ? 'all' : '7d'
+  const unlimited = viewLimitMax === -1
+  const overallPct = !unlimited && viewLimitMax > 0
+    ? Math.round((viewLimitTotal / viewLimitMax) * 100)
+    : 0
 
   function setRange(v: string) {
     router.push(`${pathname}?range=${v}`)
@@ -77,6 +98,75 @@ export function AnalyticsClient({
             </button>
           ))}
         </div>
+      </div>
+
+      {/* View Limit Status */}
+      <div className="bg-white rounded-xl border border-gray-200 p-5">
+        <div className="flex items-center justify-between mb-4">
+          <div>
+            <h2 className="font-semibold text-gray-900">View Limit Status</h2>
+            <p className="text-sm text-gray-500 mt-0.5 capitalize">{viewLimitPlan} plan</p>
+          </div>
+          {viewLimitPlan === 'free' && (
+            <Link
+              href="/dashboard/billing"
+              className="text-sm font-semibold text-orange-600 hover:underline"
+            >
+              Upgrade →
+            </Link>
+          )}
+        </div>
+
+        {unlimited ? (
+          <p className="text-sm text-gray-500">
+            {viewLimitTotal.toLocaleString()} views this month · Unlimited
+          </p>
+        ) : (
+          <>
+            <div className="flex items-center justify-between text-sm mb-1.5">
+              <span className="text-gray-600">Total views this month</span>
+              <span className={`font-semibold ${overallPct >= 100 ? 'text-red-600' : 'text-gray-900'}`}>
+                {viewLimitTotal.toLocaleString()} / {viewLimitMax.toLocaleString()}
+              </span>
+            </div>
+            <div className="h-2 bg-gray-100 rounded-full overflow-hidden mb-5">
+              <div
+                className={`h-full rounded-full transition-all ${barColor(overallPct)}`}
+                style={{ width: `${Math.min(100, overallPct)}%` }}
+              />
+            </div>
+            {widgetViews.length > 0 && (
+              <ul className="space-y-3">
+                {widgetViews.map(w => {
+                  const pct = Math.round((w.monthly_views / viewLimitMax) * 100)
+                  return (
+                    <li key={w.id} className="space-y-1">
+                      <div className="flex items-center justify-between">
+                        <span className="text-xs text-gray-700 truncate max-w-[240px]">{w.name}</span>
+                        <div className="flex items-center gap-2 ml-2 flex-shrink-0">
+                          {pct >= 100 && (
+                            <span className="text-xs font-semibold text-red-600 bg-red-50 px-1.5 py-0.5 rounded">
+                              Limit reached
+                            </span>
+                          )}
+                          <span className="text-xs text-gray-500">
+                            {w.monthly_views.toLocaleString()} / {viewLimitMax.toLocaleString()}
+                          </span>
+                        </div>
+                      </div>
+                      <div className="h-1.5 bg-gray-100 rounded-full overflow-hidden">
+                        <div
+                          className={`h-full rounded-full transition-all ${barColor(pct)}`}
+                          style={{ width: `${Math.min(100, pct)}%` }}
+                        />
+                      </div>
+                    </li>
+                  )
+                })}
+              </ul>
+            )}
+          </>
+        )}
       </div>
 
       {/* Stats row */}

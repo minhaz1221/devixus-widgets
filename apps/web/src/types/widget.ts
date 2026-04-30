@@ -18,6 +18,8 @@ export interface Widget {
   is_active: boolean
   show_branding: boolean
   install_count: number
+  monthly_views: number
+  views_reset_at: string
   created_at: string
   updated_at: string
 }

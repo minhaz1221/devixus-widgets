@@ -32,3 +32,14 @@
 - [x] 5.2 Transactional emails
 - [x] 5.3 Error monitoring
 - [ ] 5.4 Beta launch (manual step)
+
+## Phase 6 — New Widgets
+- [x] 6.1 YouTube Feed widget
+- [x] 6.2 Countdown Timer + Announcement Bar
+- [x] 6.3 Google Reviews widget
+
+## Phase 7 — View Limiting
+- [x] 7.1 Monthly view counter per widget
+- [x] 7.2 View limit enforcement in embed script
+- [x] 7.3 Upgrade overlay UI
+- [x] 7.4 View usage dashboard

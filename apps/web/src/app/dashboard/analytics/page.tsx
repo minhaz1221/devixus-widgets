@@ -1,5 +1,6 @@
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
+import { getUserPlan } from '@/lib/plan-limits'
 import { AnalyticsClient } from './_components/AnalyticsClient'
 
 export default async function AnalyticsPage({
@@ -19,7 +20,7 @@ export default async function AnalyticsPage({
   // Get user's widget IDs first (RLS-safe)
   const { data: userWidgets } = await supabase
     .from('widgets')
-    .select('id, name')
+    .select('id, name, monthly_views, views_reset_at')
     .eq('user_id', user.id)
 
   const widgetIds = (userWidgets ?? []).map(w => w.id)
@@ -37,6 +38,20 @@ export default async function AnalyticsPage({
       </div>
     )
   }
+
+  // Fetch plan for view limit data
+  const plan = await getUserPlan(user.id)
+  const monthlyViewLimit: number = plan?.monthly_view_limit ?? 200
+  const totalMonthlyViews = (userWidgets ?? []).reduce(
+    (sum, w) => sum + (w.monthly_views ?? 0),
+    0
+  )
+  const widgetViews = (userWidgets ?? []).map(w => ({
+    id: w.id,
+    name: w.name,
+    monthly_views: w.monthly_views ?? 0,
+    views_reset_at: w.views_reset_at ?? '',
+  }))
 
   // Events query (scoped to user's widgets)
   let eventsQuery = supabase
@@ -97,6 +112,10 @@ export default async function AnalyticsPage({
       recentEvents={recentEvents}
       maxWidgetCount={maxWidgetCount}
       maxDomainCount={maxDomainCount}
+      viewLimitPlan={plan?.name ?? 'free'}
+      viewLimitTotal={totalMonthlyViews}
+      viewLimitMax={monthlyViewLimit}
+      widgetViews={widgetViews}
     />
   )
 }
