@@ -63,6 +63,7 @@ export async function POST(request: NextRequest) {
     const validTypes = [
       'whatsapp', 'testimonials', 'google_reviews',
       'countdown', 'contact_form', 'social_follow',
+      'youtube_feed',
     ]
 
     if (!validTypes.includes(type)) {
