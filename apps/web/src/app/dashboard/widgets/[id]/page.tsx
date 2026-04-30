@@ -834,6 +834,7 @@ function GoogleReviewsForm({
   }
 
   function selectPlace(place: PlaceResult) {
+    console.log('Selected place:', place.place_id, place.name)
     onChange({
       ...config,
       place_id: place.place_id,
