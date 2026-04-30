@@ -76,6 +76,27 @@ const WIDGET_TYPES = [
     available: false,
     defaultConfig: {},
   },
+  {
+    type: 'youtube_feed',
+    label: 'YouTube Feed',
+    description: 'Show your latest YouTube videos on your website',
+    color: 'border-red-200 hover:border-red-400 hover:bg-red-50',
+    badge: 'bg-red-100 text-red-700',
+    available: true,
+    defaultConfig: {
+      channel_id: '',
+      channel_url: '',
+      max_results: 6,
+      layout: 'grid',
+      columns: 3,
+      show_title: true,
+      show_description: false,
+      show_views: false,
+      show_date: true,
+      theme: 'light',
+      accent_color: '#ff0000',
+    },
+  },
 ]
 
 export function NewWidgetModal({ onClose }: Props) {

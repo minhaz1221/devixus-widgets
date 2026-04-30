@@ -216,6 +216,246 @@
     `
   }
 
+  // Render YouTube Feed widget
+  function renderYouTubeFeed(
+    shadow: ShadowRoot,
+    config: Record<string, unknown>,
+    showBranding: boolean,
+    apiBase: string
+  ) {
+    const theme = (config.theme as string) || 'light'
+    const bg = theme === 'dark' ? '#0f0f0f' : '#ffffff'
+    const text = theme === 'dark' ? '#ffffff' : '#0f0f0f'
+    const subtext = theme === 'dark' ? '#aaaaaa' : '#606060'
+    const cardBg = theme === 'dark' ? '#1a1a1a' : '#f9f9f9'
+    const accent = (config.accent_color as string) || '#ff0000'
+    const columns = (config.columns as number) || 3
+    const layout = (config.layout as string) || 'grid'
+
+    shadow.innerHTML = `
+      <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        .yt-wrap {
+          font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+          background: ${bg};
+          padding: 20px;
+          color: ${text};
+        }
+        .yt-loading {
+          text-align: center;
+          padding: 40px;
+          color: ${subtext};
+          font-size: 14px;
+        }
+      </style>
+      <div class="yt-wrap">
+        <div class="yt-loading">Loading videos...</div>
+      </div>
+    `
+
+    const channelId = config.channel_id as string
+    const maxResults = (config.max_results as number) || 6
+    const apiUrl = `${apiBase}/api/youtube?channel_id=${channelId}&max_results=${maxResults}`
+
+    fetch(apiUrl)
+      .then(r => r.json())
+      .then(data => {
+        if (!data.videos || data.videos.length === 0) {
+          shadow.innerHTML = `
+            <div style="padding:20px;text-align:center;
+              color:${subtext};font-family:sans-serif;">
+              No videos found
+            </div>`
+          return
+        }
+
+        const channel = data.channel
+        const videos = data.videos
+
+        const videoCards = videos.map((v: Record<string, string>) => `
+          <a class="yt-card"
+             href="${v.url}"
+             target="_blank"
+             rel="noopener noreferrer">
+            <div class="yt-thumb">
+              <img src="${v.thumbnail}"
+                   alt="${v.title}"
+                   loading="lazy" />
+              <div class="yt-play">▶</div>
+            </div>
+            ${config.show_title !== false
+              ? `<div class="yt-title">${v.title}</div>`
+              : ''}
+            ${config.show_date !== false
+              ? `<div class="yt-meta">${new Date(v.published_at).toLocaleDateString()}</div>`
+              : ''}
+          </a>
+        `).join('')
+
+        const gridStyle = layout === 'grid'
+          ? `grid-template-columns: repeat(${columns}, 1fr);`
+          : layout === 'list'
+          ? 'grid-template-columns: 1fr;'
+          : 'grid-auto-flow: column; grid-auto-columns: 280px;'
+
+        shadow.innerHTML = `
+          <style>
+            * { box-sizing: border-box; margin: 0; padding: 0; }
+            .yt-wrap {
+              font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+              background: ${bg};
+              padding: 20px;
+              color: ${text};
+            }
+            .yt-header {
+              display: flex;
+              align-items: center;
+              gap: 12px;
+              margin-bottom: 20px;
+              padding-bottom: 16px;
+              border-bottom: 1px solid ${theme === 'dark' ? '#333' : '#eee'};
+            }
+            .yt-avatar {
+              width: 48px;
+              height: 48px;
+              border-radius: 50%;
+              object-fit: cover;
+            }
+            .yt-channel-name {
+              font-size: 16px;
+              font-weight: 600;
+              color: ${text};
+            }
+            .yt-subs {
+              font-size: 12px;
+              color: ${subtext};
+              margin-top: 2px;
+            }
+            .yt-subscribe {
+              margin-left: auto;
+              background: ${accent};
+              color: white;
+              border: none;
+              padding: 8px 16px;
+              border-radius: 20px;
+              font-size: 13px;
+              font-weight: 500;
+              cursor: pointer;
+              text-decoration: none;
+              display: inline-block;
+            }
+            .yt-grid {
+              display: grid;
+              ${gridStyle}
+              gap: 16px;
+              ${layout === 'carousel'
+                ? 'overflow-x: auto; scrollbar-width: none;'
+                : ''}
+            }
+            .yt-grid::-webkit-scrollbar { display: none; }
+            .yt-card {
+              text-decoration: none;
+              color: ${text};
+              display: block;
+              border-radius: 8px;
+              overflow: hidden;
+              background: ${cardBg};
+              transition: transform 0.2s ease;
+            }
+            .yt-card:hover { transform: translateY(-2px); }
+            .yt-thumb {
+              position: relative;
+              padding-top: 56.25%;
+              overflow: hidden;
+              background: #000;
+            }
+            .yt-thumb img {
+              position: absolute;
+              top: 0; left: 0;
+              width: 100%; height: 100%;
+              object-fit: cover;
+            }
+            .yt-play {
+              position: absolute;
+              top: 50%; left: 50%;
+              transform: translate(-50%, -50%);
+              background: rgba(0,0,0,0.7);
+              color: white;
+              width: 44px; height: 44px;
+              border-radius: 50%;
+              display: flex;
+              align-items: center;
+              justify-content: center;
+              font-size: 16px;
+              opacity: 0;
+              transition: opacity 0.2s;
+            }
+            .yt-card:hover .yt-play { opacity: 1; }
+            .yt-title {
+              font-size: 13px;
+              font-weight: 500;
+              padding: 10px 12px 4px;
+              line-height: 1.4;
+              display: -webkit-box;
+              -webkit-line-clamp: 2;
+              -webkit-box-orient: vertical;
+              overflow: hidden;
+            }
+            .yt-meta {
+              font-size: 11px;
+              color: ${subtext};
+              padding: 0 12px 10px;
+            }
+            .yt-branding {
+              text-align: center;
+              margin-top: 16px;
+              font-size: 10px;
+            }
+            .yt-branding a {
+              color: ${subtext};
+              text-decoration: none;
+              opacity: 0.6;
+            }
+          </style>
+          <div class="yt-wrap">
+            ${channel ? `
+            <div class="yt-header">
+              ${channel.avatar
+                ? `<img src="${channel.avatar}"
+                         class="yt-avatar"
+                         alt="${channel.name}" />`
+                : ''}
+              <div>
+                <div class="yt-channel-name">${channel.name}</div>
+                ${channel.subscriber_count
+                  ? `<div class="yt-subs">${channel.subscriber_count} subscribers</div>`
+                  : ''}
+              </div>
+              <a href="https://youtube.com/channel/${channelId}"
+                 class="yt-subscribe"
+                 target="_blank"
+                 rel="noopener noreferrer">
+                Subscribe
+              </a>
+            </div>` : ''}
+            <div class="yt-grid">${videoCards}</div>
+            ${showBranding ? `
+              <div class="yt-branding">
+                <a href="${apiBase}"
+                   target="_blank"
+                   rel="noopener noreferrer">
+                  Powered by Devixus Widgets
+                </a>
+              </div>` : ''}
+          </div>
+        `
+      })
+      .catch(() => {
+        const loadingEl = shadow.querySelector('.yt-loading')
+        if (loadingEl) loadingEl.textContent = 'Failed to load videos'
+      })
+  }
+
   // Fire-and-forget load beacon
   function trackLoad(widgetId: string, apiBase: string) {
     try {
@@ -251,6 +491,9 @@
         break
       case 'testimonials':
         renderTestimonials(shadow, widget.config, widget.show_branding)
+        break
+      case 'youtube_feed':
+        renderYouTubeFeed(shadow, widget.config, widget.show_branding, API_BASE)
         break
       default:
         console.warn(`[Devixus] Unknown widget type: ${widget.type}`)

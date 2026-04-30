@@ -5,6 +5,7 @@ export type WidgetType =
   | 'countdown'
   | 'contact_form'
   | 'social_follow'
+  | 'youtube_feed'
 
 export interface Widget {
   id: string
@@ -40,4 +41,18 @@ export interface TestimonialsConfig {
   autoplay_speed: number
   show_rating: boolean
   theme: 'light' | 'dark'
+}
+
+export interface YouTubeFeedConfig {
+  channel_id: string
+  channel_url: string
+  max_results: number
+  layout: 'grid' | 'list' | 'carousel'
+  columns: 2 | 3 | 4
+  show_title: boolean
+  show_description: boolean
+  show_views: boolean
+  show_date: boolean
+  theme: 'light' | 'dark'
+  accent_color: string
 }

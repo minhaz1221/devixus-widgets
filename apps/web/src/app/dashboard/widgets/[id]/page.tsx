@@ -3,7 +3,7 @@
 import { useEffect, useState, useCallback } from 'react'
 import { useParams } from 'next/navigation'
 import { Copy, Check, Star, Trash2, Plus } from 'lucide-react'
-import type { Widget, WhatsAppConfig, TestimonialsConfig } from '@/types/widget'
+import type { Widget, WhatsAppConfig, TestimonialsConfig, YouTubeFeedConfig } from '@/types/widget'
 
 // ── Embed code ─────────────────────────────────────────────────────────────
 const EMBED_ORIGIN = 'https://devixus-widgets-web.vercel.app'
@@ -36,6 +36,33 @@ function EmbedCode({ widgetId }: { widgetId: string }) {
         {copied ? <><Check size={14} className="text-green-600" /> Copied!</> : <><Copy size={14} /> Copy to clipboard</>}
       </button>
     </div>
+  )
+}
+
+// ── Toggle helper ──────────────────────────────────────────────────────────
+function Toggle({
+  checked,
+  onChange,
+}: {
+  checked: boolean
+  onChange: (v: boolean) => void
+}) {
+  return (
+    <button
+      type="button"
+      role="switch"
+      aria-checked={checked}
+      onClick={() => onChange(!checked)}
+      className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
+        checked ? 'bg-blue-600' : 'bg-gray-200'
+      }`}
+    >
+      <span
+        className={`inline-block h-4 w-4 rounded-full bg-white shadow transition-transform ${
+          checked ? 'translate-x-6' : 'translate-x-1'
+        }`}
+      />
+    </button>
   )
 }
 
@@ -114,19 +141,10 @@ function WhatsAppForm({
         ]).map(([key, label]) => (
           <label key={key} className="flex items-center justify-between cursor-pointer">
             <span className="text-sm text-gray-700">{label}</span>
-            <button
-              type="button"
-              role="switch"
-              aria-checked={!!(config[key] ?? true)}
-              onClick={() => set(key, !(config[key] ?? true))}
-              className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-                (config[key] ?? true) ? 'bg-blue-600' : 'bg-gray-200'
-              }`}
-            >
-              <span className={`inline-block h-4 w-4 rounded-full bg-white shadow transition-transform ${
-                (config[key] ?? true) ? 'translate-x-6' : 'translate-x-1'
-              }`} />
-            </button>
+            <Toggle
+              checked={!!(config[key] ?? true)}
+              onChange={v => set(key, v)}
+            />
           </label>
         ))}
       </div>
@@ -180,7 +198,6 @@ function TestimonialsForm({
 
   return (
     <div className="space-y-5">
-      {/* Theme */}
       <div>
         <label className="block text-sm font-medium text-gray-700 mb-2">Theme</label>
         <div className="flex gap-3">
@@ -198,7 +215,6 @@ function TestimonialsForm({
         </div>
       </div>
 
-      {/* Toggles */}
       <div className="flex flex-col gap-3">
         {([
           ['show_rating', 'Show star ratings'] as const,
@@ -206,24 +222,14 @@ function TestimonialsForm({
         ]).map(([key, label]) => (
           <label key={key} className="flex items-center justify-between cursor-pointer">
             <span className="text-sm text-gray-700">{label}</span>
-            <button
-              type="button"
-              role="switch"
-              aria-checked={!!(config[key] ?? true)}
-              onClick={() => set(key, !(config[key] ?? true))}
-              className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-                (config[key] ?? true) ? 'bg-blue-600' : 'bg-gray-200'
-              }`}
-            >
-              <span className={`inline-block h-4 w-4 rounded-full bg-white shadow transition-transform ${
-                (config[key] ?? true) ? 'translate-x-6' : 'translate-x-1'
-              }`} />
-            </button>
+            <Toggle
+              checked={!!(config[key] ?? true)}
+              onChange={v => set(key, v)}
+            />
           </label>
         ))}
       </div>
 
-      {/* Testimonials list */}
       <div>
         <div className="flex items-center justify-between mb-2">
           <label className="text-sm font-medium text-gray-700">Testimonials ({testimonials.length})</label>
@@ -236,7 +242,6 @@ function TestimonialsForm({
           </button>
         </div>
 
-        {/* Add form */}
         {adding && (
           <div className="border border-blue-200 bg-blue-50 rounded-xl p-4 space-y-3 mb-3">
             <div className="grid grid-cols-2 gap-3">
@@ -304,7 +309,6 @@ function TestimonialsForm({
           </div>
         )}
 
-        {/* Existing testimonials */}
         {testimonials.length === 0 && !adding && (
           <p className="text-xs text-gray-400 py-2">No testimonials yet. Click Add to get started.</p>
         )}
@@ -325,6 +329,179 @@ function TestimonialsForm({
             </li>
           ))}
         </ul>
+      </div>
+    </div>
+  )
+}
+
+// ── YouTube Feed form ──────────────────────────────────────────────────────
+function YouTubeFeedForm({
+  config,
+  onChange,
+}: {
+  config: Partial<YouTubeFeedConfig>
+  onChange: (c: Partial<YouTubeFeedConfig>) => void
+}) {
+  const [channelUrl, setChannelUrl] = useState(config.channel_url ?? '')
+  const [channelName, setChannelName] = useState('')
+  const [fetching, setFetching] = useState(false)
+  const [fetchError, setFetchError] = useState<string | null>(null)
+
+  const set = (key: keyof YouTubeFeedConfig, val: unknown) =>
+    onChange({ ...config, [key]: val })
+
+  async function fetchChannel() {
+    if (!channelUrl.trim()) return
+    setFetching(true)
+    setFetchError(null)
+    try {
+      const res = await fetch(
+        `/api/youtube/resolve?url=${encodeURIComponent(channelUrl.trim())}`
+      )
+      const data = await res.json()
+      if (!res.ok) throw new Error(data.error ?? 'Failed to resolve channel')
+      onChange({ ...config, channel_id: data.channel_id, channel_url: channelUrl.trim() })
+      setChannelName(data.channel_name)
+    } catch (err) {
+      setFetchError(err instanceof Error ? err.message : 'Failed to resolve channel')
+    } finally {
+      setFetching(false)
+    }
+  }
+
+  return (
+    <div className="space-y-5">
+
+      {/* Channel URL */}
+      <div>
+        <label className="block text-sm font-medium text-gray-700 mb-1">
+          YouTube Channel URL
+        </label>
+        <div className="flex gap-2">
+          <input
+            value={channelUrl}
+            onChange={e => setChannelUrl(e.target.value)}
+            onKeyDown={e => e.key === 'Enter' && fetchChannel()}
+            placeholder="https://youtube.com/@channelname"
+            className="flex-1 px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+          />
+          <button
+            type="button"
+            onClick={fetchChannel}
+            disabled={!channelUrl.trim() || fetching}
+            className="px-3 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 disabled:opacity-50 whitespace-nowrap"
+          >
+            {fetching ? '…' : 'Fetch'}
+          </button>
+        </div>
+        {config.channel_id && (
+          <p className="text-xs text-green-600 mt-1.5 flex items-center gap-1">
+            <Check size={12} /> {channelName || config.channel_id}
+          </p>
+        )}
+        {fetchError && (
+          <p className="text-xs text-red-600 mt-1.5">{fetchError}</p>
+        )}
+      </div>
+
+      {/* Layout */}
+      <div>
+        <label className="block text-sm font-medium text-gray-700 mb-2">Layout</label>
+        <div className="flex gap-4">
+          {(['grid', 'list', 'carousel'] as const).map(l => (
+            <label key={l} className="flex items-center gap-2 cursor-pointer">
+              <input
+                type="radio"
+                name="yt-layout"
+                checked={(config.layout ?? 'grid') === l}
+                onChange={() => set('layout', l)}
+              />
+              <span className="text-sm text-gray-700 capitalize">{l}</span>
+            </label>
+          ))}
+        </div>
+      </div>
+
+      {/* Columns — only for grid */}
+      {(config.layout ?? 'grid') === 'grid' && (
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-2">Columns</label>
+          <div className="flex gap-4">
+            {([2, 3, 4] as const).map(c => (
+              <label key={c} className="flex items-center gap-2 cursor-pointer">
+                <input
+                  type="radio"
+                  name="yt-columns"
+                  checked={(config.columns ?? 3) === c}
+                  onChange={() => set('columns', c)}
+                />
+                <span className="text-sm text-gray-700">{c}</span>
+              </label>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Max Videos */}
+      <div>
+        <label className="block text-sm font-medium text-gray-700 mb-1">Max Videos</label>
+        <select
+          value={config.max_results ?? 6}
+          onChange={e => set('max_results', parseInt(e.target.value))}
+          className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+        >
+          {[3, 6, 9, 12].map(n => (
+            <option key={n} value={n}>{n} videos</option>
+          ))}
+        </select>
+      </div>
+
+      {/* Theme */}
+      <div>
+        <label className="block text-sm font-medium text-gray-700 mb-2">Theme</label>
+        <div className="flex gap-4">
+          {(['light', 'dark'] as const).map(t => (
+            <label key={t} className="flex items-center gap-2 cursor-pointer">
+              <input
+                type="radio"
+                name="yt-theme"
+                checked={(config.theme ?? 'light') === t}
+                onChange={() => set('theme', t)}
+              />
+              <span className="text-sm text-gray-700 capitalize">{t}</span>
+            </label>
+          ))}
+        </div>
+      </div>
+
+      {/* Accent color */}
+      <div>
+        <label className="block text-sm font-medium text-gray-700 mb-2">Accent Color</label>
+        <div className="flex items-center gap-3">
+          <input
+            type="color"
+            value={config.accent_color ?? '#ff0000'}
+            onChange={e => set('accent_color', e.target.value)}
+            className="w-10 h-10 rounded-lg border border-gray-200 cursor-pointer p-0.5"
+          />
+          <span className="text-sm text-gray-500">{config.accent_color ?? '#ff0000'}</span>
+        </div>
+      </div>
+
+      {/* Toggles */}
+      <div className="flex flex-col gap-3">
+        {([
+          ['show_title', 'Show video title'] as const,
+          ['show_date', 'Show publish date'] as const,
+        ]).map(([key, label]) => (
+          <label key={key} className="flex items-center justify-between cursor-pointer">
+            <span className="text-sm text-gray-700">{label}</span>
+            <Toggle
+              checked={!!(config[key] ?? true)}
+              onChange={v => set(key, v)}
+            />
+          </label>
+        ))}
       </div>
     </div>
   )
@@ -366,7 +543,7 @@ export default function ConfiguratorPage() {
     setSaving(false)
     if (res.ok) {
       showToast('Saved successfully', true)
-      setPreviewKey(k => k + 1) // refresh iframe
+      setPreviewKey(k => k + 1)
     } else {
       const data = await res.json()
       showToast(data.error ?? 'Save failed', false)
@@ -421,6 +598,12 @@ export default function ConfiguratorPage() {
               onChange={c => setConfig(c as Record<string, unknown>)}
             />
           )}
+          {widget.type === 'youtube_feed' && (
+            <YouTubeFeedForm
+              config={config as Partial<YouTubeFeedConfig>}
+              onChange={c => setConfig(c as Record<string, unknown>)}
+            />
+          )}
         </div>
 
         {/* Save */}
@@ -435,10 +618,8 @@ export default function ConfiguratorPage() {
 
       {/* RIGHT — Preview + embed */}
       <div className="flex-1 flex flex-col gap-4 min-w-0 overflow-y-auto">
-        {/* Embed code */}
         <EmbedCode widgetId={id} />
 
-        {/* Preview */}
         <div className="bg-white rounded-xl border border-gray-200 flex-1 flex flex-col overflow-hidden">
           <div className="px-5 py-3 border-b border-gray-100 flex items-center justify-between">
             <h3 className="font-semibold text-gray-900 text-sm">Preview</h3>
