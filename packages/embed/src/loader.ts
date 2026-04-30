@@ -456,6 +456,367 @@
       })
   }
 
+  // Render Countdown Timer widget
+  function renderCountdownTimer(
+    shadow: ShadowRoot,
+    config: any,
+    showBranding: boolean,
+    apiBase: string
+  ) {
+    const theme = config.theme || 'light'
+    const bgColor = config.bg_color ||
+      (theme === 'dark' ? '#1a1a2e' : '#ffffff')
+    const textColor = config.text_color ||
+      (theme === 'dark' ? '#ffffff' : '#1a1a1a')
+    const accentColor = config.accent_color || '#ff6914'
+    const title = config.title || 'Offer ends in'
+    const style = config.style || 'blocks'
+
+    function getTimeLeft() {
+      const target = new Date(
+        config.target_date + 'T' + (config.target_time || '00:00')
+      ).getTime()
+      const now = Date.now()
+      const diff = target - now
+
+      if (diff <= 0) return null
+
+      return {
+        days: Math.floor(diff / (1000 * 60 * 60 * 24)),
+        hours: Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)),
+        minutes: Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60)),
+        seconds: Math.floor((diff % (1000 * 60)) / 1000),
+      }
+    }
+
+    function pad(n: number) {
+      return String(n).padStart(2, '0')
+    }
+
+    function render() {
+      const time = getTimeLeft()
+
+      if (!time) {
+        const msg = config.expired_message || 'This offer has ended'
+        if (config.redirect_url) {
+          window.location.href = config.redirect_url
+        }
+        shadow.innerHTML = `
+          <style>
+            .ct-wrap {
+              font-family: -apple-system, sans-serif;
+              background: ${bgColor};
+              padding: 24px;
+              text-align: center;
+              color: ${textColor};
+              border-radius: 8px;
+            }
+            .ct-expired { font-size: 18px; font-weight: 500; }
+          </style>
+          <div class="ct-wrap">
+            <div class="ct-expired">${msg}</div>
+          </div>
+        `
+        return
+      }
+
+      const units = []
+      if (config.show_days !== false)
+        units.push({ value: pad(time.days), label: 'Days' })
+      if (config.show_hours !== false)
+        units.push({ value: pad(time.hours), label: 'Hours' })
+      if (config.show_minutes !== false)
+        units.push({ value: pad(time.minutes), label: 'Minutes' })
+      if (config.show_seconds !== false)
+        units.push({ value: pad(time.seconds), label: 'Seconds' })
+
+      const blockStyle = style === 'blocks' ? `
+        .ct-unit {
+          background: ${accentColor};
+          border-radius: 8px;
+          padding: 16px 20px;
+          min-width: 72px;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+        }
+        .ct-value {
+          font-size: 36px;
+          font-weight: 700;
+          color: white;
+          line-height: 1;
+          font-variant-numeric: tabular-nums;
+        }
+        .ct-label {
+          font-size: 11px;
+          color: rgba(255,255,255,0.8);
+          margin-top: 4px;
+          text-transform: uppercase;
+          letter-spacing: .05em;
+        }
+      ` : style === 'flip' ? `
+        .ct-unit {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          gap: 4px;
+        }
+        .ct-value {
+          font-size: 48px;
+          font-weight: 800;
+          color: ${accentColor};
+          line-height: 1;
+          font-variant-numeric: tabular-nums;
+          background: ${bgColor};
+          border: 2px solid ${accentColor};
+          border-radius: 8px;
+          padding: 8px 16px;
+          min-width: 80px;
+          text-align: center;
+        }
+        .ct-label {
+          font-size: 11px;
+          color: ${textColor};
+          opacity: 0.6;
+          text-transform: uppercase;
+          letter-spacing: .05em;
+        }
+      ` : `
+        .ct-unit {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          gap: 4px;
+        }
+        .ct-value {
+          font-size: 42px;
+          font-weight: 700;
+          color: ${accentColor};
+          line-height: 1;
+          font-variant-numeric: tabular-nums;
+        }
+        .ct-label {
+          font-size: 11px;
+          color: ${textColor};
+          opacity: 0.6;
+          text-transform: uppercase;
+          letter-spacing: .05em;
+        }
+      `
+
+      const unitsHtml = units.map(u => `
+        <div class="ct-unit">
+          <div class="ct-value">${u.value}</div>
+          ${config.show_labels !== false ? `<div class="ct-label">${u.label}</div>` : ''}
+        </div>
+      `).join(style === 'minimal' ? `<div class="ct-sep">:</div>` : '')
+
+      shadow.innerHTML = `
+        <style>
+          * { box-sizing: border-box; margin: 0; padding: 0; }
+          .ct-wrap {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: ${bgColor};
+            padding: 24px 20px;
+            border-radius: 8px;
+            text-align: center;
+            color: ${textColor};
+          }
+          .ct-title {
+            font-size: 16px;
+            font-weight: 500;
+            margin-bottom: 16px;
+            color: ${textColor};
+          }
+          .ct-units {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            flex-wrap: wrap;
+          }
+          ${blockStyle}
+          .ct-sep {
+            font-size: 36px;
+            font-weight: 700;
+            color: ${accentColor};
+            margin-bottom: 16px;
+          }
+          .ct-branding {
+            margin-top: 16px;
+            font-size: 10px;
+          }
+          .ct-branding a {
+            color: ${textColor};
+            opacity: 0.4;
+            text-decoration: none;
+          }
+        </style>
+        <div class="ct-wrap">
+          ${title ? `<div class="ct-title">${title}</div>` : ''}
+          <div class="ct-units">${unitsHtml}</div>
+          ${showBranding ? `
+            <div class="ct-branding">
+              <a href="${apiBase}" target="_blank" rel="noopener noreferrer">
+                Powered by Devixus Widgets
+              </a>
+            </div>` : ''}
+        </div>
+      `
+    }
+
+    render()
+
+    const interval = setInterval(() => {
+      const time = getTimeLeft()
+      if (!time) {
+        clearInterval(interval)
+        render()
+        return
+      }
+      const values = shadow.querySelectorAll('.ct-value')
+      const units2 = []
+      if (config.show_days !== false) units2.push(pad(time.days))
+      if (config.show_hours !== false) units2.push(pad(time.hours))
+      if (config.show_minutes !== false) units2.push(pad(time.minutes))
+      if (config.show_seconds !== false) units2.push(pad(time.seconds))
+      values.forEach((el, i) => {
+        if (units2[i]) el.textContent = units2[i]
+      })
+    }, 1000)
+  }
+
+  // Render Announcement Bar widget
+  function renderAnnouncementBar(
+    shadow: ShadowRoot,
+    config: any,
+    showBranding: boolean,
+    apiBase: string
+  ) {
+    const message = config.message || '🎉 Welcome to our website!'
+    const bgColor = config.bg_color || '#ff6914'
+    const textColor = config.text_color || '#ffffff'
+    const linkColor = config.link_color || '#ffffff'
+    const position = config.position || 'top'
+    const isSticky = config.is_sticky !== false
+    const showClose = config.show_close_button !== false
+    const emoji = config.show_emoji ? (config.emoji || '🎉') : ''
+    const style = config.style || 'solid'
+
+    let background = bgColor
+    if (style === 'gradient') {
+      background = `linear-gradient(135deg, ${bgColor}, ${bgColor}dd)`
+    } else if (style === 'striped') {
+      background = `repeating-linear-gradient(
+        45deg,
+        ${bgColor},
+        ${bgColor} 10px,
+        ${bgColor}ee 10px,
+        ${bgColor}ee 20px
+      )`
+    }
+
+    const positionStyle = isSticky
+      ? `position: fixed; ${position}: 0; left: 0; right: 0; z-index: 999999;`
+      : `position: relative;`
+
+    shadow.innerHTML = `
+      <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        .ab-bar {
+          ${positionStyle}
+          background: ${background};
+          color: ${textColor};
+          padding: 10px 16px;
+          font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+          font-size: 14px;
+          line-height: 1.4;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          gap: 8px;
+          min-height: 44px;
+        }
+        .ab-content {
+          display: flex;
+          align-items: center;
+          gap: 8px;
+          flex-wrap: wrap;
+          justify-content: center;
+        }
+        .ab-message { color: ${textColor}; font-weight: 500; }
+        .ab-link {
+          color: ${linkColor};
+          text-decoration: underline;
+          font-weight: 600;
+          cursor: pointer;
+          white-space: nowrap;
+        }
+        .ab-link:hover { opacity: 0.85; }
+        .ab-close {
+          position: absolute;
+          right: 12px;
+          top: 50%;
+          transform: translateY(-50%);
+          background: none;
+          border: none;
+          color: ${textColor};
+          cursor: pointer;
+          font-size: 18px;
+          opacity: 0.7;
+          padding: 4px;
+          line-height: 1;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          width: 28px;
+          height: 28px;
+          border-radius: 50%;
+        }
+        .ab-close:hover { opacity: 1; background: rgba(0,0,0,0.1); }
+        .ab-branding {
+          position: absolute;
+          right: ${showClose ? '44px' : '12px'};
+          top: 50%;
+          transform: translateY(-50%);
+          font-size: 9px;
+        }
+        .ab-branding a { color: ${textColor}; opacity: 0.4; text-decoration: none; }
+      </style>
+      <div class="ab-bar" id="ab-bar">
+        <div class="ab-content">
+          ${emoji ? `<span>${emoji}</span>` : ''}
+          <span class="ab-message">${message}</span>
+          ${config.link_text && config.link_url ? `
+            <a class="ab-link"
+               href="${config.link_url}"
+               target="_blank"
+               rel="noopener noreferrer">
+              ${config.link_text} →
+            </a>
+          ` : ''}
+        </div>
+        ${showBranding ? `
+          <div class="ab-branding">
+            <a href="${apiBase}" target="_blank" rel="noopener noreferrer">Devixus</a>
+          </div>` : ''}
+        ${showClose ? `
+          <button class="ab-close" id="ab-close" aria-label="Close">✕</button>
+        ` : ''}
+      </div>
+    `
+
+    if (showClose) {
+      const closeBtn = shadow.getElementById('ab-close')
+      const bar = shadow.getElementById('ab-bar')
+      if (closeBtn && bar) {
+        closeBtn.addEventListener('click', () => {
+          bar.style.display = 'none'
+        })
+      }
+    }
+  }
+
   // Fire-and-forget load beacon
   function trackLoad(widgetId: string, apiBase: string) {
     try {
@@ -494,6 +855,12 @@
         break
       case 'youtube_feed':
         renderYouTubeFeed(shadow, widget.config, widget.show_branding, API_BASE)
+        break
+      case 'countdown_timer':
+        renderCountdownTimer(shadow, widget.config, widget.show_branding, API_BASE)
+        break
+      case 'announcement_bar':
+        renderAnnouncementBar(shadow, widget.config, widget.show_branding, API_BASE)
         break
       default:
         console.warn(`[Devixus] Unknown widget type: ${widget.type}`)

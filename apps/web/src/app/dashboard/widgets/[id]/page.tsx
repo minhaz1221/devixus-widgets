@@ -3,7 +3,7 @@
 import { useEffect, useState, useCallback } from 'react'
 import { useParams } from 'next/navigation'
 import { Copy, Check, Star, Trash2, Plus } from 'lucide-react'
-import type { Widget, WhatsAppConfig, TestimonialsConfig, YouTubeFeedConfig } from '@/types/widget'
+import type { Widget, WhatsAppConfig, TestimonialsConfig, YouTubeFeedConfig, CountdownTimerConfig, AnnouncementBarConfig } from '@/types/widget'
 
 // ── Embed code ─────────────────────────────────────────────────────────────
 const EMBED_ORIGIN = 'https://devixus-widgets-web.vercel.app'
@@ -507,6 +507,288 @@ function YouTubeFeedForm({
   )
 }
 
+// ── Countdown Timer form ───────────────────────────────────────────────────
+function CountdownTimerForm({
+  config,
+  onChange,
+}: {
+  config: Partial<CountdownTimerConfig>
+  onChange: (c: Partial<CountdownTimerConfig>) => void
+}) {
+  const set = (key: keyof CountdownTimerConfig, val: unknown) =>
+    onChange({ ...config, [key]: val })
+
+  return (
+    <div className="space-y-5">
+      <div>
+        <label className="block text-sm font-medium text-gray-700 mb-1">Title</label>
+        <input
+          type="text"
+          value={config.title ?? ''}
+          onChange={e => set('title', e.target.value)}
+          placeholder="Sale ends in"
+          className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+        />
+      </div>
+
+      <div className="grid grid-cols-2 gap-3">
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">Target Date</label>
+          <input
+            type="date"
+            value={config.target_date ?? ''}
+            onChange={e => set('target_date', e.target.value)}
+            className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+          />
+        </div>
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">Target Time</label>
+          <input
+            type="time"
+            value={config.target_time ?? ''}
+            onChange={e => set('target_time', e.target.value)}
+            className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+          />
+        </div>
+      </div>
+
+      <div>
+        <label className="block text-sm font-medium text-gray-700 mb-1">Expired Message</label>
+        <input
+          type="text"
+          value={config.expired_message ?? ''}
+          onChange={e => set('expired_message', e.target.value)}
+          placeholder="This offer has ended"
+          className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+        />
+      </div>
+
+      <div>
+        <label className="block text-sm font-medium text-gray-700 mb-1">
+          Redirect URL <span className="text-gray-400 font-normal">(optional, on expiry)</span>
+        </label>
+        <input
+          type="url"
+          value={config.redirect_url ?? ''}
+          onChange={e => set('redirect_url', e.target.value)}
+          placeholder="https://example.com"
+          className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+        />
+      </div>
+
+      <div>
+        <label className="block text-sm font-medium text-gray-700 mb-2">Style</label>
+        <div className="flex gap-4">
+          {(['blocks', 'minimal', 'flip'] as const).map(s => (
+            <label key={s} className="flex items-center gap-2 cursor-pointer">
+              <input
+                type="radio"
+                name="ct-style"
+                checked={(config.style ?? 'blocks') === s}
+                onChange={() => set('style', s)}
+              />
+              <span className="text-sm text-gray-700 capitalize">{s}</span>
+            </label>
+          ))}
+        </div>
+      </div>
+
+      <div>
+        <label className="block text-sm font-medium text-gray-700 mb-2">Theme</label>
+        <div className="flex gap-4">
+          {(['light', 'dark'] as const).map(t => (
+            <label key={t} className="flex items-center gap-2 cursor-pointer">
+              <input
+                type="radio"
+                name="ct-theme"
+                checked={(config.theme ?? 'light') === t}
+                onChange={() => set('theme', t)}
+              />
+              <span className="text-sm text-gray-700 capitalize">{t}</span>
+            </label>
+          ))}
+        </div>
+      </div>
+
+      <div className="grid grid-cols-3 gap-3">
+        {([
+          ['accent_color', 'Accent Color', '#8b5cf6'] as const,
+          ['bg_color', 'Background', '#ffffff'] as const,
+          ['text_color', 'Text Color', '#1a1a1a'] as const,
+        ]).map(([key, label, fallback]) => (
+          <div key={key}>
+            <label className="block text-xs font-medium text-gray-600 mb-1">{label}</label>
+            <div className="flex items-center gap-2">
+              <input
+                type="color"
+                value={(config[key as keyof CountdownTimerConfig] as string) ?? fallback}
+                onChange={e => set(key as keyof CountdownTimerConfig, e.target.value)}
+                className="w-9 h-9 rounded-lg border border-gray-200 cursor-pointer p-0.5"
+              />
+              <span className="text-xs text-gray-400">{(config[key as keyof CountdownTimerConfig] as string) ?? fallback}</span>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      <div className="flex flex-col gap-3">
+        {([
+          ['show_days', 'Show days'] as const,
+          ['show_hours', 'Show hours'] as const,
+          ['show_minutes', 'Show minutes'] as const,
+          ['show_seconds', 'Show seconds'] as const,
+          ['show_labels', 'Show labels'] as const,
+        ]).map(([key, label]) => (
+          <label key={key} className="flex items-center justify-between cursor-pointer">
+            <span className="text-sm text-gray-700">{label}</span>
+            <Toggle
+              checked={!!(config[key] ?? true)}
+              onChange={v => set(key, v)}
+            />
+          </label>
+        ))}
+      </div>
+    </div>
+  )
+}
+
+// ── Announcement Bar form ──────────────────────────────────────────────────
+function AnnouncementBarForm({
+  config,
+  onChange,
+}: {
+  config: Partial<AnnouncementBarConfig>
+  onChange: (c: Partial<AnnouncementBarConfig>) => void
+}) {
+  const set = (key: keyof AnnouncementBarConfig, val: unknown) =>
+    onChange({ ...config, [key]: val })
+
+  return (
+    <div className="space-y-5">
+      <div>
+        <label className="block text-sm font-medium text-gray-700 mb-1">Message</label>
+        <input
+          type="text"
+          value={config.message ?? ''}
+          onChange={e => set('message', e.target.value)}
+          placeholder="🎉 Special offer — Limited time only!"
+          className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+        />
+      </div>
+
+      <div className="grid grid-cols-2 gap-3">
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            Link Text <span className="text-gray-400 font-normal">(optional)</span>
+          </label>
+          <input
+            type="text"
+            value={config.link_text ?? ''}
+            onChange={e => set('link_text', e.target.value)}
+            placeholder="Shop now"
+            className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+          />
+        </div>
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            Link URL <span className="text-gray-400 font-normal">(optional)</span>
+          </label>
+          <input
+            type="url"
+            value={config.link_url ?? ''}
+            onChange={e => set('link_url', e.target.value)}
+            placeholder="https://example.com"
+            className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+          />
+        </div>
+      </div>
+
+      <div>
+        <label className="block text-sm font-medium text-gray-700 mb-2">Position</label>
+        <div className="flex gap-4">
+          {(['top', 'bottom'] as const).map(p => (
+            <label key={p} className="flex items-center gap-2 cursor-pointer">
+              <input
+                type="radio"
+                name="ab-position"
+                checked={(config.position ?? 'top') === p}
+                onChange={() => set('position', p)}
+              />
+              <span className="text-sm text-gray-700 capitalize">{p}</span>
+            </label>
+          ))}
+        </div>
+      </div>
+
+      <div>
+        <label className="block text-sm font-medium text-gray-700 mb-2">Style</label>
+        <div className="flex gap-4">
+          {(['solid', 'gradient', 'striped'] as const).map(s => (
+            <label key={s} className="flex items-center gap-2 cursor-pointer">
+              <input
+                type="radio"
+                name="ab-style"
+                checked={(config.style ?? 'solid') === s}
+                onChange={() => set('style', s)}
+              />
+              <span className="text-sm text-gray-700 capitalize">{s}</span>
+            </label>
+          ))}
+        </div>
+      </div>
+
+      <div className="grid grid-cols-3 gap-3">
+        {([
+          ['bg_color', 'Background', '#ff6914'] as const,
+          ['text_color', 'Text Color', '#ffffff'] as const,
+          ['link_color', 'Link Color', '#ffffff'] as const,
+        ]).map(([key, label, fallback]) => (
+          <div key={key}>
+            <label className="block text-xs font-medium text-gray-600 mb-1">{label}</label>
+            <div className="flex items-center gap-2">
+              <input
+                type="color"
+                value={(config[key as keyof AnnouncementBarConfig] as string) ?? fallback}
+                onChange={e => set(key as keyof AnnouncementBarConfig, e.target.value)}
+                className="w-9 h-9 rounded-lg border border-gray-200 cursor-pointer p-0.5"
+              />
+              <span className="text-xs text-gray-400">{(config[key as keyof AnnouncementBarConfig] as string) ?? fallback}</span>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      <div>
+        <label className="block text-sm font-medium text-gray-700 mb-1">Emoji</label>
+        <input
+          type="text"
+          value={config.emoji ?? ''}
+          onChange={e => set('emoji', e.target.value)}
+          placeholder="🎉"
+          maxLength={4}
+          className="w-20 px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+        />
+      </div>
+
+      <div className="flex flex-col gap-3">
+        {([
+          ['show_emoji', 'Show emoji'] as const,
+          ['show_close_button', 'Show close button'] as const,
+          ['is_sticky', 'Sticky (fixed position)'] as const,
+        ]).map(([key, label]) => (
+          <label key={key} className="flex items-center justify-between cursor-pointer">
+            <span className="text-sm text-gray-700">{label}</span>
+            <Toggle
+              checked={!!(config[key] ?? true)}
+              onChange={v => set(key, v)}
+            />
+          </label>
+        ))}
+      </div>
+    </div>
+  )
+}
+
 // ── Main configurator page ─────────────────────────────────────────────────
 export default function ConfiguratorPage() {
   const { id } = useParams<{ id: string }>()
@@ -601,6 +883,18 @@ export default function ConfiguratorPage() {
           {widget.type === 'youtube_feed' && (
             <YouTubeFeedForm
               config={config as Partial<YouTubeFeedConfig>}
+              onChange={c => setConfig(c as Record<string, unknown>)}
+            />
+          )}
+          {widget.type === 'countdown_timer' && (
+            <CountdownTimerForm
+              config={config as Partial<CountdownTimerConfig>}
+              onChange={c => setConfig(c as Record<string, unknown>)}
+            />
+          )}
+          {widget.type === 'announcement_bar' && (
+            <AnnouncementBarForm
+              config={config as Partial<AnnouncementBarConfig>}
               onChange={c => setConfig(c as Record<string, unknown>)}
             />
           )}

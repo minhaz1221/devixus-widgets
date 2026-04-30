@@ -6,6 +6,8 @@ export type WidgetType =
   | 'contact_form'
   | 'social_follow'
   | 'youtube_feed'
+  | 'countdown_timer'
+  | 'announcement_bar'
 
 export interface Widget {
   id: string
@@ -55,4 +57,38 @@ export interface YouTubeFeedConfig {
   show_date: boolean
   theme: 'light' | 'dark'
   accent_color: string
+}
+
+export interface CountdownTimerConfig {
+  target_date: string
+  target_time: string
+  timezone: string
+  title: string
+  expired_message: string
+  redirect_url: string
+  style: 'flip' | 'minimal' | 'blocks'
+  theme: 'light' | 'dark' | 'custom'
+  bg_color: string
+  text_color: string
+  accent_color: string
+  show_days: boolean
+  show_hours: boolean
+  show_minutes: boolean
+  show_seconds: boolean
+  show_labels: boolean
+}
+
+export interface AnnouncementBarConfig {
+  message: string
+  link_text: string
+  link_url: string
+  position: 'top' | 'bottom'
+  bg_color: string
+  text_color: string
+  link_color: string
+  show_close_button: boolean
+  show_emoji: boolean
+  emoji: string
+  style: 'solid' | 'gradient' | 'striped'
+  is_sticky: boolean
 }
