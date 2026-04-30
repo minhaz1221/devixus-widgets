@@ -3,7 +3,7 @@
 import { useEffect, useState, useCallback } from 'react'
 import { useParams } from 'next/navigation'
 import { Copy, Check, Star, Trash2, Plus } from 'lucide-react'
-import type { Widget, WhatsAppConfig, TestimonialsConfig, YouTubeFeedConfig, CountdownTimerConfig, AnnouncementBarConfig } from '@/types/widget'
+import type { Widget, WhatsAppConfig, TestimonialsConfig, YouTubeFeedConfig, CountdownTimerConfig, AnnouncementBarConfig, GoogleReviewsConfig } from '@/types/widget'
 
 // ── Embed code ─────────────────────────────────────────────────────────────
 const EMBED_ORIGIN = 'https://devixus-widgets-web.vercel.app'
@@ -789,6 +789,223 @@ function AnnouncementBarForm({
   )
 }
 
+// ── Google Reviews form ────────────────────────────────────────────────────
+interface PlaceResult {
+  place_id: string
+  name: string
+  address: string
+  rating: number
+  total_ratings: number
+}
+
+function GoogleReviewsForm({
+  config,
+  onChange,
+}: {
+  config: Partial<GoogleReviewsConfig>
+  onChange: (c: Partial<GoogleReviewsConfig>) => void
+}) {
+  const [query, setQuery] = useState('')
+  const [searching, setSearching] = useState(false)
+  const [results, setResults] = useState<PlaceResult[]>([])
+  const [searchError, setSearchError] = useState<string | null>(null)
+
+  const set = (key: keyof GoogleReviewsConfig, val: unknown) =>
+    onChange({ ...config, [key]: val })
+
+  async function handleSearch() {
+    if (!query.trim()) return
+    setSearching(true)
+    setSearchError(null)
+    setResults([])
+    try {
+      const res = await fetch(
+        `/api/google-reviews/search?query=${encodeURIComponent(query.trim())}`
+      )
+      const data = await res.json()
+      if (!res.ok) throw new Error(data.error ?? 'Search failed')
+      setResults(data.results ?? [])
+      if ((data.results ?? []).length === 0) setSearchError('No businesses found. Try a more specific name + city.')
+    } catch (err) {
+      setSearchError(err instanceof Error ? err.message : 'Search failed')
+    } finally {
+      setSearching(false)
+    }
+  }
+
+  function selectPlace(place: PlaceResult) {
+    onChange({
+      ...config,
+      place_id: place.place_id,
+      place_name: place.name,
+      place_address: place.address,
+    })
+    setResults([])
+    setQuery('')
+  }
+
+  return (
+    <div className="space-y-5">
+      {/* Business search */}
+      <div>
+        <label className="block text-sm font-medium text-gray-700 mb-1">
+          Business Name
+        </label>
+        <div className="flex gap-2">
+          <input
+            value={query}
+            onChange={e => setQuery(e.target.value)}
+            onKeyDown={e => e.key === 'Enter' && handleSearch()}
+            placeholder="e.g. Acme Coffee Shop, New York"
+            className="flex-1 px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+          />
+          <button
+            type="button"
+            onClick={handleSearch}
+            disabled={!query.trim() || searching}
+            className="px-3 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 disabled:opacity-50 whitespace-nowrap"
+          >
+            {searching ? '…' : 'Search'}
+          </button>
+        </div>
+
+        {config.place_id && (
+          <p className="text-xs text-green-600 mt-1.5 flex items-center gap-1">
+            <Check size={12} /> {config.place_name || config.place_id}
+            {config.place_address && (
+              <span className="text-gray-400 ml-1">— {config.place_address}</span>
+            )}
+          </p>
+        )}
+        {searchError && (
+          <p className="text-xs text-red-600 mt-1.5">{searchError}</p>
+        )}
+
+        {results.length > 0 && (
+          <ul className="mt-2 border border-gray-200 rounded-lg overflow-hidden divide-y divide-gray-100 shadow-sm">
+            {results.map(r => (
+              <li key={r.place_id}>
+                <button
+                  type="button"
+                  onClick={() => selectPlace(r)}
+                  className="w-full text-left px-3 py-2.5 hover:bg-blue-50 transition-colors"
+                >
+                  <p className="text-sm font-medium text-gray-800">{r.name}</p>
+                  <p className="text-xs text-gray-500 mt-0.5">{r.address}</p>
+                  {r.rating > 0 && (
+                    <p className="text-xs text-yellow-600 mt-0.5">
+                      {'★'.repeat(Math.round(r.rating))} {r.rating} · {r.total_ratings} reviews
+                    </p>
+                  )}
+                </button>
+              </li>
+            ))}
+          </ul>
+        )}
+      </div>
+
+      {/* Layout */}
+      <div>
+        <label className="block text-sm font-medium text-gray-700 mb-2">Layout</label>
+        <div className="flex gap-3 flex-wrap">
+          {(['grid', 'list', 'carousel'] as const).map(l => (
+            <label key={l} className="flex items-center gap-2 cursor-pointer">
+              <input
+                type="radio"
+                name="gr-layout"
+                checked={(config.layout ?? 'grid') === l}
+                onChange={() => set('layout', l)}
+              />
+              <span className="text-sm text-gray-700 capitalize">{l}</span>
+            </label>
+          ))}
+        </div>
+      </div>
+
+      {/* Min rating */}
+      <div>
+        <label className="block text-sm font-medium text-gray-700 mb-1">
+          Minimum Rating
+        </label>
+        <select
+          value={config.min_rating ?? 1}
+          onChange={e => set('min_rating', parseInt(e.target.value) as 1 | 2 | 3 | 4 | 5)}
+          className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+        >
+          {[1, 2, 3, 4, 5].map(n => (
+            <option key={n} value={n}>{n}+ stars</option>
+          ))}
+        </select>
+      </div>
+
+      {/* Max reviews */}
+      <div>
+        <label className="block text-sm font-medium text-gray-700 mb-1">Max Reviews</label>
+        <select
+          value={config.max_reviews ?? 6}
+          onChange={e => set('max_reviews', parseInt(e.target.value))}
+          className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+        >
+          {[3, 6, 9, 12].map(n => (
+            <option key={n} value={n}>{n} reviews</option>
+          ))}
+        </select>
+      </div>
+
+      {/* Theme */}
+      <div>
+        <label className="block text-sm font-medium text-gray-700 mb-2">Theme</label>
+        <div className="flex gap-4">
+          {(['light', 'dark'] as const).map(t => (
+            <label key={t} className="flex items-center gap-2 cursor-pointer">
+              <input
+                type="radio"
+                name="gr-theme"
+                checked={(config.theme ?? 'light') === t}
+                onChange={() => set('theme', t)}
+              />
+              <span className="text-sm text-gray-700 capitalize">{t}</span>
+            </label>
+          ))}
+        </div>
+      </div>
+
+      {/* Accent color */}
+      <div>
+        <label className="block text-sm font-medium text-gray-700 mb-2">Accent Color</label>
+        <div className="flex items-center gap-3">
+          <input
+            type="color"
+            value={config.accent_color ?? '#4285f4'}
+            onChange={e => set('accent_color', e.target.value)}
+            className="w-10 h-10 rounded-lg border border-gray-200 cursor-pointer p-0.5"
+          />
+          <span className="text-sm text-gray-500">{config.accent_color ?? '#4285f4'}</span>
+        </div>
+      </div>
+
+      {/* Toggles */}
+      <div className="flex flex-col gap-3">
+        {([
+          ['show_header', 'Show header (business name + rating)'] as const,
+          ['show_overall_rating', 'Show overall rating score'] as const,
+          ['show_review_date', 'Show review date'] as const,
+          ['show_reviewer_photo', 'Show reviewer photo'] as const,
+          ['write_review_link', 'Show "Write a review" link'] as const,
+        ]).map(([key, label]) => (
+          <label key={key} className="flex items-center justify-between cursor-pointer">
+            <span className="text-sm text-gray-700">{label}</span>
+            <Toggle
+              checked={!!(config[key] ?? true)}
+              onChange={v => set(key, v)}
+            />
+          </label>
+        ))}
+      </div>
+    </div>
+  )
+}
+
 // ── Main configurator page ─────────────────────────────────────────────────
 export default function ConfiguratorPage() {
   const { id } = useParams<{ id: string }>()
@@ -895,6 +1112,12 @@ export default function ConfiguratorPage() {
           {widget.type === 'announcement_bar' && (
             <AnnouncementBarForm
               config={config as Partial<AnnouncementBarConfig>}
+              onChange={c => setConfig(c as Record<string, unknown>)}
+            />
+          )}
+          {widget.type === 'google_reviews' && (
+            <GoogleReviewsForm
+              config={config as Partial<GoogleReviewsConfig>}
               onChange={c => setConfig(c as Record<string, unknown>)}
             />
           )}

@@ -92,3 +92,19 @@ export interface AnnouncementBarConfig {
   style: 'solid' | 'gradient' | 'striped'
   is_sticky: boolean
 }
+
+export interface GoogleReviewsConfig {
+  place_id: string
+  place_name: string
+  place_address: string
+  layout: 'grid' | 'list' | 'carousel' | 'badge'
+  min_rating: 1 | 2 | 3 | 4 | 5
+  max_reviews: number
+  show_header: boolean
+  show_overall_rating: boolean
+  show_review_date: boolean
+  show_reviewer_photo: boolean
+  theme: 'light' | 'dark'
+  accent_color: string
+  write_review_link: boolean
+}

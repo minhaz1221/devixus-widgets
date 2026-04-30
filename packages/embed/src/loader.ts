@@ -456,6 +456,246 @@
       })
   }
 
+  // Render Google Reviews widget
+  function renderGoogleReviews(
+    shadow: ShadowRoot,
+    config: any,
+    showBranding: boolean,
+    apiBase: string
+  ) {
+    const theme = config.theme || 'light'
+    const bg = theme === 'dark' ? '#1a1a1a' : '#ffffff'
+    const text = theme === 'dark' ? '#ffffff' : '#1a1a1a'
+    const subtext = theme === 'dark' ? '#aaaaaa' : '#666666'
+    const cardBg = theme === 'dark' ? '#2a2a2a' : '#f9f9f9'
+    const accent = config.accent_color || '#4285f4'
+    const layout = config.layout || 'grid'
+
+    shadow.innerHTML = `
+      <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        .gr-wrap {
+          font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+          background: ${bg};
+          padding: 20px;
+          color: ${text};
+        }
+        .gr-loading {
+          text-align: center;
+          padding: 40px;
+          color: ${subtext};
+          font-size: 14px;
+        }
+      </style>
+      <div class="gr-wrap">
+        <div class="gr-loading">Loading reviews...</div>
+      </div>
+    `
+
+    if (!config.place_id) {
+      const wrap = shadow.querySelector('.gr-wrap')
+      if (wrap) {
+        wrap.innerHTML = `<div class="gr-loading" style="color:${subtext}">No business configured</div>`
+      }
+      return
+    }
+
+    const maxReviews = config.max_reviews || 6
+    const minRating = config.min_rating || 1
+    const apiUrl =
+      `${apiBase}/api/google-reviews?` +
+      `place_id=${encodeURIComponent(config.place_id)}&` +
+      `max_reviews=${maxReviews}&` +
+      `min_rating=${minRating}`
+
+    fetch(apiUrl)
+      .then(r => r.json())
+      .then(data => {
+        if (!data.reviews || data.reviews.length === 0) {
+          shadow.innerHTML = `
+            <div style="padding:20px;text-align:center;
+              color:${subtext};font-family:sans-serif;background:${bg};">
+              No reviews found
+            </div>`
+          return
+        }
+
+        const place = data.place
+        const reviews = data.reviews
+
+        function renderStars(rating: number) {
+          return Array.from({ length: 5 }, (_, i) =>
+            `<span style="color:${i < rating ? '#fbbc04' : '#dadce0'}">★</span>`
+          ).join('')
+        }
+
+        const reviewCards = reviews.map((r: any) => `
+          <div class="gr-card">
+            <div class="gr-card-header">
+              ${config.show_reviewer_photo !== false && r.author_photo
+                ? `<img src="${r.author_photo}" class="gr-avatar" alt="${r.author_name}" />`
+                : `<div class="gr-avatar-placeholder">${r.author_name.charAt(0).toUpperCase()}</div>`
+              }
+              <div class="gr-author-info">
+                <div class="gr-author">${r.author_name}</div>
+                ${config.show_review_date !== false
+                  ? `<div class="gr-date">${r.relative_time}</div>`
+                  : ''}
+              </div>
+            </div>
+            <div class="gr-stars">${renderStars(r.rating)}</div>
+            ${r.text ? `<p class="gr-text">${r.text}</p>` : ''}
+          </div>
+        `).join('')
+
+        const gridStyle = layout === 'grid'
+          ? 'grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));'
+          : layout === 'carousel'
+          ? 'grid-auto-flow: column; grid-auto-columns: 300px; overflow-x: auto;'
+          : 'grid-template-columns: 1fr;'
+
+        shadow.innerHTML = `
+          <style>
+            * { box-sizing: border-box; margin: 0; padding: 0; }
+            .gr-wrap {
+              font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+              background: ${bg};
+              padding: 20px;
+              color: ${text};
+            }
+            .gr-header {
+              display: flex;
+              align-items: flex-start;
+              justify-content: space-between;
+              margin-bottom: 20px;
+              padding-bottom: 16px;
+              border-bottom: 1px solid ${theme === 'dark' ? '#333' : '#eee'};
+              flex-wrap: wrap;
+              gap: 12px;
+            }
+            .gr-place-name {
+              font-size: 18px;
+              font-weight: 600;
+              color: ${text};
+              margin-bottom: 4px;
+            }
+            .gr-place-address { font-size: 12px; color: ${subtext}; }
+            .gr-overall {
+              display: flex;
+              flex-direction: column;
+              align-items: center;
+              gap: 4px;
+            }
+            .gr-overall-score {
+              font-size: 36px;
+              font-weight: 700;
+              color: ${text};
+              line-height: 1;
+            }
+            .gr-overall-stars { font-size: 18px; }
+            .gr-overall-count { font-size: 11px; color: ${subtext}; }
+            .gr-write-link {
+              display: inline-block;
+              margin-top: 8px;
+              font-size: 12px;
+              color: ${accent};
+              text-decoration: none;
+            }
+            .gr-google-badge {
+              display: flex;
+              align-items: center;
+              gap: 6px;
+              margin-top: 4px;
+            }
+            .gr-google-logo { font-size: 12px; font-weight: 700; color: ${accent}; }
+            .gr-grid {
+              display: grid;
+              ${gridStyle}
+              gap: 16px;
+              scrollbar-width: none;
+            }
+            .gr-grid::-webkit-scrollbar { display: none; }
+            .gr-card {
+              background: ${cardBg};
+              border-radius: 12px;
+              padding: 16px;
+              display: flex;
+              flex-direction: column;
+              gap: 10px;
+            }
+            .gr-card-header { display: flex; align-items: center; gap: 10px; }
+            .gr-avatar {
+              width: 40px; height: 40px;
+              border-radius: 50%;
+              object-fit: cover;
+              flex-shrink: 0;
+            }
+            .gr-avatar-placeholder {
+              width: 40px; height: 40px;
+              border-radius: 50%;
+              background: ${accent};
+              color: white;
+              display: flex;
+              align-items: center;
+              justify-content: center;
+              font-size: 16px;
+              font-weight: 600;
+              flex-shrink: 0;
+            }
+            .gr-author { font-size: 14px; font-weight: 500; color: ${text}; }
+            .gr-date { font-size: 11px; color: ${subtext}; margin-top: 1px; }
+            .gr-stars { font-size: 15px; letter-spacing: 1px; }
+            .gr-text {
+              font-size: 13px;
+              color: ${subtext};
+              line-height: 1.6;
+              display: -webkit-box;
+              -webkit-line-clamp: 4;
+              -webkit-box-orient: vertical;
+              overflow: hidden;
+            }
+            .gr-branding { text-align: center; margin-top: 16px; font-size: 10px; }
+            .gr-branding a { color: ${subtext}; text-decoration: none; opacity: 0.6; }
+          </style>
+          <div class="gr-wrap">
+            ${config.show_header !== false && place ? `
+            <div class="gr-header">
+              <div>
+                <div class="gr-place-name">${place.name}</div>
+                <div class="gr-place-address">${place.address || ''}</div>
+                ${config.write_review_link && place.google_url ? `
+                  <a href="${place.google_url}"
+                     class="gr-write-link"
+                     target="_blank"
+                     rel="noopener noreferrer">Write a review ↗</a>` : ''}
+              </div>
+              ${config.show_overall_rating !== false ? `
+              <div class="gr-overall">
+                <div class="gr-overall-score">${place.overall_rating}</div>
+                <div class="gr-overall-stars">${renderStars(Math.round(place.overall_rating))}</div>
+                <div class="gr-overall-count">${place.total_reviews} reviews</div>
+                <div class="gr-google-badge">
+                  <span class="gr-google-logo">G</span>
+                  <span style="font-size:11px;color:${subtext}">Google Reviews</span>
+                </div>
+              </div>` : ''}
+            </div>` : ''}
+            <div class="gr-grid">${reviewCards}</div>
+            ${showBranding ? `
+              <div class="gr-branding">
+                <a href="${apiBase}" target="_blank" rel="noopener noreferrer">
+                  Powered by Devixus Widgets
+                </a>
+              </div>` : ''}
+          </div>
+        `
+      })
+      .catch(() => {
+        const loadingEl = shadow.querySelector('.gr-loading')
+        if (loadingEl) loadingEl.textContent = 'Failed to load reviews'
+      })
+  }
+
   // Render Countdown Timer widget
   function renderCountdownTimer(
     shadow: ShadowRoot,
@@ -855,6 +1095,9 @@
         break
       case 'youtube_feed':
         renderYouTubeFeed(shadow, widget.config, widget.show_branding, API_BASE)
+        break
+      case 'google_reviews':
+        renderGoogleReviews(shadow, widget.config, widget.show_branding, API_BASE)
         break
       case 'countdown_timer':
         renderCountdownTimer(shadow, widget.config, widget.show_branding, API_BASE)
