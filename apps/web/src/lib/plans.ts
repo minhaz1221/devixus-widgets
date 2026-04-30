@@ -20,7 +20,7 @@ export const PLANS = {
     price: 900,
     widgetLimit: 5,
     removeBranding: true,
-    variantId: process.env.LEMONSQUEEZY_PRO_VARIANT_ID,
+    variantId: null as string | null,
     features: [
       '5 widgets',
       'No Devixus branding',
@@ -36,7 +36,7 @@ export const PLANS = {
     price: 2900,
     widgetLimit: -1,
     removeBranding: true,
-    variantId: process.env.LEMONSQUEEZY_AGENCY_VARIANT_ID,
+    variantId: null as string | null,
     features: [
       'Unlimited widgets',
       'No Devixus branding',

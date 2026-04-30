@@ -18,10 +18,22 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Invalid plan' }, { status: 400 })
     }
 
-    const planConfig = PLANS[plan as PlanKey]
-    if (!planConfig?.variantId) {
+    if (!PLANS[plan as PlanKey]) {
+      return NextResponse.json({ error: 'Invalid plan' }, { status: 400 })
+    }
+
+    const variantId = plan === 'pro'
+      ? process.env.LEMONSQUEEZY_PRO_VARIANT_ID
+      : process.env.LEMONSQUEEZY_AGENCY_VARIANT_ID
+
+    if (!variantId) {
+      console.error('Missing variant ID for plan:', plan)
       return NextResponse.json({ error: 'Plan not found' }, { status: 400 })
     }
+
+    const storeId = process.env.LEMONSQUEEZY_STORE_ID!
+
+    console.log('Checkout attempt:', { plan, variantId, storeId })
 
     const { data: profile } = await supabase
       .from('profiles')
@@ -30,9 +42,6 @@ export async function POST(request: NextRequest) {
       .single()
 
     setupLemonSqueezy()
-
-    const storeId = process.env.LEMONSQUEEZY_STORE_ID!
-    const variantId = planConfig.variantId as string
 
     const { data, error } = await createCheckout(storeId, variantId, {
       checkoutOptions: {
