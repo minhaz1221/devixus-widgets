@@ -110,3 +110,54 @@ export interface GoogleReviewsConfig {
   accent_color: string
   write_review_link: boolean
 }
+
+export interface ContactFormConfig {
+  title: string
+  subtitle: string
+  recipient_email: string
+  button_text: string
+  button_color: string
+  success_message: string
+  display_mode: 'popup' | 'inline'
+  trigger_text: string
+  trigger_style: 'button' | 'tab'
+  fields: {
+    name: boolean
+    email: boolean
+    phone: boolean
+    subject: boolean
+    message: boolean
+  }
+  required_fields: {
+    name: boolean
+    email: boolean
+    phone: boolean
+    subject: boolean
+    message: boolean
+  }
+  theme: 'light' | 'dark'
+  border_radius: number
+  accent_color: string
+}
+
+export interface SocialFollowConfig {
+  networks: {
+    facebook?: string
+    instagram?: string
+    twitter?: string
+    tiktok?: string
+    youtube?: string
+    linkedin?: string
+    pinterest?: string
+    whatsapp?: string
+  }
+  layout: 'horizontal' | 'vertical' | 'grid'
+  style: 'filled' | 'outline' | 'minimal'
+  size: 'small' | 'medium' | 'large'
+  show_labels: boolean
+  label_type: 'network_name' | 'follow_us' | 'custom'
+  custom_label: string
+  theme: 'light' | 'dark'
+  border_radius: number
+  animation: 'none' | 'hover_grow' | 'hover_bounce'
+}

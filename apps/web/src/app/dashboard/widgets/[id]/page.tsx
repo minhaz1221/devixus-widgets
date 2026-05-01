@@ -3,7 +3,7 @@
 import { useEffect, useState, useCallback } from 'react'
 import { useParams } from 'next/navigation'
 import { Copy, Check, Star, Trash2, Plus } from 'lucide-react'
-import type { Widget, WhatsAppConfig, TestimonialsConfig, YouTubeFeedConfig, CountdownTimerConfig, AnnouncementBarConfig, GoogleReviewsConfig } from '@/types/widget'
+import type { Widget, WhatsAppConfig, TestimonialsConfig, YouTubeFeedConfig, CountdownTimerConfig, AnnouncementBarConfig, GoogleReviewsConfig, ContactFormConfig, SocialFollowConfig } from '@/types/widget'
 
 // ── Embed code ─────────────────────────────────────────────────────────────
 const EMBED_ORIGIN = 'https://devixus-widgets-web.vercel.app'
@@ -1007,6 +1007,382 @@ function GoogleReviewsForm({
   )
 }
 
+// ── Contact Form form ──────────────────────────────────────────────────────
+function ContactFormForm({
+  config,
+  onChange,
+}: {
+  config: Partial<ContactFormConfig>
+  onChange: (c: Partial<ContactFormConfig>) => void
+}) {
+  const set = (key: keyof ContactFormConfig, val: unknown) =>
+    onChange({ ...config, [key]: val })
+
+  const fields = config.fields ?? { name: true, email: true, phone: false, subject: false, message: true }
+  const required = config.required_fields ?? { name: true, email: true, phone: false, subject: false, message: true }
+
+  function setField(key: keyof typeof fields, val: boolean) {
+    onChange({ ...config, fields: { ...fields, [key]: val } })
+  }
+  function setRequired(key: keyof typeof required, val: boolean) {
+    onChange({ ...config, required_fields: { ...required, [key]: val } })
+  }
+
+  return (
+    <div className="space-y-5">
+      <div>
+        <label className="block text-sm font-medium text-gray-700 mb-1">Title</label>
+        <input
+          type="text"
+          value={config.title ?? ''}
+          onChange={e => set('title', e.target.value)}
+          placeholder="Contact Us"
+          className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+        />
+      </div>
+
+      <div>
+        <label className="block text-sm font-medium text-gray-700 mb-1">Subtitle</label>
+        <input
+          type="text"
+          value={config.subtitle ?? ''}
+          onChange={e => set('subtitle', e.target.value)}
+          placeholder="Send us a message..."
+          className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+        />
+      </div>
+
+      <div>
+        <label className="block text-sm font-medium text-gray-700 mb-1">
+          Recipient Email <span className="text-red-500">*</span>
+        </label>
+        <input
+          type="email"
+          value={config.recipient_email ?? ''}
+          onChange={e => set('recipient_email', e.target.value)}
+          placeholder="you@example.com"
+          className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+        />
+        <p className="text-xs text-gray-400 mt-1">Form submissions will be sent to this address.</p>
+      </div>
+
+      <div>
+        <label className="block text-sm font-medium text-gray-700 mb-1">Button Text</label>
+        <input
+          type="text"
+          value={config.button_text ?? ''}
+          onChange={e => set('button_text', e.target.value)}
+          placeholder="Send Message"
+          className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+        />
+      </div>
+
+      <div>
+        <label className="block text-sm font-medium text-gray-700 mb-1">Success Message</label>
+        <input
+          type="text"
+          value={config.success_message ?? ''}
+          onChange={e => set('success_message', e.target.value)}
+          placeholder="Thank you! We'll be in touch soon."
+          className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+        />
+      </div>
+
+      <div>
+        <label className="block text-sm font-medium text-gray-700 mb-2">Display Mode</label>
+        <div className="flex gap-4">
+          {(['inline', 'popup'] as const).map(m => (
+            <label key={m} className="flex items-center gap-2 cursor-pointer">
+              <input
+                type="radio"
+                name="cf-display"
+                checked={(config.display_mode ?? 'inline') === m}
+                onChange={() => set('display_mode', m)}
+              />
+              <span className="text-sm text-gray-700 capitalize">{m}</span>
+            </label>
+          ))}
+        </div>
+      </div>
+
+      {config.display_mode === 'popup' && (
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">Trigger Button Text</label>
+          <input
+            type="text"
+            value={config.trigger_text ?? ''}
+            onChange={e => set('trigger_text', e.target.value)}
+            placeholder="✉ Contact Us"
+            className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+          />
+        </div>
+      )}
+
+      <div>
+        <label className="block text-sm font-medium text-gray-700 mb-2">Fields to Show</label>
+        <div className="space-y-2">
+          {(['name', 'email', 'phone', 'subject', 'message'] as const).map(f => (
+            <div key={f} className="flex items-center justify-between">
+              <label className="flex items-center gap-2 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={!!fields[f]}
+                  onChange={e => setField(f, e.target.checked)}
+                  className="rounded"
+                />
+                <span className="text-sm text-gray-700 capitalize">{f}</span>
+              </label>
+              {fields[f] && (
+                <label className="flex items-center gap-1 text-xs text-gray-500 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={!!required[f]}
+                    onChange={e => setRequired(f, e.target.checked)}
+                    className="rounded"
+                  />
+                  Required
+                </label>
+              )}
+            </div>
+          ))}
+        </div>
+      </div>
+
+      <div>
+        <label className="block text-sm font-medium text-gray-700 mb-2">Theme</label>
+        <div className="flex gap-4">
+          {(['light', 'dark'] as const).map(t => (
+            <label key={t} className="flex items-center gap-2 cursor-pointer">
+              <input
+                type="radio"
+                name="cf-theme"
+                checked={(config.theme ?? 'light') === t}
+                onChange={() => set('theme', t)}
+              />
+              <span className="text-sm text-gray-700 capitalize">{t}</span>
+            </label>
+          ))}
+        </div>
+      </div>
+
+      <div>
+        <label className="block text-sm font-medium text-gray-700 mb-2">Accent Color</label>
+        <div className="flex items-center gap-3">
+          <input
+            type="color"
+            value={config.accent_color ?? '#ff6914'}
+            onChange={e => set('accent_color', e.target.value)}
+            className="w-10 h-10 rounded-lg border border-gray-200 cursor-pointer p-0.5"
+          />
+          <span className="text-sm text-gray-500">{config.accent_color ?? '#ff6914'}</span>
+        </div>
+      </div>
+
+      <div>
+        <label className="block text-sm font-medium text-gray-700 mb-2">
+          Border Radius: {config.border_radius ?? 8}px
+        </label>
+        <input
+          type="range"
+          min={0}
+          max={20}
+          value={config.border_radius ?? 8}
+          onChange={e => set('border_radius', parseInt(e.target.value))}
+          className="w-full"
+        />
+      </div>
+    </div>
+  )
+}
+
+// ── Social Follow form ─────────────────────────────────────────────────────
+const SOCIAL_NETWORKS = [
+  { key: 'facebook', label: 'Facebook', placeholder: 'https://facebook.com/yourpage' },
+  { key: 'instagram', label: 'Instagram', placeholder: 'https://instagram.com/yourhandle' },
+  { key: 'twitter', label: 'Twitter / X', placeholder: 'https://x.com/yourhandle' },
+  { key: 'tiktok', label: 'TikTok', placeholder: 'https://tiktok.com/@yourhandle' },
+  { key: 'youtube', label: 'YouTube', placeholder: 'https://youtube.com/@yourchannel' },
+  { key: 'linkedin', label: 'LinkedIn', placeholder: 'https://linkedin.com/company/yours' },
+  { key: 'pinterest', label: 'Pinterest', placeholder: 'https://pinterest.com/yourprofile' },
+  { key: 'whatsapp', label: 'WhatsApp', placeholder: '+1234567890' },
+] as const
+
+function SocialFollowForm({
+  config,
+  onChange,
+}: {
+  config: Partial<SocialFollowConfig>
+  onChange: (c: Partial<SocialFollowConfig>) => void
+}) {
+  const set = (key: keyof SocialFollowConfig, val: unknown) =>
+    onChange({ ...config, [key]: val })
+
+  const networks = config.networks ?? {}
+
+  function setNetwork(key: string, val: string) {
+    onChange({ ...config, networks: { ...networks, [key]: val } })
+  }
+
+  return (
+    <div className="space-y-5">
+      <div>
+        <label className="block text-sm font-medium text-gray-700 mb-2">Network URLs</label>
+        <div className="space-y-3">
+          {SOCIAL_NETWORKS.map(({ key, label, placeholder }) => (
+            <div key={key}>
+              <label className="block text-xs font-medium text-gray-500 mb-1">{label}</label>
+              <input
+                type="text"
+                value={(networks as Record<string, string>)[key] ?? ''}
+                onChange={e => setNetwork(key, e.target.value)}
+                placeholder={placeholder}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
+          ))}
+        </div>
+      </div>
+
+      <div>
+        <label className="block text-sm font-medium text-gray-700 mb-2">Layout</label>
+        <div className="flex gap-4 flex-wrap">
+          {(['horizontal', 'vertical', 'grid'] as const).map(l => (
+            <label key={l} className="flex items-center gap-2 cursor-pointer">
+              <input
+                type="radio"
+                name="sf-layout"
+                checked={(config.layout ?? 'horizontal') === l}
+                onChange={() => set('layout', l)}
+              />
+              <span className="text-sm text-gray-700 capitalize">{l}</span>
+            </label>
+          ))}
+        </div>
+      </div>
+
+      <div>
+        <label className="block text-sm font-medium text-gray-700 mb-2">Style</label>
+        <div className="flex gap-4 flex-wrap">
+          {(['filled', 'outline', 'minimal'] as const).map(s => (
+            <label key={s} className="flex items-center gap-2 cursor-pointer">
+              <input
+                type="radio"
+                name="sf-style"
+                checked={(config.style ?? 'filled') === s}
+                onChange={() => set('style', s)}
+              />
+              <span className="text-sm text-gray-700 capitalize">{s}</span>
+            </label>
+          ))}
+        </div>
+      </div>
+
+      <div>
+        <label className="block text-sm font-medium text-gray-700 mb-2">Size</label>
+        <div className="flex gap-4">
+          {(['small', 'medium', 'large'] as const).map(s => (
+            <label key={s} className="flex items-center gap-2 cursor-pointer">
+              <input
+                type="radio"
+                name="sf-size"
+                checked={(config.size ?? 'medium') === s}
+                onChange={() => set('size', s)}
+              />
+              <span className="text-sm text-gray-700 capitalize">{s}</span>
+            </label>
+          ))}
+        </div>
+      </div>
+
+      <div>
+        <label className="block text-sm font-medium text-gray-700 mb-2">Label Type</label>
+        <div className="flex gap-4 flex-wrap">
+          {(['network_name', 'follow_us', 'custom'] as const).map(l => (
+            <label key={l} className="flex items-center gap-2 cursor-pointer">
+              <input
+                type="radio"
+                name="sf-label-type"
+                checked={(config.label_type ?? 'network_name') === l}
+                onChange={() => set('label_type', l)}
+              />
+              <span className="text-sm text-gray-700 capitalize">{l.replace('_', ' ')}</span>
+            </label>
+          ))}
+        </div>
+      </div>
+
+      {config.label_type === 'custom' && (
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">Custom Label</label>
+          <input
+            type="text"
+            value={config.custom_label ?? ''}
+            onChange={e => set('custom_label', e.target.value)}
+            placeholder="Follow us"
+            className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+          />
+        </div>
+      )}
+
+      <div>
+        <label className="block text-sm font-medium text-gray-700 mb-2">Animation</label>
+        <div className="flex gap-4 flex-wrap">
+          {(['none', 'hover_grow', 'hover_bounce'] as const).map(a => (
+            <label key={a} className="flex items-center gap-2 cursor-pointer">
+              <input
+                type="radio"
+                name="sf-anim"
+                checked={(config.animation ?? 'hover_grow') === a}
+                onChange={() => set('animation', a)}
+              />
+              <span className="text-sm text-gray-700 capitalize">{a.replace('_', ' ')}</span>
+            </label>
+          ))}
+        </div>
+      </div>
+
+      <div>
+        <label className="block text-sm font-medium text-gray-700 mb-2">
+          Border Radius: {config.border_radius ?? 50}px
+        </label>
+        <input
+          type="range"
+          min={0}
+          max={50}
+          value={config.border_radius ?? 50}
+          onChange={e => set('border_radius', parseInt(e.target.value))}
+          className="w-full"
+        />
+      </div>
+
+      <div>
+        <label className="block text-sm font-medium text-gray-700 mb-2">Theme</label>
+        <div className="flex gap-4">
+          {(['light', 'dark'] as const).map(t => (
+            <label key={t} className="flex items-center gap-2 cursor-pointer">
+              <input
+                type="radio"
+                name="sf-theme"
+                checked={(config.theme ?? 'light') === t}
+                onChange={() => set('theme', t)}
+              />
+              <span className="text-sm text-gray-700 capitalize">{t}</span>
+            </label>
+          ))}
+        </div>
+      </div>
+
+      <label className="flex items-center justify-between cursor-pointer">
+        <span className="text-sm text-gray-700">Show labels</span>
+        <Toggle
+          checked={config.show_labels !== false}
+          onChange={v => set('show_labels', v)}
+        />
+      </label>
+    </div>
+  )
+}
+
 // ── Main configurator page ─────────────────────────────────────────────────
 export default function ConfiguratorPage() {
   const { id } = useParams<{ id: string }>()
@@ -1119,6 +1495,18 @@ export default function ConfiguratorPage() {
           {widget.type === 'google_reviews' && (
             <GoogleReviewsForm
               config={config as Partial<GoogleReviewsConfig>}
+              onChange={c => setConfig(c as Record<string, unknown>)}
+            />
+          )}
+          {widget.type === 'contact_form' && (
+            <ContactFormForm
+              config={config as Partial<ContactFormConfig>}
+              onChange={c => setConfig(c as Record<string, unknown>)}
+            />
+          )}
+          {widget.type === 'social_follow' && (
+            <SocialFollowForm
+              config={config as Partial<SocialFollowConfig>}
               onChange={c => setConfig(c as Record<string, unknown>)}
             />
           )}

@@ -1201,8 +1201,437 @@
     }
   }
 
+  // Render Contact Form widget
+  function renderContactForm(
+    shadow: ShadowRoot,
+    config: any,
+    showBranding: boolean,
+    apiBase: string,
+    widgetId: string
+  ) {
+    const theme = config.theme || 'light'
+    const bg = theme === 'dark' ? '#1a1a1a' : '#ffffff'
+    const text = theme === 'dark' ? '#ffffff' : '#1a1a1a'
+    const subtext = theme === 'dark' ? '#aaaaaa' : '#666666'
+    const inputBg = theme === 'dark' ? '#2a2a2a' : '#f9f9f9'
+    const borderColor = theme === 'dark' ? '#333' : '#e5e7eb'
+    const accent = config.accent_color || '#ff6914'
+    const radius = config.border_radius || 8
+    const isPopup = config.display_mode === 'popup'
+    const title = config.title || 'Contact Us'
+    const subtitle = config.subtitle || "Send us a message and we'll get back to you."
+    const btnText = config.button_text || 'Send Message'
+    const successMsg = config.success_message || "Thank you! We'll be in touch soon."
+
+    const fields = config.fields || {
+      name: true, email: true, phone: false,
+      subject: false, message: true
+    }
+    const required = config.required_fields || {
+      name: true, email: true, message: true
+    }
+
+    function buildForm(containerId: string) {
+      return `
+        <div class="cf-form-wrap" id="${containerId}">
+          <div class="cf-header">
+            <h3 class="cf-title">${title}</h3>
+            ${subtitle ? `<p class="cf-subtitle">${subtitle}</p>` : ''}
+          </div>
+          <form class="cf-form" id="cf-form-${widgetId}">
+            ${fields.name ? `
+              <div class="cf-field">
+                <label class="cf-label">
+                  Name${required.name ? ' <span class="cf-req">*</span>' : ''}
+                </label>
+                <input type="text" name="name" class="cf-input"
+                       placeholder="Your name"
+                       ${required.name ? 'required' : ''} />
+              </div>` : ''}
+            ${fields.email ? `
+              <div class="cf-field">
+                <label class="cf-label">
+                  Email${required.email ? ' <span class="cf-req">*</span>' : ''}
+                </label>
+                <input type="email" name="email" class="cf-input"
+                       placeholder="your@email.com"
+                       ${required.email ? 'required' : ''} />
+              </div>` : ''}
+            ${fields.phone ? `
+              <div class="cf-field">
+                <label class="cf-label">
+                  Phone${required.phone ? ' <span class="cf-req">*</span>' : ''}
+                </label>
+                <input type="tel" name="phone" class="cf-input"
+                       placeholder="+1 234 567 8900"
+                       ${required.phone ? 'required' : ''} />
+              </div>` : ''}
+            ${fields.subject ? `
+              <div class="cf-field">
+                <label class="cf-label">Subject</label>
+                <input type="text" name="subject" class="cf-input"
+                       placeholder="What is this about?" />
+              </div>` : ''}
+            ${fields.message ? `
+              <div class="cf-field">
+                <label class="cf-label">
+                  Message${required.message ? ' <span class="cf-req">*</span>' : ''}
+                </label>
+                <textarea name="message" class="cf-textarea"
+                          placeholder="Your message..." rows="4"
+                          ${required.message ? 'required' : ''}></textarea>
+              </div>` : ''}
+            <div class="cf-field" id="cf-error-${widgetId}" style="display:none">
+              <p class="cf-error-msg"></p>
+            </div>
+            <button type="submit" class="cf-btn">${btnText}</button>
+          </form>
+          <div class="cf-success" id="cf-success-${widgetId}" style="display:none">
+            <div class="cf-success-icon">✓</div>
+            <p class="cf-success-msg">${successMsg}</p>
+          </div>
+          ${showBranding ? `
+            <div class="cf-branding">
+              <a href="${apiBase}" target="_blank" rel="noopener noreferrer">
+                Powered by Devixus Widgets
+              </a>
+            </div>` : ''}
+        </div>
+      `
+    }
+
+    const formHtml = isPopup ? `
+      <div>
+        <button class="cf-trigger" id="cf-trigger">
+          ${config.trigger_text || '✉ Contact Us'}
+        </button>
+        <div class="cf-popup-overlay" id="cf-popup" style="display:none">
+          <div class="cf-popup-box">
+            <button class="cf-popup-close" id="cf-popup-close">✕</button>
+            ${buildForm('cf-popup-form')}
+          </div>
+        </div>
+      </div>
+    ` : buildForm('cf-inline-form')
+
+    shadow.innerHTML = `
+      <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        .cf-trigger {
+          background: ${accent};
+          color: white;
+          border: none;
+          padding: 12px 20px;
+          border-radius: ${radius}px;
+          font-size: 14px;
+          font-weight: 600;
+          cursor: pointer;
+          font-family: -apple-system, sans-serif;
+          transition: opacity .2s;
+        }
+        .cf-trigger:hover { opacity: .9; }
+        .cf-popup-overlay {
+          position: fixed;
+          inset: 0;
+          background: rgba(0,0,0,0.5);
+          z-index: 999999;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          padding: 16px;
+        }
+        .cf-popup-box {
+          background: ${bg};
+          border-radius: ${radius + 4}px;
+          padding: 28px;
+          width: 100%;
+          max-width: 480px;
+          position: relative;
+          max-height: 90vh;
+          overflow-y: auto;
+        }
+        .cf-popup-close {
+          position: absolute;
+          top: 12px;
+          right: 12px;
+          background: none;
+          border: none;
+          font-size: 18px;
+          cursor: pointer;
+          color: ${subtext};
+          width: 28px;
+          height: 28px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          border-radius: 50%;
+        }
+        .cf-popup-close:hover { background: ${inputBg}; }
+        .cf-form-wrap {
+          font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+          background: ${bg};
+          padding: ${isPopup ? '0' : '24px'};
+          border-radius: ${radius}px;
+          color: ${text};
+        }
+        .cf-header { margin-bottom: 20px; }
+        .cf-title {
+          font-size: 20px;
+          font-weight: 600;
+          color: ${text};
+          margin-bottom: 6px;
+        }
+        .cf-subtitle {
+          font-size: 13px;
+          color: ${subtext};
+          line-height: 1.5;
+        }
+        .cf-form { display: flex; flex-direction: column; gap: 14px; }
+        .cf-field { display: flex; flex-direction: column; gap: 5px; }
+        .cf-label { font-size: 13px; font-weight: 500; color: ${text}; }
+        .cf-req { color: #ef4444; }
+        .cf-input, .cf-textarea {
+          background: ${inputBg};
+          border: 1px solid ${borderColor};
+          border-radius: ${radius - 2}px;
+          padding: 10px 12px;
+          font-size: 14px;
+          color: ${text};
+          font-family: inherit;
+          outline: none;
+          transition: border-color .2s;
+          width: 100%;
+        }
+        .cf-input:focus, .cf-textarea:focus { border-color: ${accent}; }
+        .cf-textarea { resize: vertical; }
+        .cf-btn {
+          background: ${accent};
+          color: white;
+          border: none;
+          padding: 12px 20px;
+          border-radius: ${radius - 2}px;
+          font-size: 14px;
+          font-weight: 600;
+          cursor: pointer;
+          font-family: inherit;
+          transition: opacity .2s;
+          margin-top: 4px;
+        }
+        .cf-btn:hover { opacity: .9; }
+        .cf-btn:disabled { opacity: .6; cursor: not-allowed; }
+        .cf-error-msg {
+          font-size: 12px;
+          color: #ef4444;
+          padding: 8px 12px;
+          background: #fee2e2;
+          border-radius: 6px;
+        }
+        .cf-success { text-align: center; padding: 32px 16px; }
+        .cf-success-icon {
+          width: 48px;
+          height: 48px;
+          background: #dcfce7;
+          color: #16a34a;
+          border-radius: 50%;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          font-size: 22px;
+          font-weight: 700;
+          margin: 0 auto 12px;
+        }
+        .cf-success-msg {
+          font-size: 15px;
+          color: ${text};
+          font-family: -apple-system, sans-serif;
+        }
+        .cf-branding { text-align: center; margin-top: 16px; font-size: 10px; }
+        .cf-branding a { color: ${subtext}; text-decoration: none; opacity: 0.6; }
+      </style>
+      ${formHtml}
+    `
+
+    if (isPopup) {
+      const trigger = shadow.getElementById('cf-trigger')
+      const popup = shadow.getElementById('cf-popup')
+      const closeBtn = shadow.getElementById('cf-popup-close')
+      trigger?.addEventListener('click', () => {
+        if (popup) popup.style.display = 'flex'
+      })
+      closeBtn?.addEventListener('click', () => {
+        if (popup) popup.style.display = 'none'
+      })
+      popup?.addEventListener('click', (e) => {
+        if (e.target === popup) popup.style.display = 'none'
+      })
+    }
+
+    const form = shadow.getElementById(`cf-form-${widgetId}`) as HTMLFormElement
+    const successEl = shadow.getElementById(`cf-success-${widgetId}`)
+    const errorEl = shadow.getElementById(`cf-error-${widgetId}`)
+
+    form?.addEventListener('submit', async (e) => {
+      e.preventDefault()
+      const btn = form.querySelector('.cf-btn') as HTMLButtonElement
+      if (btn) { btn.disabled = true; btn.textContent = 'Sending...' }
+
+      const data = new FormData(form)
+      try {
+        const res = await fetch(`${apiBase}/api/contact-submit`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            widget_id: widgetId,
+            name: data.get('name'),
+            email: data.get('email'),
+            phone: data.get('phone'),
+            subject: data.get('subject'),
+            message: data.get('message'),
+          }),
+        })
+        if (res.ok) {
+          form.style.display = 'none'
+          if (successEl) successEl.style.display = 'block'
+        } else {
+          throw new Error('Failed')
+        }
+      } catch {
+        if (btn) { btn.disabled = false; btn.textContent = btnText }
+        const errEl = errorEl?.querySelector('.cf-error-msg')
+        if (errEl) errEl.textContent = 'Failed to send. Please try again.'
+        if (errorEl) errorEl.style.display = 'block'
+      }
+    })
+  }
+
+  // Render Social Follow widget
+  function renderSocialFollow(
+    shadow: ShadowRoot,
+    config: any,
+    showBranding: boolean,
+    apiBase: string
+  ) {
+    const theme = config.theme || 'light'
+    const style = config.style || 'filled'
+    const size = config.size || 'medium'
+    const layout = config.layout || 'horizontal'
+    const showLabels = config.show_labels !== false
+    const animation = config.animation || 'hover_grow'
+    const radius = config.border_radius ?? 50
+
+    const sizeMap: Record<string, { btn: string; icon: string; font: string }> = {
+      small: { btn: '36px', icon: '18px', font: '12px' },
+      medium: { btn: '44px', icon: '22px', font: '13px' },
+      large: { btn: '56px', icon: '28px', font: '14px' },
+    }
+    const s = sizeMap[size] || sizeMap.medium
+
+    const networks = config.networks || {}
+
+    const networkConfig: Record<string, { label: string; color: string; icon: string }> = {
+      facebook: { label: 'Facebook', color: '#1877F2', icon: 'f' },
+      instagram: { label: 'Instagram', color: '#E4405F', icon: '📷' },
+      twitter: { label: 'Twitter / X', color: '#000000', icon: 'X' },
+      tiktok: { label: 'TikTok', color: '#000000', icon: '♪' },
+      youtube: { label: 'YouTube', color: '#FF0000', icon: '▶' },
+      linkedin: { label: 'LinkedIn', color: '#0A66C2', icon: 'in' },
+      pinterest: { label: 'Pinterest', color: '#E60023', icon: 'P' },
+      whatsapp: { label: 'WhatsApp', color: '#25D366', icon: '💬' },
+    }
+
+    const buttons = Object.entries(networks)
+      .filter(([, url]) => url)
+      .map(([network, url]) => {
+        const nc = networkConfig[network]
+        if (!nc) return ''
+        const btnStyle = style === 'filled'
+          ? `background: ${nc.color}; color: white; border: none;`
+          : style === 'outline'
+          ? `background: transparent; color: ${nc.color}; border: 2px solid ${nc.color};`
+          : `background: transparent; color: ${nc.color}; border: none;`
+        const label = config.label_type === 'follow_us'
+          ? 'Follow us'
+          : config.label_type === 'custom'
+          ? (config.custom_label || nc.label)
+          : nc.label
+        return `
+          <a href="${url}"
+             target="_blank"
+             rel="noopener noreferrer"
+             class="sf-btn sf-${network}"
+             aria-label="${nc.label}"
+             style="${btnStyle}">
+            <span class="sf-icon">${nc.icon}</span>
+            ${showLabels ? `<span class="sf-label">${label}</span>` : ''}
+          </a>
+        `
+      }).join('')
+
+    const layoutStyle = layout === 'horizontal'
+      ? 'flex-direction: row; flex-wrap: wrap;'
+      : layout === 'vertical'
+      ? 'flex-direction: column;'
+      : 'display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));'
+
+    const animStyle = animation === 'hover_grow'
+      ? '.sf-btn:hover { transform: scale(1.08); }'
+      : animation === 'hover_bounce'
+      ? `.sf-btn:hover { animation: sfbounce .3s ease; }
+         @keyframes sfbounce {
+           0%,100% { transform: translateY(0); }
+           50% { transform: translateY(-4px); }
+         }`
+      : ''
+
+    shadow.innerHTML = `
+      <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        .sf-wrap {
+          font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+          background: transparent;
+          padding: 12px;
+          display: flex;
+          ${layoutStyle}
+          gap: 10px;
+          align-items: center;
+        }
+        .sf-btn {
+          display: inline-flex;
+          align-items: center;
+          gap: 8px;
+          height: ${s.btn};
+          padding: 0 ${showLabels ? '14px' : '0'};
+          ${!showLabels ? `width: ${s.btn};` : ''}
+          justify-content: center;
+          border-radius: ${radius}px;
+          text-decoration: none;
+          font-size: ${s.font};
+          font-weight: 600;
+          cursor: pointer;
+          transition: transform .2s, opacity .2s;
+          white-space: nowrap;
+        }
+        .sf-btn:hover { opacity: .9; }
+        .sf-icon { font-size: ${s.icon}; line-height: 1; font-style: normal; }
+        .sf-label { font-size: ${s.font}; }
+        ${animStyle}
+        .sf-branding { width: 100%; text-align: center; margin-top: 8px; font-size: 10px; }
+        .sf-branding a { color: #999; text-decoration: none; opacity: 0.6; }
+      </style>
+      <div class="sf-wrap">
+        ${buttons}
+        ${showBranding ? `
+          <div class="sf-branding">
+            <a href="${apiBase}" target="_blank" rel="noopener noreferrer">
+              Powered by Devixus Widgets
+            </a>
+          </div>` : ''}
+      </div>
+    `
+  }
+
   // Main render router
-  function renderWidget(shadow: ShadowRoot, widget: { type: string; config: Record<string, unknown>; show_branding: boolean }) {
+  function renderWidget(shadow: ShadowRoot, widget: { type: string; config: Record<string, unknown>; show_branding: boolean }, widgetId: string) {
     switch (widget.type) {
       case 'whatsapp':
         renderWhatsApp(shadow, widget.config, widget.show_branding)
@@ -1221,6 +1650,12 @@
         break
       case 'announcement_bar':
         renderAnnouncementBar(shadow, widget.config, widget.show_branding, API_BASE)
+        break
+      case 'contact_form':
+        renderContactForm(shadow, widget.config, widget.show_branding, API_BASE, widgetId)
+        break
+      case 'social_follow':
+        renderSocialFollow(shadow, widget.config, widget.show_branding, API_BASE)
         break
       default:
         console.warn(`[Devixus] Unknown widget type: ${widget.type}`)
@@ -1253,7 +1688,7 @@
       }
 
       const shadow = createContainer(targetEl)
-      renderWidget(shadow, widget)
+      renderWidget(shadow, widget, widgetId)
       trackLoad(widgetId, API_BASE)
     } catch (err) {
       console.warn('[Devixus] Widget failed to load:', err)
