@@ -2,58 +2,30 @@
 
 import { useEffect, useState, useMemo } from 'react'
 import Link from 'next/link'
-import { Plus, Settings2, Trash2, Zap, ZapOff, Copy, Check, Search } from 'lucide-react'
+import { Plus, Settings2, Trash2, Zap, ZapOff, Copy, Check, Search, Eye, Globe, Layers } from 'lucide-react'
 import { NewWidgetModal } from './_components/NewWidgetModal'
 import type { Widget } from '@/types/widget'
 
 const EMBED_ORIGIN = 'https://devixus-widgets-web.vercel.app'
 
-const TYPE_COLORS: Record<string, string> = {
-  whatsapp: 'bg-green-100 text-green-700 border-green-400',
-  testimonials: 'bg-blue-100 text-blue-700 border-blue-400',
-  google_reviews: 'bg-yellow-100 text-yellow-700 border-yellow-400',
-  countdown_timer: 'bg-purple-100 text-purple-700 border-purple-400',
-  countdown: 'bg-purple-100 text-purple-700 border-purple-400',
-  contact_form: 'bg-orange-100 text-orange-700 border-orange-400',
-  social_follow: 'bg-pink-100 text-pink-700 border-pink-400',
-  youtube_feed: 'bg-red-100 text-red-700 border-red-400',
-  announcement_bar: 'bg-orange-100 text-orange-700 border-orange-400',
-  instagram_feed: 'bg-pink-100 text-pink-700 border-pink-400',
-  tiktok_feed: 'bg-gray-100 text-gray-700 border-gray-400',
-}
-
-const TYPE_BORDER: Record<string, string> = {
-  whatsapp: '#22c55e',
-  testimonials: '#3b82f6',
-  google_reviews: '#eab308',
-  countdown_timer: '#8b5cf6',
-  countdown: '#8b5cf6',
-  contact_form: '#f97316',
-  social_follow: '#ec4899',
-  youtube_feed: '#ef4444',
-  announcement_bar: '#f97316',
-  instagram_feed: '#E1306C',
-  tiktok_feed: '#010101',
-}
-
-const TYPE_ICONS: Record<string, string> = {
-  whatsapp: '💬',
-  testimonials: '⭐',
-  google_reviews: '🏢',
-  countdown_timer: '⏱',
-  countdown: '⏱',
-  contact_form: '✉',
-  social_follow: '📱',
-  youtube_feed: '▶',
-  announcement_bar: '📢',
-  instagram_feed: '📸',
-  tiktok_feed: '🎵',
+const TYPE_META: Record<string, { label: string; icon: string; bg: string; text: string; dot: string }> = {
+  whatsapp:         { label: 'WhatsApp Chat',     icon: '💬', bg: 'bg-green-50',   text: 'text-green-700',  dot: '#22c55e' },
+  testimonials:     { label: 'Testimonials',       icon: '⭐', bg: 'bg-blue-50',    text: 'text-blue-700',   dot: '#3b82f6' },
+  google_reviews:   { label: 'Google Reviews',     icon: '🏢', bg: 'bg-yellow-50',  text: 'text-yellow-700', dot: '#eab308' },
+  countdown_timer:  { label: 'Countdown Timer',    icon: '⏱',  bg: 'bg-purple-50',  text: 'text-purple-700', dot: '#8b5cf6' },
+  countdown:        { label: 'Countdown Timer',    icon: '⏱',  bg: 'bg-purple-50',  text: 'text-purple-700', dot: '#8b5cf6' },
+  contact_form:     { label: 'Contact Form',       icon: '✉',  bg: 'bg-orange-50',  text: 'text-orange-700', dot: '#f97316' },
+  social_follow:    { label: 'Social Follow',      icon: '📱', bg: 'bg-pink-50',    text: 'text-pink-700',   dot: '#ec4899' },
+  youtube_feed:     { label: 'YouTube Feed',       icon: '▶',  bg: 'bg-red-50',     text: 'text-red-700',    dot: '#ef4444' },
+  announcement_bar: { label: 'Announcement Bar',   icon: '📢', bg: 'bg-orange-50',  text: 'text-orange-700', dot: '#f97316' },
+  instagram_feed:   { label: 'Instagram Feed',     icon: '📸', bg: 'bg-pink-50',    text: 'text-pink-700',   dot: '#E1306C' },
+  tiktok_feed:      { label: 'TikTok Feed',        icon: '🎵', bg: 'bg-gray-50',    text: 'text-gray-700',   dot: '#010101' },
 }
 
 function barColor(pct: number): string {
   if (pct >= 100) return 'bg-red-500'
-  if (pct >= 80) return 'bg-orange-500'
-  if (pct >= 50) return 'bg-yellow-500'
+  if (pct >= 80)  return 'bg-orange-500'
+  if (pct >= 50)  return 'bg-yellow-500'
   return 'bg-green-500'
 }
 
@@ -78,10 +50,33 @@ function CopyEmbedButton({ widgetId }: { widgetId: string }) {
     <button
       onClick={copy}
       title="Copy embed code"
-      className="px-3 py-2 border border-gray-200 text-gray-500 text-xs font-medium rounded-lg hover:bg-gray-50 transition-colors flex items-center gap-1"
+      className="flex-1 inline-flex items-center justify-center gap-1.5 px-3 py-2 border border-gray-200 text-gray-600 text-xs font-medium rounded-lg hover:bg-gray-50 transition-colors"
     >
-      {copied ? <><Check size={12} className="text-green-500" /> Copied</> : <><Copy size={12} /> Embed</>}
+      {copied
+        ? <><Check size={12} className="text-green-500" /> Copied</>
+        : <><Copy size={12} /> Embed</>}
     </button>
+  )
+}
+
+function SkeletonCard() {
+  return (
+    <div className="bg-white rounded-xl border border-gray-200 p-6 flex flex-col gap-4">
+      <div className="flex items-start gap-3">
+        <div className="skeleton w-12 h-12 rounded-xl" />
+        <div className="flex-1 space-y-2">
+          <div className="skeleton h-3 w-16 rounded" />
+          <div className="skeleton h-4 w-32 rounded" />
+        </div>
+      </div>
+      <div className="skeleton h-3 w-24 rounded" />
+      <div className="skeleton h-1.5 w-full rounded" />
+      <div className="flex gap-2">
+        <div className="skeleton h-8 flex-1 rounded-lg" />
+        <div className="skeleton h-8 flex-1 rounded-lg" />
+        <div className="skeleton h-8 w-10 rounded-lg" />
+      </div>
+    </div>
   )
 }
 
@@ -151,8 +146,7 @@ export default function WidgetsPage() {
         </div>
         <button
           onClick={() => setShowModal(true)}
-          className="inline-flex items-center gap-2 px-4 py-2 text-white text-sm font-semibold rounded-lg transition-opacity hover:opacity-90"
-          style={{ background: '#ff6914' }}
+          className="inline-flex items-center gap-2 px-4 py-2 text-white text-sm font-semibold rounded-lg bg-indigo-600 hover:bg-indigo-700 transition-colors shadow-sm"
         >
           <Plus size={16} /> New Widget
         </button>
@@ -167,13 +161,13 @@ export default function WidgetsPage() {
               value={search}
               onChange={e => setSearch(e.target.value)}
               placeholder="Search by name or type…"
-              className="w-full pl-9 pr-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full pl-9 pr-3 py-2 border border-gray-200 rounded-lg text-sm bg-white"
             />
           </div>
           <select
             value={sort}
             onChange={e => setSort(e.target.value as 'newest' | 'views' | 'name')}
-            className="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
+            className="px-3 py-2 border border-gray-200 rounded-lg text-sm bg-white"
           >
             <option value="newest">Newest first</option>
             <option value="views">Most views</option>
@@ -183,20 +177,19 @@ export default function WidgetsPage() {
       )}
 
       {loading ? (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          {[1, 2, 3].map(i => (
-            <div key={i} className="bg-white rounded-xl border border-gray-200 p-5 animate-pulse h-48" />
-          ))}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+          {[1, 2, 3].map(i => <SkeletonCard key={i} />)}
         </div>
       ) : widgets.length === 0 ? (
         <div className="bg-white rounded-xl border border-gray-200 py-20 text-center">
-          <div className="text-5xl mb-4">🧩</div>
+          <div className="w-16 h-16 rounded-2xl bg-indigo-50 flex items-center justify-center mx-auto mb-4">
+            <Layers size={28} className="text-indigo-400" />
+          </div>
           <h3 className="font-semibold text-gray-800 text-lg">No widgets yet</h3>
-          <p className="text-gray-400 text-sm mt-1 mb-6">Create your first widget and embed it on your website in seconds.</p>
+          <p className="text-gray-400 text-sm mt-1 mb-6">Create your first widget and embed it on your site in seconds.</p>
           <button
             onClick={() => setShowModal(true)}
-            className="inline-flex items-center gap-2 px-5 py-2.5 text-white text-sm font-semibold rounded-lg transition-opacity hover:opacity-90"
-            style={{ background: '#ff6914' }}
+            className="inline-flex items-center gap-2 px-5 py-2.5 text-white text-sm font-semibold rounded-lg bg-indigo-600 hover:bg-indigo-700 transition-colors"
           >
             <Plus size={15} /> Create your first widget
           </button>
@@ -206,58 +199,71 @@ export default function WidgetsPage() {
           <p className="text-gray-400 text-sm">No widgets match &quot;{search}&quot;</p>
         </div>
       ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          {filtered.map(widget => {
-            const views = widget.monthly_views ?? 0
-            const limit = planViewLimit
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+          {filtered.map((widget, idx) => {
+            const meta   = TYPE_META[widget.type] ?? { label: widget.type, icon: '🔧', bg: 'bg-gray-50', text: 'text-gray-700', dot: '#6b7280' }
+            const views  = widget.monthly_views ?? 0
+            const limit  = planViewLimit
             const unlimited = limit === -1
-            const pct = limit && limit > 0 && !unlimited ? Math.round((views / limit) * 100) : 0
+            const pct    = limit && limit > 0 && !unlimited ? Math.round((views / limit) * 100) : 0
             const atLimit = !unlimited && limit !== null && views >= limit
-            const borderColor = TYPE_BORDER[widget.type] ?? '#e5e7eb'
 
             return (
               <div
                 key={widget.id}
-                className="bg-white rounded-xl border border-gray-200 p-5 flex flex-col gap-4"
-                style={{ borderLeftWidth: 3, borderLeftColor: borderColor }}
+                className="bg-white rounded-xl border border-gray-200 p-6 flex flex-col gap-4 card-hover card-animate"
+                style={{ animationDelay: `${idx * 40}ms` }}
               >
-                <div className="flex items-start justify-between">
-                  <div className="flex flex-col gap-1.5">
-                    <div className="flex items-center gap-2">
-                      <span className="text-lg">{TYPE_ICONS[widget.type] ?? '🔧'}</span>
-                      <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${TYPE_COLORS[widget.type]?.split(' ').slice(0, 2).join(' ') ?? 'bg-gray-100 text-gray-600'}`}>
-                        {widget.type.replace(/_/g, ' ')}
-                      </span>
+                {/* Header */}
+                <div className="flex items-start justify-between gap-3">
+                  <div className="flex items-center gap-3">
+                    {/* Icon block */}
+                    <div className={`w-12 h-12 rounded-xl ${meta.bg} flex items-center justify-center text-2xl shrink-0`}>
+                      {meta.icon}
                     </div>
-                    <h3 className="font-semibold text-gray-900 text-sm leading-tight">{widget.name}</h3>
+                    <div>
+                      <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${meta.bg} ${meta.text}`}>
+                        {meta.label}
+                      </span>
+                      <h3 className="font-semibold text-gray-900 text-sm leading-tight mt-1">{widget.name}</h3>
+                    </div>
                   </div>
                   <button
                     onClick={() => handleToggle(widget)}
                     disabled={togglingId === widget.id}
                     title={widget.is_active ? 'Deactivate' : 'Activate'}
-                    className={`p-1.5 rounded-lg transition-colors ${widget.is_active ? 'text-green-600 hover:bg-green-50' : 'text-gray-300 hover:bg-gray-100'}`}
+                    className={`p-1.5 rounded-lg transition-colors shrink-0 ${widget.is_active ? 'text-green-600 hover:bg-green-50' : 'text-gray-300 hover:bg-gray-100'}`}
                   >
                     {widget.is_active ? <Zap size={16} /> : <ZapOff size={16} />}
                   </button>
                 </div>
 
-                <div className="flex items-center gap-2 text-xs text-gray-400">
-                  <span className={`w-2 h-2 rounded-full ${widget.is_active ? 'bg-green-500' : 'bg-gray-300'}`} />
-                  <span className={widget.is_active ? 'text-green-600 font-medium' : 'text-gray-400'}>
-                    {widget.is_active ? 'Live' : 'Inactive'}
+                {/* Status + installs */}
+                <div className="flex items-center gap-3 text-xs text-gray-500">
+                  <span className="flex items-center gap-1.5">
+                    <span className={`w-2 h-2 rounded-full ${widget.is_active ? 'bg-green-500' : 'bg-gray-300'}`} />
+                    <span className={widget.is_active ? 'text-green-600 font-medium' : 'text-gray-400'}>
+                      {widget.is_active ? 'Live' : 'Inactive'}
+                    </span>
                   </span>
                   <span className="text-gray-300">·</span>
-                  <span>{widget.install_count} install{widget.install_count !== 1 ? 's' : ''}</span>
+                  <span className="flex items-center gap-1">
+                    <Globe size={11} />
+                    {widget.install_count} install{widget.install_count !== 1 ? 's' : ''}
+                  </span>
+                  <span className="text-gray-300">·</span>
+                  <span className="flex items-center gap-1">
+                    <Eye size={11} />
+                    {views.toLocaleString()} views
+                  </span>
                 </div>
 
-                {/* View usage */}
-                {limit !== null && (
+                {/* View usage bar */}
+                {limit !== null && !unlimited && (
                   <div className="space-y-1.5">
                     <div className="flex items-center justify-between">
                       <span className="text-xs text-gray-500">
-                        {unlimited
-                          ? `${views.toLocaleString()} views`
-                          : `${views.toLocaleString()} / ${limit.toLocaleString()} views`}
+                        {views.toLocaleString()} / {limit.toLocaleString()} views
                       </span>
                       {atLimit && (
                         <span className="text-xs font-semibold text-red-600 bg-red-50 px-1.5 py-0.5 rounded">
@@ -265,26 +271,23 @@ export default function WidgetsPage() {
                         </span>
                       )}
                     </div>
-                    {!unlimited && (
-                      <>
-                        <div className="h-1.5 bg-gray-100 rounded-full overflow-hidden">
-                          <div
-                            className={`h-full rounded-full transition-all ${barColor(pct)}`}
-                            style={{ width: `${Math.min(100, pct)}%` }}
-                          />
-                        </div>
-                        <p className="text-xs text-gray-400">
-                          Resets {widget.views_reset_at ? nextResetDate(widget.views_reset_at) : 'next month'}
-                        </p>
-                      </>
-                    )}
+                    <div className="h-1.5 bg-gray-100 rounded-full overflow-hidden">
+                      <div
+                        className={`h-full rounded-full transition-all ${barColor(pct)}`}
+                        style={{ width: `${Math.min(100, pct)}%` }}
+                      />
+                    </div>
+                    <p className="text-xs text-gray-400">
+                      Resets {widget.views_reset_at ? nextResetDate(widget.views_reset_at) : 'next month'}
+                    </p>
                   </div>
                 )}
 
+                {/* Actions */}
                 <div className="flex gap-2 mt-auto">
                   <Link
                     href={`/dashboard/widgets/${widget.id}`}
-                    className="flex-1 inline-flex items-center justify-center gap-1.5 px-3 py-2 border border-gray-200 text-gray-700 text-xs font-medium rounded-lg hover:bg-gray-50 transition-colors"
+                    className="flex-1 inline-flex items-center justify-center gap-1.5 px-3 py-2 bg-indigo-600 text-white text-xs font-semibold rounded-lg hover:bg-indigo-700 transition-colors"
                   >
                     <Settings2 size={13} /> Configure
                   </Link>

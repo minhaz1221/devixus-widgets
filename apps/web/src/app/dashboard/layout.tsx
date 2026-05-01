@@ -20,6 +20,11 @@ export default async function DashboardLayout({ children }: { children: React.Re
     .map((s: string) => s[0].toUpperCase())
     .join('')
 
+  const planBadgeCls =
+    planName.toLowerCase() === 'pro'    ? 'bg-indigo-600 text-white' :
+    planName.toLowerCase() === 'agency' ? 'bg-purple-600 text-white' :
+    'bg-gray-100 text-gray-600'
+
   async function signOut() {
     'use server'
     const supabase = await createClient()
@@ -33,32 +38,35 @@ export default async function DashboardLayout({ children }: { children: React.Re
 
       <div className="flex flex-col flex-1 min-w-0">
         {/* Top header */}
-        <header className="bg-white border-b border-gray-200 px-6 h-14 flex items-center justify-end gap-4 shrink-0">
-          <span className="text-sm text-gray-500 truncate hidden sm:block">{user.email}</span>
-          <span
-            className="text-xs font-semibold px-2 py-0.5 rounded-full"
-            style={{ background: planName.toLowerCase() === 'pro' ? '#ff6914' : planName.toLowerCase() === 'agency' ? '#7c3aed' : '#f3f4f6', color: planName.toLowerCase() === 'free' ? '#6b7280' : 'white' }}
-          >
-            {planName}
-          </span>
-          <div
-            className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold text-white shrink-0"
-            style={{ background: '#ff6914' }}
-          >
-            {initials || '?'}
+        <header className="bg-white border-b border-gray-200 px-6 h-14 flex items-center justify-between gap-4 shrink-0">
+          <div className="flex items-center gap-3">
+            <span className="text-sm font-semibold text-gray-800 hidden sm:block">
+              {displayName || user.email}
+            </span>
+            <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${planBadgeCls}`}>
+              {planName}
+            </span>
           </div>
-          <form action={signOut}>
-            <button
-              type="submit"
-              className="text-sm text-gray-500 hover:text-gray-800 font-medium transition-colors"
+
+          <div className="flex items-center gap-3">
+            <div
+              className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold text-white shrink-0 bg-indigo-600"
             >
-              Sign out
-            </button>
-          </form>
+              {initials || '?'}
+            </div>
+            <form action={signOut}>
+              <button
+                type="submit"
+                className="text-sm text-gray-500 hover:text-gray-800 font-medium transition-colors"
+              >
+                Sign out
+              </button>
+            </form>
+          </div>
         </header>
 
         {/* Page content */}
-        <main className="flex-1 p-6">
+        <main className="flex-1 p-6 page-animate">
           {children}
         </main>
       </div>

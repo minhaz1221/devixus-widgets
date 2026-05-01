@@ -13,7 +13,10 @@ const WIDGET_TYPES = [
     type: 'whatsapp',
     label: 'WhatsApp Chat',
     description: 'Floating chat button that opens WhatsApp',
-    color: 'border-green-200 hover:border-green-400 hover:bg-green-50',
+    icon: '💬',
+    bg: 'bg-green-50',
+    border: 'border-green-200',
+    activeBorder: 'hover:border-green-400',
     badge: 'bg-green-100 text-green-700',
     available: true,
     defaultConfig: {
@@ -29,7 +32,10 @@ const WIDGET_TYPES = [
     type: 'testimonials',
     label: 'Testimonials',
     description: 'Scrollable customer testimonial cards',
-    color: 'border-blue-200 hover:border-blue-400 hover:bg-blue-50',
+    icon: '⭐',
+    bg: 'bg-blue-50',
+    border: 'border-blue-200',
+    activeBorder: 'hover:border-blue-400',
     badge: 'bg-blue-100 text-blue-700',
     available: true,
     defaultConfig: {
@@ -44,7 +50,10 @@ const WIDGET_TYPES = [
     type: 'google_reviews',
     label: 'Google Reviews',
     description: 'Display your Google Business reviews',
-    color: 'border-yellow-200 hover:border-yellow-400 hover:bg-yellow-50',
+    icon: '🏢',
+    bg: 'bg-yellow-50',
+    border: 'border-yellow-200',
+    activeBorder: 'hover:border-yellow-400',
     badge: 'bg-yellow-100 text-yellow-700',
     available: true,
     defaultConfig: {
@@ -67,7 +76,10 @@ const WIDGET_TYPES = [
     type: 'countdown_timer',
     label: 'Countdown Timer',
     description: 'Create urgency with a live countdown',
-    color: 'border-purple-200 hover:border-purple-400 hover:bg-purple-50',
+    icon: '⏱',
+    bg: 'bg-purple-50',
+    border: 'border-purple-200',
+    activeBorder: 'hover:border-purple-400',
     badge: 'bg-purple-100 text-purple-700',
     available: true,
     defaultConfig: {
@@ -93,7 +105,10 @@ const WIDGET_TYPES = [
     type: 'contact_form',
     label: 'Contact Form',
     description: 'Beautiful popup or inline contact form',
-    color: 'border-orange-200 hover:border-orange-400 hover:bg-orange-50',
+    icon: '✉',
+    bg: 'bg-orange-50',
+    border: 'border-orange-200',
+    activeBorder: 'hover:border-orange-400',
     badge: 'bg-orange-100 text-orange-700',
     available: true,
     defaultConfig: {
@@ -101,37 +116,30 @@ const WIDGET_TYPES = [
       subtitle: "Send us a message and we'll get back to you.",
       recipient_email: '',
       button_text: 'Send Message',
-      button_color: '#ff6914',
+      button_color: '#6366f1',
       success_message: "Thank you! We'll be in touch soon.",
       display_mode: 'inline',
       trigger_text: '✉ Contact Us',
       trigger_style: 'button',
-      fields: {
-        name: true, email: true, phone: false,
-        subject: false, message: true,
-      },
-      required_fields: {
-        name: true, email: true, message: true,
-      },
+      fields: { name: true, email: true, phone: false, subject: false, message: true },
+      required_fields: { name: true, email: true, message: true },
       theme: 'light',
       border_radius: 8,
-      accent_color: '#ff6914',
+      accent_color: '#6366f1',
     },
   },
   {
     type: 'social_follow',
     label: 'Social Follow',
     description: 'Social media follow buttons bundle',
-    color: 'border-pink-200 hover:border-pink-400 hover:bg-pink-50',
+    icon: '📱',
+    bg: 'bg-pink-50',
+    border: 'border-pink-200',
+    activeBorder: 'hover:border-pink-400',
     badge: 'bg-pink-100 text-pink-700',
     available: true,
     defaultConfig: {
-      networks: {
-        facebook: '',
-        instagram: '',
-        twitter: '',
-        youtube: '',
-      },
+      networks: { facebook: '', instagram: '', twitter: '', youtube: '' },
       layout: 'horizontal',
       style: 'filled',
       size: 'medium',
@@ -146,8 +154,11 @@ const WIDGET_TYPES = [
   {
     type: 'youtube_feed',
     label: 'YouTube Feed',
-    description: 'Show your latest YouTube videos on your website',
-    color: 'border-red-200 hover:border-red-400 hover:bg-red-50',
+    description: 'Show your latest YouTube videos',
+    icon: '▶',
+    bg: 'bg-red-50',
+    border: 'border-red-200',
+    activeBorder: 'hover:border-red-400',
     badge: 'bg-red-100 text-red-700',
     available: true,
     defaultConfig: {
@@ -168,15 +179,18 @@ const WIDGET_TYPES = [
     type: 'announcement_bar',
     label: 'Announcement Bar',
     description: 'Sticky top or bottom bar for promotions',
-    color: 'border-orange-200 hover:border-orange-400 hover:bg-orange-50',
-    badge: 'bg-orange-100 text-orange-700',
+    icon: '📢',
+    bg: 'bg-indigo-50',
+    border: 'border-indigo-200',
+    activeBorder: 'hover:border-indigo-400',
+    badge: 'bg-indigo-100 text-indigo-700',
     available: true,
     defaultConfig: {
       message: '🎉 Special offer — Limited time only!',
       link_text: 'Shop now',
       link_url: '',
       position: 'top',
-      bg_color: '#ff6914',
+      bg_color: '#6366f1',
       text_color: '#ffffff',
       link_color: '#ffffff',
       show_close_button: true,
@@ -189,8 +203,11 @@ const WIDGET_TYPES = [
   {
     type: 'instagram_feed',
     label: 'Instagram Feed',
-    description: 'Display your Instagram posts on any website',
-    color: 'border-pink-200 hover:border-pink-400 hover:bg-pink-50',
+    description: 'Display your Instagram posts',
+    icon: '📸',
+    bg: 'bg-pink-50',
+    border: 'border-pink-200',
+    activeBorder: 'hover:border-pink-400',
     badge: 'bg-pink-100 text-pink-700',
     available: true,
     navigateTo: '/dashboard/widgets/new/instagram_feed',
@@ -211,8 +228,11 @@ const WIDGET_TYPES = [
   {
     type: 'tiktok_feed',
     label: 'TikTok Feed',
-    description: 'Embed your TikTok videos on any website',
-    color: 'border-gray-200 hover:border-gray-400 hover:bg-gray-50',
+    description: 'Embed your TikTok videos',
+    icon: '🎵',
+    bg: 'bg-gray-50',
+    border: 'border-gray-200',
+    activeBorder: 'hover:border-gray-400',
     badge: 'bg-gray-100 text-gray-700',
     available: true,
     navigateTo: '/dashboard/widgets/new/tiktok_feed',
@@ -237,11 +257,26 @@ export function NewWidgetModal({ onClose }: Props) {
   const router = useRouter()
   const [creating, setCreating] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
+  const [filter, setFilter] = useState<'all' | 'social' | 'tools' | 'forms'>('all')
+
+  const CATEGORIES: Record<string, 'social' | 'tools' | 'forms'> = {
+    whatsapp: 'social',
+    social_follow: 'social',
+    instagram_feed: 'social',
+    tiktok_feed: 'social',
+    youtube_feed: 'social',
+    testimonials: 'tools',
+    google_reviews: 'tools',
+    countdown_timer: 'tools',
+    announcement_bar: 'tools',
+    contact_form: 'forms',
+  }
+
+  const filtered = WIDGET_TYPES.filter(w => filter === 'all' || CATEGORIES[w.type] === filter)
 
   async function handleSelect(wt: typeof WIDGET_TYPES[0]) {
     if (!wt.available || creating) return
 
-    // Widgets with dedicated creation pages
     if ('navigateTo' in wt && wt.navigateTo) {
       router.push(wt.navigateTo as string)
       onClose()
@@ -255,18 +290,12 @@ export function NewWidgetModal({ onClose }: Props) {
       const res = await fetch('/api/widgets', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          name: `My ${wt.label}`,
-          type: wt.type,
-          config: wt.defaultConfig,
-        }),
+        body: JSON.stringify({ name: `My ${wt.label}`, type: wt.type, config: wt.defaultConfig }),
       })
 
       if (!res.ok) {
         const data = await res.json()
-        if (data.code === 'PLAN_LIMIT_REACHED') {
-          throw new Error('Widget limit reached. Upgrade your plan at Dashboard → Billing.')
-        }
+        if (data.code === 'PLAN_LIMIT_REACHED') throw new Error('Widget limit reached. Upgrade your plan at Dashboard → Billing.')
         throw new Error(data.error ?? 'Failed to create widget')
       }
 
@@ -280,12 +309,11 @@ export function NewWidgetModal({ onClose }: Props) {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-      {/* Backdrop */}
       <div className="absolute inset-0 bg-black/50" onClick={onClose} />
 
-      {/* Modal */}
-      <div className="relative bg-white rounded-2xl shadow-xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
-        <div className="flex items-center justify-between px-6 py-5 border-b border-gray-100">
+      <div className="relative bg-white rounded-2xl shadow-xl w-full max-w-2xl max-h-[90vh] overflow-hidden flex flex-col modal-animate">
+        {/* Header */}
+        <div className="flex items-center justify-between px-6 py-5 border-b border-gray-100 shrink-0">
           <div>
             <h2 className="text-lg font-bold text-gray-900">Choose a widget type</h2>
             <p className="text-sm text-gray-500 mt-0.5">Select the widget you want to add to your site</p>
@@ -295,38 +323,62 @@ export function NewWidgetModal({ onClose }: Props) {
           </button>
         </div>
 
-        <div className="p-6 grid grid-cols-2 gap-3">
-          {WIDGET_TYPES.map(wt => (
-            <button
-              key={wt.type}
-              disabled={!wt.available || creating !== null}
-              onClick={() => handleSelect(wt)}
-              className={[
-                'relative text-left rounded-xl border-2 p-4 transition-all',
-                wt.available
-                  ? `${wt.color} cursor-pointer`
-                  : 'border-gray-100 bg-gray-50 cursor-not-allowed opacity-60',
-                creating === wt.type ? 'opacity-70' : '',
-              ].join(' ')}
-            >
-              {!wt.available && (
-                <span className="absolute top-3 right-3 text-xs bg-gray-200 text-gray-500 px-2 py-0.5 rounded-full">
-                  Coming soon
-                </span>
-              )}
-              <span className={`inline-block text-xs font-semibold px-2 py-0.5 rounded-full mb-2 ${wt.badge}`}>
-                {wt.label}
-              </span>
-              <p className="text-sm text-gray-600">{wt.description}</p>
-              {creating === wt.type && (
-                <p className="text-xs text-blue-600 mt-2 font-medium">Creating…</p>
-              )}
-            </button>
-          ))}
+        {/* Category tabs */}
+        <div className="px-6 pt-3 pb-0 border-b border-gray-100 shrink-0">
+          <div className="flex gap-1">
+            {(['all', 'social', 'tools', 'forms'] as const).map(f => (
+              <button
+                key={f}
+                onClick={() => setFilter(f)}
+                className={[
+                  'px-4 py-2 text-sm font-medium border-b-2 -mb-px capitalize transition-colors',
+                  filter === f ? 'border-indigo-600 text-indigo-600' : 'border-transparent text-gray-500 hover:text-gray-700',
+                ].join(' ')}
+              >
+                {f === 'all' ? 'All' : f.charAt(0).toUpperCase() + f.slice(1)}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Widget grid */}
+        <div className="overflow-y-auto p-6">
+          <div className="grid grid-cols-2 gap-3">
+            {filtered.map((wt, i) => (
+              <button
+                key={wt.type}
+                disabled={!wt.available || creating !== null}
+                onClick={() => handleSelect(wt)}
+                className={[
+                  'relative text-left rounded-xl border-2 p-4 transition-all card-animate',
+                  wt.available
+                    ? `${wt.border} ${wt.activeBorder} hover:shadow-md cursor-pointer`
+                    : 'border-gray-100 bg-gray-50 cursor-not-allowed opacity-60',
+                  creating === wt.type ? 'opacity-70' : '',
+                ].join(' ')}
+                style={{ animationDelay: `${i * 30}ms` }}
+              >
+                <div className="flex items-start gap-3">
+                  <div className={`w-10 h-10 rounded-xl ${wt.bg} flex items-center justify-center text-xl shrink-0`}>
+                    {wt.icon}
+                  </div>
+                  <div className="min-w-0">
+                    <span className={`inline-block text-xs font-semibold px-2 py-0.5 rounded-full mb-1 ${wt.badge}`}>
+                      {wt.label}
+                    </span>
+                    <p className="text-xs text-gray-500 leading-relaxed">{wt.description}</p>
+                  </div>
+                </div>
+                {creating === wt.type && (
+                  <p className="text-xs text-indigo-600 mt-2 font-semibold">Creating…</p>
+                )}
+              </button>
+            ))}
+          </div>
         </div>
 
         {error && (
-          <div className="mx-6 mb-6 rounded-lg bg-red-50 border border-red-200 px-4 py-3 text-sm text-red-700">
+          <div className="mx-6 mb-6 rounded-lg bg-red-50 border border-red-200 px-4 py-3 text-sm text-red-700 shrink-0">
             {error}
           </div>
         )}
