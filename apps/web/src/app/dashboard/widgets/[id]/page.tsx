@@ -1633,12 +1633,12 @@ export default function ConfiguratorPage() {
   const [name, setName] = useState('')
   const [saving, setSaving] = useState(false)
   const [toast, setToast] = useState<{ msg: string; ok: boolean } | null>(null)
-  const [previewKey, setPreviewKey] = useState(0)
   const [autoPreview, setAutoPreview] = useState(false)
   const [previewSaving, setPreviewSaving] = useState(false)
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const configRef = useRef(config)
   const nameRef = useRef(name)
+  const iframeRef = useRef<HTMLIFrameElement>(null)
 
   const showToast = (msg: string, ok: boolean) => {
     setToast({ msg, ok })
@@ -1669,7 +1669,10 @@ export default function ConfiguratorPage() {
     setPreviewSaving(false)
     if (res.ok) {
       if (!silent) showToast('Saved successfully', true)
-      setPreviewKey(k => k + 1)
+      await new Promise(r => setTimeout(r, 500))
+      if (iframeRef.current) {
+        iframeRef.current.src = `/widget-preview/${id}?t=${Date.now()}`
+      }
     } else if (!silent) {
       const data = await res.json()
       showToast(data.error ?? 'Save failed', false)
@@ -1694,7 +1697,10 @@ export default function ConfiguratorPage() {
     setSaving(false)
     if (res.ok) {
       showToast('Saved successfully', true)
-      setPreviewKey(k => k + 1)
+      await new Promise(r => setTimeout(r, 500))
+      if (iframeRef.current) {
+        iframeRef.current.src = `/widget-preview/${id}?t=${Date.now()}`
+      }
     } else {
       const data = await res.json()
       showToast(data.error ?? 'Save failed', false)
@@ -1825,7 +1831,7 @@ export default function ConfiguratorPage() {
             </div>
           </div>
           <iframe
-            key={previewKey}
+            ref={iframeRef}
             src={`/widget-preview/${id}`}
             style={{ width: '100%', height: 500, border: 'none', background: '#f5f5f5' }}
             title="Widget preview"

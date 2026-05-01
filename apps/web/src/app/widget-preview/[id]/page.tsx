@@ -10,7 +10,7 @@ export default function WidgetPreviewPage({ params }: { params: { id: string } }
           body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
             background: #f5f5f5;
-            min-height: 400px;
+            min-height: 600px;
           }
           .preview-banner {
             background: #1a1a2e;
@@ -71,7 +71,7 @@ export default function WidgetPreviewPage({ params }: { params: { id: string } }
             height: 60px;
             box-shadow: 0 1px 3px rgba(0,0,0,.06);
           }
-          .widget-mount { margin-top: 20px; }
+          .widget-container { margin-top: 20px; min-height: 200px; padding: 20px 0; }
         `}</style>
       </head>
       <body>
@@ -89,9 +89,9 @@ export default function WidgetPreviewPage({ params }: { params: { id: string } }
             <div className="mock-card" />
           </div>
           <div className="mock-wide" />
-          <div className="widget-mount">
+          <div className="widget-container">
             {/* eslint-disable-next-line @next/next/no-sync-scripts */}
-            <script src="/widget.js" data-widget-id={params.id} />
+            <script src="https://devixus-widgets-web.vercel.app/widget.js" data-widget-id={params.id} />
           </div>
         </div>
       </body>
