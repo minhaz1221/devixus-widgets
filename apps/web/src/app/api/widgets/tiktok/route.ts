@@ -1,0 +1,138 @@
+import { NextRequest, NextResponse } from 'next/server'
+
+// TODO: Replace with real TikTok API when approved
+const mockProfile = {
+  username: 'creativestudio',
+  display_name: 'Creative Studio',
+  avatar: 'https://i.pravatar.cc/150?img=33',
+  followers: 84500,
+  following: 312,
+  likes: 1200000,
+  bio: '🎬 Video Creator | Daily Content',
+  videos: [
+    {
+      id: 'vid_1',
+      thumbnail: 'https://picsum.photos/seed/tiktok1/360/640',
+      caption: 'Day in my life as a content creator 🎬 #dayinmylife',
+      views: 125000,
+      likes: 8900,
+      comments: 234,
+      shares: 156,
+      duration: '0:32',
+      timestamp: '2024-01-15T10:00:00Z',
+    },
+    {
+      id: 'vid_2',
+      thumbnail: 'https://picsum.photos/seed/tiktok2/360/640',
+      caption: 'This editing trick changed everything ✨ #editing',
+      views: 892000,
+      likes: 67000,
+      comments: 1203,
+      shares: 4500,
+      duration: '0:47',
+      timestamp: '2024-01-14T14:00:00Z',
+    },
+    {
+      id: 'vid_3',
+      thumbnail: 'https://picsum.photos/seed/tiktok3/360/640',
+      caption: 'Studio setup tour 2024 🖥️ #setup #studio',
+      views: 45000,
+      likes: 3400,
+      comments: 189,
+      shares: 78,
+      duration: '1:02',
+      timestamp: '2024-01-13T09:30:00Z',
+    },
+    {
+      id: 'vid_4',
+      thumbnail: 'https://picsum.photos/seed/tiktok4/360/640',
+      caption: 'POV: You finally nailed the transition 🔥',
+      views: 234000,
+      likes: 19800,
+      comments: 445,
+      shares: 890,
+      duration: '0:15',
+      timestamp: '2024-01-12T16:00:00Z',
+    },
+    {
+      id: 'vid_5',
+      thumbnail: 'https://picsum.photos/seed/tiktok5/360/640',
+      caption: 'My top 3 apps for creators 📱 #apps #creator',
+      views: 67000,
+      likes: 5100,
+      comments: 312,
+      shares: 234,
+      duration: '0:58',
+      timestamp: '2024-01-11T11:00:00Z',
+    },
+    {
+      id: 'vid_6',
+      thumbnail: 'https://picsum.photos/seed/tiktok6/360/640',
+      caption: 'Behind the scenes of a viral video 👀 #bts',
+      views: 1200000,
+      likes: 98000,
+      comments: 2340,
+      shares: 8900,
+      duration: '1:15',
+      timestamp: '2024-01-10T08:00:00Z',
+    },
+    {
+      id: 'vid_7',
+      thumbnail: 'https://picsum.photos/seed/tiktok7/360/640',
+      caption: 'Morning routine for productivity ☀️ #routine',
+      views: 34000,
+      likes: 2800,
+      comments: 145,
+      shares: 67,
+      duration: '0:45',
+      timestamp: '2024-01-09T07:30:00Z',
+    },
+    {
+      id: 'vid_8',
+      thumbnail: 'https://picsum.photos/seed/tiktok8/360/640',
+      caption: 'Realistic vs expectation 😂 #funny #relatable',
+      views: 445000,
+      likes: 38000,
+      comments: 890,
+      shares: 2300,
+      duration: '0:22',
+      timestamp: '2024-01-08T13:00:00Z',
+    },
+    {
+      id: 'vid_9',
+      thumbnail: 'https://picsum.photos/seed/tiktok9/360/640',
+      caption: 'How I grew to 80k followers 📈 #growthtips',
+      views: 156000,
+      likes: 12400,
+      comments: 678,
+      shares: 1200,
+      duration: '2:03',
+      timestamp: '2024-01-07T15:00:00Z',
+    },
+  ],
+}
+
+const corsHeaders = {
+  'Access-Control-Allow-Origin': '*',
+  'x-data-source': 'mock',
+}
+
+export async function GET(request: NextRequest) {
+  const { searchParams } = new URL(request.url)
+  const username = searchParams.get('username') || 'creativestudio'
+
+  return NextResponse.json(
+    { ...mockProfile, username },
+    { headers: corsHeaders }
+  )
+}
+
+export async function OPTIONS() {
+  return new NextResponse(null, {
+    status: 204,
+    headers: {
+      'Access-Control-Allow-Origin': '*',
+      'Access-Control-Allow-Methods': 'GET, OPTIONS',
+    },
+  })
+}

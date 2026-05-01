@@ -186,6 +186,51 @@ const WIDGET_TYPES = [
       is_sticky: true,
     },
   },
+  {
+    type: 'instagram_feed',
+    label: 'Instagram Feed',
+    description: 'Display your Instagram posts on any website',
+    color: 'border-pink-200 hover:border-pink-400 hover:bg-pink-50',
+    badge: 'bg-pink-100 text-pink-700',
+    available: true,
+    navigateTo: '/dashboard/widgets/new/instagram_feed',
+    defaultConfig: {
+      username: '',
+      layout: 'grid',
+      columns: 3,
+      show_caption: false,
+      show_likes: true,
+      show_video_icon: true,
+      border_radius: '8px',
+      gap: '8px',
+      num_posts: 9,
+      link_behavior: 'instagram',
+      theme: 'light',
+    },
+  },
+  {
+    type: 'tiktok_feed',
+    label: 'TikTok Feed',
+    description: 'Embed your TikTok videos on any website',
+    color: 'border-gray-200 hover:border-gray-400 hover:bg-gray-50',
+    badge: 'bg-gray-100 text-gray-700',
+    available: true,
+    navigateTo: '/dashboard/widgets/new/tiktok_feed',
+    defaultConfig: {
+      username: '',
+      layout: 'grid',
+      columns: 3,
+      show_duration: true,
+      show_view_count: true,
+      show_caption: false,
+      show_like_count: true,
+      border_radius: '8px',
+      gap: '8px',
+      num_videos: 9,
+      autoplay_on_hover: false,
+      theme: 'light',
+    },
+  },
 ]
 
 export function NewWidgetModal({ onClose }: Props) {
@@ -195,6 +240,14 @@ export function NewWidgetModal({ onClose }: Props) {
 
   async function handleSelect(wt: typeof WIDGET_TYPES[0]) {
     if (!wt.available || creating) return
+
+    // Widgets with dedicated creation pages
+    if ('navigateTo' in wt && wt.navigateTo) {
+      router.push(wt.navigateTo as string)
+      onClose()
+      return
+    }
+
     setCreating(wt.type)
     setError(null)
 

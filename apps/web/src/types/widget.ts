@@ -8,6 +8,8 @@ export type WidgetType =
   | 'youtube_feed'
   | 'countdown_timer'
   | 'announcement_bar'
+  | 'instagram_feed'
+  | 'tiktok_feed'
 
 export interface Widget {
   id: string
@@ -157,6 +159,35 @@ export interface ContactFormConfig {
   theme: 'light' | 'dark'
   border_radius: number
   accent_color: string
+}
+
+export interface InstagramFeedConfig {
+  username: string
+  layout: 'grid' | 'carousel' | 'masonry'
+  columns: 2 | 3 | 4
+  show_caption: boolean
+  show_likes: boolean
+  show_video_icon: boolean
+  border_radius: '0px' | '8px' | '16px' | 'round'
+  gap: '4px' | '8px' | '12px' | '16px'
+  num_posts: 6 | 9 | 12 | 15
+  link_behavior: 'instagram' | 'lightbox' | 'none'
+  theme: 'light' | 'dark' | 'auto'
+}
+
+export interface TikTokFeedConfig {
+  username: string
+  layout: 'grid' | 'carousel' | 'list'
+  columns: 2 | 3 | 4
+  show_duration: boolean
+  show_view_count: boolean
+  show_caption: boolean
+  show_like_count: boolean
+  border_radius: '0px' | '8px' | '16px' | 'round'
+  gap: '4px' | '8px' | '12px' | '16px'
+  num_videos: 6 | 9 | 12
+  autoplay_on_hover: boolean
+  theme: 'light' | 'dark' | 'auto'
 }
 
 export interface SocialFollowConfig {

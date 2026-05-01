@@ -3,7 +3,7 @@
 import { useEffect, useState, useCallback, useRef } from 'react'
 import { useParams } from 'next/navigation'
 import { Copy, Check, Star, Trash2, Plus } from 'lucide-react'
-import type { Widget, WhatsAppConfig, TestimonialsConfig, YouTubeFeedConfig, CountdownTimerConfig, AnnouncementBarConfig, GoogleReviewsConfig, ContactFormConfig, SocialFollowConfig } from '@/types/widget'
+import type { Widget, WhatsAppConfig, TestimonialsConfig, YouTubeFeedConfig, CountdownTimerConfig, AnnouncementBarConfig, GoogleReviewsConfig, ContactFormConfig, SocialFollowConfig, InstagramFeedConfig, TikTokFeedConfig } from '@/types/widget'
 
 // ── Embed code ─────────────────────────────────────────────────────────────
 const EMBED_ORIGIN = 'https://devixus-widgets-web.vercel.app'
@@ -1625,6 +1625,325 @@ function SocialFollowForm({
   )
 }
 
+// ── Instagram Feed form ────────────────────────────────────────────────────
+function InstagramFeedForm({
+  config,
+  onChange,
+}: {
+  config: Partial<InstagramFeedConfig>
+  onChange: (c: Partial<InstagramFeedConfig>) => void
+}) {
+  const set = (key: keyof InstagramFeedConfig, val: unknown) =>
+    onChange({ ...config, [key]: val })
+
+  return (
+    <div className="space-y-5">
+      <div>
+        <label className="block text-sm font-medium text-gray-700 mb-1">Instagram Username</label>
+        <input
+          type="text"
+          value={config.username ?? ''}
+          onChange={e => set('username', e.target.value)}
+          placeholder="@yourusername"
+          className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+        />
+      </div>
+
+      <div>
+        <label className="block text-sm font-medium text-gray-700 mb-2">Layout</label>
+        <div className="flex gap-4">
+          {(['grid', 'carousel', 'masonry'] as const).map(l => (
+            <label key={l} className="flex items-center gap-2 cursor-pointer">
+              <input
+                type="radio"
+                name="ig-layout"
+                checked={(config.layout ?? 'grid') === l}
+                onChange={() => set('layout', l)}
+              />
+              <span className="text-sm text-gray-700 capitalize">{l}</span>
+            </label>
+          ))}
+        </div>
+      </div>
+
+      <div>
+        <label className="block text-sm font-medium text-gray-700 mb-2">Columns</label>
+        <div className="flex gap-4">
+          {([2, 3, 4] as const).map(c => (
+            <label key={c} className="flex items-center gap-2 cursor-pointer">
+              <input
+                type="radio"
+                name="ig-cols"
+                checked={(config.columns ?? 3) === c}
+                onChange={() => set('columns', c)}
+              />
+              <span className="text-sm text-gray-700">{c}</span>
+            </label>
+          ))}
+        </div>
+      </div>
+
+      <div className="flex flex-col gap-3">
+        {([
+          ['show_caption', 'Show caption'] as const,
+          ['show_likes', 'Show likes count'] as const,
+          ['show_video_icon', 'Show video play icon'] as const,
+        ]).map(([key, label]) => (
+          <label key={key} className="flex items-center justify-between cursor-pointer">
+            <span className="text-sm text-gray-700">{label}</span>
+            <Toggle
+              checked={key === 'show_caption' ? !!config.show_caption : config[key] !== false}
+              onChange={v => set(key, v)}
+            />
+          </label>
+        ))}
+      </div>
+
+      <div>
+        <label className="block text-sm font-medium text-gray-700 mb-2">Border Radius</label>
+        <div className="flex gap-3 flex-wrap">
+          {(['0px', '8px', '16px', 'round'] as const).map(r => (
+            <label key={r} className="flex items-center gap-2 cursor-pointer">
+              <input
+                type="radio"
+                name="ig-radius"
+                checked={(config.border_radius ?? '8px') === r}
+                onChange={() => set('border_radius', r)}
+              />
+              <span className="text-sm text-gray-700">{r}</span>
+            </label>
+          ))}
+        </div>
+      </div>
+
+      <div>
+        <label className="block text-sm font-medium text-gray-700 mb-2">Gap Between Posts</label>
+        <div className="flex gap-3 flex-wrap">
+          {(['4px', '8px', '12px', '16px'] as const).map(g => (
+            <label key={g} className="flex items-center gap-2 cursor-pointer">
+              <input
+                type="radio"
+                name="ig-gap"
+                checked={(config.gap ?? '8px') === g}
+                onChange={() => set('gap', g)}
+              />
+              <span className="text-sm text-gray-700">{g}</span>
+            </label>
+          ))}
+        </div>
+      </div>
+
+      <div>
+        <label className="block text-sm font-medium text-gray-700 mb-2">Number of Posts</label>
+        <div className="flex gap-4">
+          {([6, 9, 12, 15] as const).map(n => (
+            <label key={n} className="flex items-center gap-2 cursor-pointer">
+              <input
+                type="radio"
+                name="ig-num"
+                checked={(config.num_posts ?? 9) === n}
+                onChange={() => set('num_posts', n)}
+              />
+              <span className="text-sm text-gray-700">{n}</span>
+            </label>
+          ))}
+        </div>
+      </div>
+
+      <div>
+        <label className="block text-sm font-medium text-gray-700 mb-2">Link Behavior</label>
+        <div className="flex gap-3 flex-wrap">
+          {([
+            ['instagram', 'Open on Instagram'] as const,
+            ['lightbox', 'Lightbox'] as const,
+            ['none', 'None'] as const,
+          ]).map(([val, label]) => (
+            <label key={val} className="flex items-center gap-2 cursor-pointer">
+              <input
+                type="radio"
+                name="ig-link"
+                checked={(config.link_behavior ?? 'instagram') === val}
+                onChange={() => set('link_behavior', val)}
+              />
+              <span className="text-sm text-gray-700">{label}</span>
+            </label>
+          ))}
+        </div>
+      </div>
+
+      <div>
+        <label className="block text-sm font-medium text-gray-700 mb-2">Theme</label>
+        <div className="flex gap-4">
+          {(['light', 'dark', 'auto'] as const).map(t => (
+            <label key={t} className="flex items-center gap-2 cursor-pointer">
+              <input
+                type="radio"
+                name="ig-theme"
+                checked={(config.theme ?? 'light') === t}
+                onChange={() => set('theme', t)}
+              />
+              <span className="text-sm text-gray-700 capitalize">{t}</span>
+            </label>
+          ))}
+        </div>
+      </div>
+    </div>
+  )
+}
+
+// ── TikTok Feed form ───────────────────────────────────────────────────────
+function TikTokFeedForm({
+  config,
+  onChange,
+}: {
+  config: Partial<TikTokFeedConfig>
+  onChange: (c: Partial<TikTokFeedConfig>) => void
+}) {
+  const set = (key: keyof TikTokFeedConfig, val: unknown) =>
+    onChange({ ...config, [key]: val })
+
+  return (
+    <div className="space-y-5">
+      <div>
+        <label className="block text-sm font-medium text-gray-700 mb-1">TikTok Username</label>
+        <input
+          type="text"
+          value={config.username ?? ''}
+          onChange={e => set('username', e.target.value)}
+          placeholder="@yourusername"
+          className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+        />
+      </div>
+
+      <div>
+        <label className="block text-sm font-medium text-gray-700 mb-2">Layout</label>
+        <div className="flex gap-4">
+          {(['grid', 'carousel', 'list'] as const).map(l => (
+            <label key={l} className="flex items-center gap-2 cursor-pointer">
+              <input
+                type="radio"
+                name="tt-layout"
+                checked={(config.layout ?? 'grid') === l}
+                onChange={() => set('layout', l)}
+              />
+              <span className="text-sm text-gray-700 capitalize">{l}</span>
+            </label>
+          ))}
+        </div>
+      </div>
+
+      {(config.layout ?? 'grid') !== 'list' && (
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-2">Columns</label>
+          <div className="flex gap-4">
+            {([2, 3, 4] as const).map(c => (
+              <label key={c} className="flex items-center gap-2 cursor-pointer">
+                <input
+                  type="radio"
+                  name="tt-cols"
+                  checked={(config.columns ?? 3) === c}
+                  onChange={() => set('columns', c)}
+                />
+                <span className="text-sm text-gray-700">{c}</span>
+              </label>
+            ))}
+          </div>
+        </div>
+      )}
+
+      <div className="flex flex-col gap-3">
+        {([
+          ['show_duration', 'Show video duration'] as const,
+          ['show_view_count', 'Show view count'] as const,
+          ['show_caption', 'Show caption'] as const,
+          ['show_like_count', 'Show like count'] as const,
+          ['autoplay_on_hover', 'Autoplay on hover'] as const,
+        ]).map(([key, label]) => (
+          <label key={key} className="flex items-center justify-between cursor-pointer">
+            <span className="text-sm text-gray-700">{label}</span>
+            <Toggle
+              checked={
+                key === 'show_caption' || key === 'autoplay_on_hover'
+                  ? !!config[key]
+                  : config[key] !== false
+              }
+              onChange={v => set(key, v)}
+            />
+          </label>
+        ))}
+      </div>
+
+      <div>
+        <label className="block text-sm font-medium text-gray-700 mb-2">Border Radius</label>
+        <div className="flex gap-3 flex-wrap">
+          {(['0px', '8px', '16px', 'round'] as const).map(r => (
+            <label key={r} className="flex items-center gap-2 cursor-pointer">
+              <input
+                type="radio"
+                name="tt-radius"
+                checked={(config.border_radius ?? '8px') === r}
+                onChange={() => set('border_radius', r)}
+              />
+              <span className="text-sm text-gray-700">{r}</span>
+            </label>
+          ))}
+        </div>
+      </div>
+
+      <div>
+        <label className="block text-sm font-medium text-gray-700 mb-2">Gap</label>
+        <div className="flex gap-3 flex-wrap">
+          {(['4px', '8px', '12px', '16px'] as const).map(g => (
+            <label key={g} className="flex items-center gap-2 cursor-pointer">
+              <input
+                type="radio"
+                name="tt-gap"
+                checked={(config.gap ?? '8px') === g}
+                onChange={() => set('gap', g)}
+              />
+              <span className="text-sm text-gray-700">{g}</span>
+            </label>
+          ))}
+        </div>
+      </div>
+
+      <div>
+        <label className="block text-sm font-medium text-gray-700 mb-2">Number of Videos</label>
+        <div className="flex gap-4">
+          {([6, 9, 12] as const).map(n => (
+            <label key={n} className="flex items-center gap-2 cursor-pointer">
+              <input
+                type="radio"
+                name="tt-num"
+                checked={(config.num_videos ?? 9) === n}
+                onChange={() => set('num_videos', n)}
+              />
+              <span className="text-sm text-gray-700">{n}</span>
+            </label>
+          ))}
+        </div>
+      </div>
+
+      <div>
+        <label className="block text-sm font-medium text-gray-700 mb-2">Theme</label>
+        <div className="flex gap-4">
+          {(['light', 'dark', 'auto'] as const).map(t => (
+            <label key={t} className="flex items-center gap-2 cursor-pointer">
+              <input
+                type="radio"
+                name="tt-theme"
+                checked={(config.theme ?? 'light') === t}
+                onChange={() => set('theme', t)}
+              />
+              <span className="text-sm text-gray-700 capitalize">{t}</span>
+            </label>
+          ))}
+        </div>
+      </div>
+    </div>
+  )
+}
+
 // ── Main configurator page ─────────────────────────────────────────────────
 export default function ConfiguratorPage() {
   const { id } = useParams<{ id: string }>()
@@ -1788,6 +2107,18 @@ export default function ConfiguratorPage() {
           {widget.type === 'social_follow' && (
             <SocialFollowForm
               config={config as Partial<SocialFollowConfig>}
+              onChange={c => handleConfigChange(c as Record<string, unknown>)}
+            />
+          )}
+          {widget.type === 'instagram_feed' && (
+            <InstagramFeedForm
+              config={config as Partial<InstagramFeedConfig>}
+              onChange={c => handleConfigChange(c as Record<string, unknown>)}
+            />
+          )}
+          {widget.type === 'tiktok_feed' && (
+            <TikTokFeedForm
+              config={config as Partial<TikTokFeedConfig>}
               onChange={c => handleConfigChange(c as Record<string, unknown>)}
             />
           )}

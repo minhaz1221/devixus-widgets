@@ -18,6 +18,8 @@ const TYPE_COLORS: Record<string, string> = {
   social_follow: 'bg-pink-100 text-pink-700 border-pink-400',
   youtube_feed: 'bg-red-100 text-red-700 border-red-400',
   announcement_bar: 'bg-orange-100 text-orange-700 border-orange-400',
+  instagram_feed: 'bg-pink-100 text-pink-700 border-pink-400',
+  tiktok_feed: 'bg-gray-100 text-gray-700 border-gray-400',
 }
 
 const TYPE_BORDER: Record<string, string> = {
@@ -30,6 +32,8 @@ const TYPE_BORDER: Record<string, string> = {
   social_follow: '#ec4899',
   youtube_feed: '#ef4444',
   announcement_bar: '#f97316',
+  instagram_feed: '#E1306C',
+  tiktok_feed: '#010101',
 }
 
 const TYPE_ICONS: Record<string, string> = {
@@ -42,6 +46,8 @@ const TYPE_ICONS: Record<string, string> = {
   social_follow: '📱',
   youtube_feed: '▶',
   announcement_bar: '📢',
+  instagram_feed: '📸',
+  tiktok_feed: '🎵',
 }
 
 function barColor(pct: number): string {

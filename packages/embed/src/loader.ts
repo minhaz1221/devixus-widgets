@@ -1783,6 +1783,474 @@
     `
   }
 
+  // Render Instagram Feed widget
+  function renderInstagramFeed(
+    shadow: ShadowRoot,
+    config: any,
+    showBranding: boolean,
+    apiBase: string
+  ) {
+    const theme = config.theme || 'light'
+    const bg = theme === 'dark' ? '#1a1a1a' : '#ffffff'
+    const text = theme === 'dark' ? '#ffffff' : '#0f0f0f'
+    const subtext = theme === 'dark' ? '#aaaaaa' : '#666666'
+    const columns = config.columns || 3
+    const layout = config.layout || 'grid'
+    const borderRadius = config.border_radius === 'round' ? '50%'
+      : (config.border_radius || '8px')
+    const gap = config.gap || '8px'
+    const numPosts = config.num_posts || 9
+    const showLikes = config.show_likes !== false
+    const showCaption = !!config.show_caption
+    const showVideoIcon = config.show_video_icon !== false
+    const linkBehavior = config.link_behavior || 'instagram'
+    const username = config.username || ''
+
+    shadow.innerHTML = `
+      <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        .ig-wrap {
+          font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+          background: ${bg};
+          padding: 20px;
+          color: ${text};
+        }
+        .ig-loading { text-align: center; padding: 40px; color: ${subtext}; font-size: 14px; }
+      </style>
+      <div class="ig-wrap"><div class="ig-loading">Loading Instagram posts...</div></div>
+    `
+
+    if (!username) {
+      const wrap = shadow.querySelector('.ig-wrap')
+      if (wrap) wrap.innerHTML = `<div class="ig-loading" style="color:${subtext}">No Instagram username configured</div>`
+      return
+    }
+
+    function formatNum(n: number): string {
+      if (n >= 1_000_000) return `${(n / 1_000_000).toFixed(1)}M`
+      if (n >= 1_000) return `${(n / 1_000).toFixed(1)}K`
+      return String(n)
+    }
+
+    fetch(`${apiBase}/api/widgets/instagram?username=${encodeURIComponent(username)}`)
+      .then(r => r.json())
+      .then(profile => {
+        if (!profile || !profile.posts) return
+
+        const posts = (profile.posts as any[]).slice(0, numPosts)
+
+        const postCards = posts.map(p => {
+          const href = linkBehavior === 'instagram'
+            ? `https://www.instagram.com/${username}/`
+            : '#'
+          const cursorStyle = linkBehavior === 'none' ? 'default' : 'pointer'
+          return `
+            <div class="ig-post" style="cursor:${cursorStyle}" data-href="${href}" data-behavior="${linkBehavior}">
+              <div class="ig-thumb-wrap">
+                <img src="${p.thumbnail}" alt="" class="ig-thumb" loading="lazy" />
+                ${p.type === 'video' && showVideoIcon ? `<div class="ig-video-icon">▶</div>` : ''}
+                ${showLikes ? `
+                  <div class="ig-overlay">
+                    <span class="ig-stat">♥ ${formatNum(p.likes)}</span>
+                    <span class="ig-stat">💬 ${p.comments}</span>
+                  </div>` : ''}
+              </div>
+              ${showCaption ? `<p class="ig-caption">${p.caption}</p>` : ''}
+            </div>
+          `
+        }).join('')
+
+        const gridCss = layout === 'grid'
+          ? `display: grid; grid-template-columns: repeat(${columns}, 1fr); gap: ${gap};`
+          : layout === 'carousel'
+          ? `display: flex; gap: ${gap}; overflow-x: auto; scrollbar-width: none;`
+          : `column-count: ${columns}; column-gap: ${gap};`
+
+        const postCss = layout === 'masonry'
+          ? `break-inside: avoid; margin-bottom: ${gap};`
+          : layout === 'carousel'
+          ? `flex: 0 0 ${Math.floor(280 / columns)}px;`
+          : ''
+
+        const thumbPaddingCss = layout !== 'masonry'
+          ? 'padding-top: 100%;'
+          : ''
+
+        const thumbAbsCss = layout !== 'masonry'
+          ? 'position: absolute; top: 0; left: 0; width: 100%; height: 100%;'
+          : 'width: 100%; display: block;'
+
+        shadow.innerHTML = `
+          <style>
+            * { box-sizing: border-box; margin: 0; padding: 0; }
+            .ig-wrap {
+              font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+              background: ${bg};
+              padding: 20px;
+            }
+            .ig-header {
+              display: flex;
+              align-items: center;
+              gap: 12px;
+              padding-bottom: 16px;
+              margin-bottom: 16px;
+              border-bottom: 1px solid ${theme === 'dark' ? '#333' : '#eee'};
+            }
+            .ig-avatar { width: 48px; height: 48px; border-radius: 50%; object-fit: cover; }
+            .ig-name { font-size: 15px; font-weight: 600; color: ${text}; }
+            .ig-bio { font-size: 12px; color: ${subtext}; margin-top: 2px; }
+            .ig-followers { margin-left: auto; text-align: right; }
+            .ig-followers-num { font-size: 14px; font-weight: 700; color: ${text}; }
+            .ig-followers-label { font-size: 11px; color: ${subtext}; }
+            .ig-grid { ${gridCss} }
+            .ig-grid::-webkit-scrollbar { display: none; }
+            .ig-post { ${postCss} position: relative; }
+            .ig-thumb-wrap {
+              position: relative;
+              overflow: hidden;
+              border-radius: ${borderRadius};
+              ${thumbPaddingCss}
+              background: #eee;
+            }
+            .ig-thumb {
+              ${thumbAbsCss}
+              object-fit: cover;
+              transition: transform 0.3s ease;
+            }
+            .ig-post:hover .ig-thumb { transform: scale(1.05); }
+            .ig-video-icon {
+              position: absolute;
+              top: 8px; right: 8px;
+              background: rgba(0,0,0,0.6);
+              color: white;
+              width: 22px; height: 22px;
+              border-radius: 50%;
+              display: flex;
+              align-items: center;
+              justify-content: center;
+              font-size: 9px;
+            }
+            .ig-overlay {
+              position: absolute;
+              inset: 0;
+              background: rgba(0,0,0,0.5);
+              display: flex;
+              align-items: center;
+              justify-content: center;
+              gap: 16px;
+              opacity: 0;
+              transition: opacity 0.2s;
+              border-radius: ${borderRadius};
+            }
+            .ig-post:hover .ig-overlay { opacity: 1; }
+            .ig-stat { color: white; font-size: 13px; font-weight: 600; }
+            .ig-caption {
+              font-size: 11px;
+              color: ${subtext};
+              padding: 5px 3px 2px;
+              white-space: nowrap;
+              overflow: hidden;
+              text-overflow: ellipsis;
+            }
+            .ig-footer { text-align: center; margin-top: 16px; font-size: 10px; }
+            .ig-footer a { color: ${subtext}; text-decoration: none; opacity: 0.6; }
+          </style>
+          <div class="ig-wrap">
+            <div class="ig-header">
+              <img src="${profile.profile_picture}" alt="@${profile.username}" class="ig-avatar" />
+              <div>
+                <div class="ig-name">@${profile.username}</div>
+                <div class="ig-bio">${profile.bio || ''}</div>
+              </div>
+              <div class="ig-followers">
+                <div class="ig-followers-num">${formatNum(profile.followers)}</div>
+                <div class="ig-followers-label">followers</div>
+              </div>
+            </div>
+            <div class="ig-grid">${postCards}</div>
+            ${showBranding ? `
+              <div class="ig-footer">
+                <a href="${apiBase}" target="_blank" rel="noopener noreferrer">📸 Powered by Devixus Widgets</a>
+              </div>` : ''}
+          </div>
+        `
+
+        if (linkBehavior !== 'none') {
+          shadow.querySelectorAll('.ig-post').forEach(el => {
+            const href = (el as HTMLElement).dataset.href
+            if (href && href !== '#') {
+              el.addEventListener('click', () => {
+                window.open(href, '_blank', 'noopener noreferrer')
+              })
+            }
+          })
+        }
+      })
+      .catch(() => {
+        const loadingEl = shadow.querySelector('.ig-loading')
+        if (loadingEl) loadingEl.textContent = 'Failed to load Instagram posts'
+      })
+  }
+
+  // Render TikTok Feed widget
+  function renderTikTokFeed(
+    shadow: ShadowRoot,
+    config: any,
+    showBranding: boolean,
+    apiBase: string
+  ) {
+    const theme = config.theme || 'light'
+    const bg = theme === 'dark' ? '#1a1a1a' : '#ffffff'
+    const text = theme === 'dark' ? '#ffffff' : '#0f0f0f'
+    const subtext = theme === 'dark' ? '#aaaaaa' : '#666666'
+    const cardBg = theme === 'dark' ? '#2a2a2a' : '#f9f9f9'
+    const columns = config.columns || 3
+    const layout = config.layout || 'grid'
+    const borderRadius = config.border_radius === 'round' ? '50%'
+      : (config.border_radius || '8px')
+    const gap = config.gap || '8px'
+    const numVideos = config.num_videos || 9
+    const showDuration = config.show_duration !== false
+    const showViewCount = config.show_view_count !== false
+    const showCaption = !!config.show_caption
+    const showLikeCount = config.show_like_count !== false
+    const username = config.username || ''
+
+    shadow.innerHTML = `
+      <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        .tt-wrap {
+          font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+          background: ${bg};
+          padding: 20px;
+        }
+        .tt-loading { text-align: center; padding: 40px; color: ${subtext}; font-size: 14px; }
+      </style>
+      <div class="tt-wrap"><div class="tt-loading">Loading TikTok videos...</div></div>
+    `
+
+    if (!username) {
+      const wrap = shadow.querySelector('.tt-wrap')
+      if (wrap) wrap.innerHTML = `<div class="tt-loading">No TikTok username configured</div>`
+      return
+    }
+
+    function formatNum(n: number): string {
+      if (n >= 1_000_000) return `${(n / 1_000_000).toFixed(1)}M`
+      if (n >= 1_000) return `${(n / 1_000).toFixed(1)}K`
+      return String(n)
+    }
+
+    fetch(`${apiBase}/api/widgets/tiktok?username=${encodeURIComponent(username)}`)
+      .then(r => r.json())
+      .then(profile => {
+        if (!profile || !profile.videos) return
+
+        const videos = (profile.videos as any[]).slice(0, numVideos)
+        const href = `https://www.tiktok.com/@${username}`
+
+        const videoCards = videos.map(v => {
+          if (layout === 'list') {
+            return `
+              <a class="tt-list-item" href="${href}" target="_blank" rel="noopener noreferrer">
+                <div class="tt-list-thumb">
+                  <img src="${v.thumbnail}" alt="" class="tt-list-img" loading="lazy" />
+                  ${showDuration ? `<div class="tt-duration">${v.duration}</div>` : ''}
+                </div>
+                <div class="tt-list-info">
+                  ${showCaption ? `<p class="tt-list-caption">${v.caption}</p>` : ''}
+                  <div class="tt-list-stats">
+                    ${showViewCount ? `<span class="tt-stat">👁 ${formatNum(v.views)}</span>` : ''}
+                    ${showLikeCount ? `<span class="tt-stat">♥ ${formatNum(v.likes)}</span>` : ''}
+                  </div>
+                </div>
+              </a>
+            `
+          }
+
+          const viewBottom = showDuration ? '36px' : '6px'
+          return `
+            <a class="tt-card" href="${href}" target="_blank" rel="noopener noreferrer">
+              <div class="tt-thumb-wrap">
+                <img src="${v.thumbnail}" alt="" class="tt-thumb" loading="lazy" />
+                <div class="tt-play-icon">▶</div>
+                ${showDuration ? `<div class="tt-duration">${v.duration}</div>` : ''}
+                ${showViewCount ? `<div class="tt-views" style="bottom:${viewBottom}">👁 ${formatNum(v.views)}</div>` : ''}
+              </div>
+              ${showLikeCount ? `<div class="tt-card-footer"><span class="tt-likes">♥ ${formatNum(v.likes)}</span></div>` : ''}
+              ${showCaption ? `<p class="tt-caption">${v.caption}</p>` : ''}
+            </a>
+          `
+        }).join('')
+
+        const gridCss = layout === 'grid'
+          ? `display: grid; grid-template-columns: repeat(${columns}, 1fr); gap: ${gap};`
+          : layout === 'carousel'
+          ? `display: flex; gap: ${gap}; overflow-x: auto; scrollbar-width: none;`
+          : `display: flex; flex-direction: column; gap: ${gap};`
+
+        shadow.innerHTML = `
+          <style>
+            * { box-sizing: border-box; margin: 0; padding: 0; }
+            .tt-wrap {
+              font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+              background: ${bg};
+              padding: 20px;
+            }
+            .tt-header {
+              display: flex;
+              align-items: center;
+              gap: 12px;
+              padding-bottom: 16px;
+              margin-bottom: 16px;
+              border-bottom: 1px solid ${theme === 'dark' ? '#333' : '#eee'};
+            }
+            .tt-avatar { width: 48px; height: 48px; border-radius: 50%; object-fit: cover; }
+            .tt-display-name { font-size: 15px; font-weight: 600; color: ${text}; }
+            .tt-handle { font-size: 12px; color: ${subtext}; margin-top: 2px; }
+            .tt-header-stats { margin-left: auto; display: flex; gap: 20px; }
+            .tt-hstat { text-align: center; }
+            .tt-hstat-num { font-size: 14px; font-weight: 700; color: ${text}; }
+            .tt-hstat-label { font-size: 11px; color: ${subtext}; }
+            .tt-grid { ${gridCss} }
+            .tt-grid::-webkit-scrollbar { display: none; }
+            .tt-card {
+              text-decoration: none;
+              color: ${text};
+              display: block;
+              border-radius: ${borderRadius};
+              overflow: hidden;
+              background: ${cardBg};
+              transition: transform 0.2s;
+              ${layout === 'carousel' ? `flex: 0 0 ${Math.floor(280 / columns)}px;` : ''}
+            }
+            .tt-card:hover { transform: scale(1.02); }
+            .tt-thumb-wrap {
+              position: relative;
+              padding-top: 177.78%;
+              overflow: hidden;
+              background: #000;
+            }
+            .tt-thumb {
+              position: absolute;
+              top: 0; left: 0;
+              width: 100%; height: 100%;
+              object-fit: cover;
+            }
+            .tt-play-icon {
+              position: absolute;
+              bottom: 6px; left: 6px;
+              background: rgba(0,0,0,0.5);
+              color: white;
+              width: 22px; height: 22px;
+              border-radius: 50%;
+              display: flex;
+              align-items: center;
+              justify-content: center;
+              font-size: 9px;
+            }
+            .tt-duration {
+              position: absolute;
+              bottom: 6px; right: 6px;
+              background: rgba(0,0,0,0.7);
+              color: white;
+              font-size: 10px;
+              padding: 2px 5px;
+              border-radius: 3px;
+              font-weight: 600;
+            }
+            .tt-views {
+              position: absolute;
+              right: 6px;
+              background: rgba(0,0,0,0.6);
+              color: white;
+              font-size: 10px;
+              padding: 2px 5px;
+              border-radius: 3px;
+            }
+            .tt-card-footer { padding: 5px 8px; }
+            .tt-likes { font-size: 11px; color: ${subtext}; }
+            .tt-caption {
+              font-size: 11px;
+              color: ${subtext};
+              padding: 0 8px 7px;
+              white-space: nowrap;
+              overflow: hidden;
+              text-overflow: ellipsis;
+            }
+            .tt-list-item {
+              display: flex;
+              gap: 12px;
+              text-decoration: none;
+              color: ${text};
+              padding: 10px;
+              border-radius: ${borderRadius};
+              background: ${cardBg};
+              transition: opacity 0.2s;
+              align-items: flex-start;
+            }
+            .tt-list-item:hover { opacity: 0.85; }
+            .tt-list-thumb { position: relative; flex-shrink: 0; }
+            .tt-list-img {
+              width: 64px; height: 114px;
+              object-fit: cover;
+              border-radius: 6px;
+              display: block;
+            }
+            .tt-list-info {
+              flex: 1;
+              min-width: 0;
+              display: flex;
+              flex-direction: column;
+              justify-content: center;
+              gap: 6px;
+            }
+            .tt-list-caption {
+              font-size: 13px;
+              color: ${text};
+              line-height: 1.4;
+              display: -webkit-box;
+              -webkit-line-clamp: 3;
+              -webkit-box-orient: vertical;
+              overflow: hidden;
+            }
+            .tt-list-stats { display: flex; gap: 12px; flex-wrap: wrap; }
+            .tt-stat { font-size: 11px; color: ${subtext}; }
+            .tt-footer { text-align: center; margin-top: 16px; font-size: 10px; }
+            .tt-footer a { color: ${subtext}; text-decoration: none; opacity: 0.6; }
+          </style>
+          <div class="tt-wrap">
+            <div class="tt-header">
+              <img src="${profile.avatar}" alt="@${profile.username}" class="tt-avatar" />
+              <div>
+                <div class="tt-display-name">${profile.display_name}</div>
+                <div class="tt-handle">@${profile.username}</div>
+              </div>
+              <div class="tt-header-stats">
+                <div class="tt-hstat">
+                  <div class="tt-hstat-num">${formatNum(profile.followers)}</div>
+                  <div class="tt-hstat-label">Followers</div>
+                </div>
+                <div class="tt-hstat">
+                  <div class="tt-hstat-num">${formatNum(profile.likes)}</div>
+                  <div class="tt-hstat-label">Likes</div>
+                </div>
+              </div>
+            </div>
+            <div class="tt-grid">${videoCards}</div>
+            ${showBranding ? `
+              <div class="tt-footer">
+                <a href="${apiBase}" target="_blank" rel="noopener noreferrer">Powered by Devixus Widgets</a>
+              </div>` : ''}
+          </div>
+        `
+      })
+      .catch(() => {
+        const loadingEl = shadow.querySelector('.tt-loading')
+        if (loadingEl) loadingEl.textContent = 'Failed to load TikTok videos'
+      })
+  }
+
   // Main render router
   function renderWidget(shadow: ShadowRoot, widget: { type: string; config: Record<string, unknown>; show_branding: boolean }, widgetId: string) {
     switch (widget.type) {
@@ -1809,6 +2277,12 @@
         break
       case 'social_follow':
         renderSocialFollow(shadow, widget.config, widget.show_branding, API_BASE)
+        break
+      case 'instagram_feed':
+        renderInstagramFeed(shadow, widget.config, widget.show_branding, API_BASE)
+        break
+      case 'tiktok_feed':
+        renderTikTokFeed(shadow, widget.config, widget.show_branding, API_BASE)
         break
       default:
         console.warn(`[Devixus] Unknown widget type: ${widget.type}`)
