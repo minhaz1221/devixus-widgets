@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState, useCallback } from 'react'
+import { useEffect, useState, useCallback, useRef } from 'react'
 import { useParams } from 'next/navigation'
 import { Copy, Check, Star, Trash2, Plus } from 'lucide-react'
 import type { Widget, WhatsAppConfig, TestimonialsConfig, YouTubeFeedConfig, CountdownTimerConfig, AnnouncementBarConfig, GoogleReviewsConfig, ContactFormConfig, SocialFollowConfig } from '@/types/widget'
@@ -148,6 +148,68 @@ function WhatsAppForm({
           </label>
         ))}
       </div>
+
+      <div>
+        <label className="block text-sm font-medium text-gray-700 mb-1">
+          Tooltip Text <span className="text-gray-400 font-normal">(optional)</span>
+        </label>
+        <input
+          type="text"
+          value={config.tooltip_text ?? ''}
+          onChange={e => set('tooltip_text', e.target.value)}
+          placeholder="Chat with us!"
+          className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+        />
+      </div>
+
+      <div>
+        <label className="block text-sm font-medium text-gray-700 mb-2">Button Size</label>
+        <div className="flex gap-4">
+          {([
+            ['small', 'Small (44px)'],
+            ['medium', 'Medium (56px)'],
+            ['large', 'Large (68px)'],
+          ] as const).map(([val, label]) => (
+            <label key={val} className="flex items-center gap-2 cursor-pointer">
+              <input
+                type="radio"
+                name="wa-size"
+                checked={(config.button_size ?? 'medium') === val}
+                onChange={() => set('button_size', val)}
+              />
+              <span className="text-sm text-gray-700">{label}</span>
+            </label>
+          ))}
+        </div>
+      </div>
+
+      <div>
+        <label className="block text-sm font-medium text-gray-700 mb-2">Open in</label>
+        <div className="flex gap-4">
+          {([
+            ['new_tab', 'New tab'],
+            ['same_tab', 'Same tab'],
+          ] as const).map(([val, label]) => (
+            <label key={val} className="flex items-center gap-2 cursor-pointer">
+              <input
+                type="radio"
+                name="wa-target"
+                checked={(config.open_in ?? 'new_tab') === val}
+                onChange={() => set('open_in', val)}
+              />
+              <span className="text-sm text-gray-700">{label}</span>
+            </label>
+          ))}
+        </div>
+      </div>
+
+      <label className="flex items-center justify-between cursor-pointer">
+        <span className="text-sm text-gray-700">Pulse animation</span>
+        <Toggle
+          checked={!!config.pulse_animation}
+          onChange={v => set('pulse_animation', v)}
+        />
+      </label>
     </div>
   )
 }
@@ -224,6 +286,92 @@ function TestimonialsForm({
             <span className="text-sm text-gray-700">{label}</span>
             <Toggle
               checked={!!(config[key] ?? true)}
+              onChange={v => set(key, v)}
+            />
+          </label>
+        ))}
+      </div>
+
+      <div>
+        <label className="block text-sm font-medium text-gray-700 mb-2">Layout</label>
+        <div className="flex gap-4">
+          {(['slider', 'grid'] as const).map(l => (
+            <label key={l} className="flex items-center gap-2 cursor-pointer">
+              <input
+                type="radio"
+                name="t-layout"
+                checked={(config.layout ?? 'slider') === l}
+                onChange={() => set('layout', l)}
+              />
+              <span className="text-sm text-gray-700 capitalize">{l}</span>
+            </label>
+          ))}
+        </div>
+      </div>
+
+      {config.layout === 'grid' && (
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-2">Columns</label>
+          <div className="flex gap-4">
+            {([1, 2, 3] as const).map(c => (
+              <label key={c} className="flex items-center gap-2 cursor-pointer">
+                <input
+                  type="radio"
+                  name="t-cols"
+                  checked={(config.columns ?? 2) === c}
+                  onChange={() => set('columns', c)}
+                />
+                <span className="text-sm text-gray-700">{c}</span>
+              </label>
+            ))}
+          </div>
+        </div>
+      )}
+
+      <div>
+        <label className="block text-sm font-medium text-gray-700 mb-2">Card Shadow</label>
+        <div className="flex gap-3 flex-wrap">
+          {(['none', 'small', 'medium', 'large'] as const).map(s => (
+            <label key={s} className="flex items-center gap-2 cursor-pointer">
+              <input
+                type="radio"
+                name="t-shadow"
+                checked={(config.card_shadow ?? 'none') === s}
+                onChange={() => set('card_shadow', s)}
+              />
+              <span className="text-sm text-gray-700 capitalize">{s}</span>
+            </label>
+          ))}
+        </div>
+      </div>
+
+      <div>
+        <label className="block text-sm font-medium text-gray-700 mb-2">Avatar Shape</label>
+        <div className="flex gap-4">
+          {(['circle', 'square', 'rounded'] as const).map(s => (
+            <label key={s} className="flex items-center gap-2 cursor-pointer">
+              <input
+                type="radio"
+                name="t-avatar"
+                checked={(config.avatar_shape ?? 'circle') === s}
+                onChange={() => set('avatar_shape', s)}
+              />
+              <span className="text-sm text-gray-700 capitalize">{s}</span>
+            </label>
+          ))}
+        </div>
+      </div>
+
+      <div className="flex flex-col gap-3">
+        {([
+          ['show_arrows', 'Show navigation arrows'],
+          ['show_dots', 'Show dots indicator'],
+          ['show_quote_icon', 'Show quote icon'],
+        ] as const).map(([key, label]) => (
+          <label key={key} className="flex items-center justify-between cursor-pointer">
+            <span className="text-sm text-gray-700">{label}</span>
+            <Toggle
+              checked={!!(config[key] ?? (key === 'show_arrows'))}
               onChange={v => set(key, v)}
             />
           </label>
@@ -488,16 +636,50 @@ function YouTubeFeedForm({
         </div>
       </div>
 
+      {/* Header style */}
+      <div>
+        <label className="block text-sm font-medium text-gray-700 mb-2">Header Style</label>
+        <div className="flex gap-4">
+          {(['full', 'compact', 'none'] as const).map(h => (
+            <label key={h} className="flex items-center gap-2 cursor-pointer">
+              <input
+                type="radio"
+                name="yt-header"
+                checked={(config.header_style ?? 'full') === h}
+                onChange={() => set('header_style', h)}
+              />
+              <span className="text-sm text-gray-700 capitalize">{h}</span>
+            </label>
+          ))}
+        </div>
+      </div>
+
+      {/* Subscribe button color */}
+      <div>
+        <label className="block text-sm font-medium text-gray-700 mb-2">Subscribe Button Color</label>
+        <div className="flex items-center gap-3">
+          <input
+            type="color"
+            value={config.subscribe_button_color ?? '#ff0000'}
+            onChange={e => set('subscribe_button_color', e.target.value)}
+            className="w-10 h-10 rounded-lg border border-gray-200 cursor-pointer p-0.5"
+          />
+          <span className="text-sm text-gray-500">{config.subscribe_button_color ?? '#ff0000'}</span>
+        </div>
+      </div>
+
       {/* Toggles */}
       <div className="flex flex-col gap-3">
         {([
           ['show_title', 'Show video title'] as const,
           ['show_date', 'Show publish date'] as const,
+          ['show_subscriber_count', 'Show subscriber count'] as const,
+          ['show_view_count', 'Show video view count'] as const,
         ]).map(([key, label]) => (
           <label key={key} className="flex items-center justify-between cursor-pointer">
             <span className="text-sm text-gray-700">{label}</span>
             <Toggle
-              checked={!!(config[key] ?? true)}
+              checked={!!(config[key] ?? (key === 'show_title' || key === 'show_date' || key === 'show_subscriber_count'))}
               onChange={v => set(key, v)}
             />
           </label>
@@ -647,6 +829,66 @@ function CountdownTimerForm({
             />
           </label>
         ))}
+      </div>
+
+      <div>
+        <label className="block text-sm font-medium text-gray-700 mb-2">Font Family</label>
+        <div className="flex gap-4">
+          {([
+            ['system', 'System'],
+            ['mono', 'Monospace'],
+            ['serif', 'Serif'],
+          ] as const).map(([val, label]) => (
+            <label key={val} className="flex items-center gap-2 cursor-pointer">
+              <input
+                type="radio"
+                name="ct-font"
+                checked={(config.font_family ?? 'system') === val}
+                onChange={() => set('font_family', val)}
+              />
+              <span className="text-sm text-gray-700">{label}</span>
+            </label>
+          ))}
+        </div>
+      </div>
+
+      <div>
+        <label className="block text-sm font-medium text-gray-700 mb-2">Separator Style</label>
+        <div className="flex gap-4 flex-wrap">
+          {(['colon', 'slash', 'dot', 'none'] as const).map(s => (
+            <label key={s} className="flex items-center gap-2 cursor-pointer">
+              <input
+                type="radio"
+                name="ct-sep"
+                checked={(config.separator_style ?? 'colon') === s}
+                onChange={() => set('separator_style', s)}
+              />
+              <span className="text-sm text-gray-700 capitalize">{s}</span>
+            </label>
+          ))}
+        </div>
+      </div>
+
+      <div>
+        <label className="block text-sm font-medium text-gray-700 mb-2">When Timer Expires</label>
+        <div className="flex gap-3 flex-wrap">
+          {([
+            ['nothing', 'Do nothing'],
+            ['message', 'Show message'],
+            ['redirect', 'Redirect'],
+            ['hide', 'Hide widget'],
+          ] as const).map(([val, label]) => (
+            <label key={val} className="flex items-center gap-2 cursor-pointer">
+              <input
+                type="radio"
+                name="ct-expire"
+                checked={(config.expire_action ?? 'message') === val}
+                onChange={() => set('expire_action', val)}
+              />
+              <span className="text-sm text-gray-700">{label}</span>
+            </label>
+          ))}
+        </div>
       </div>
     </div>
   )
@@ -1392,6 +1634,11 @@ export default function ConfiguratorPage() {
   const [saving, setSaving] = useState(false)
   const [toast, setToast] = useState<{ msg: string; ok: boolean } | null>(null)
   const [previewKey, setPreviewKey] = useState(0)
+  const [autoPreview, setAutoPreview] = useState(false)
+  const [previewSaving, setPreviewSaving] = useState(false)
+  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const configRef = useRef(config)
+  const nameRef = useRef(name)
 
   const showToast = (msg: string, ok: boolean) => {
     setToast({ msg, ok })
@@ -1408,6 +1655,34 @@ export default function ConfiguratorPage() {
   }, [id])
 
   useEffect(() => { load() }, [load])
+
+  useEffect(() => { configRef.current = config }, [config])
+  useEffect(() => { nameRef.current = name }, [name])
+
+  async function saveAndRefresh(silent = false) {
+    setPreviewSaving(true)
+    const res = await fetch(`/api/widgets/${id}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name: nameRef.current, config: configRef.current }),
+    })
+    setPreviewSaving(false)
+    if (res.ok) {
+      if (!silent) showToast('Saved successfully', true)
+      setPreviewKey(k => k + 1)
+    } else if (!silent) {
+      const data = await res.json()
+      showToast(data.error ?? 'Save failed', false)
+    }
+  }
+
+  function handleConfigChange(newConfig: Record<string, unknown>) {
+    setConfig(newConfig)
+    if (autoPreview) {
+      if (debounceRef.current) clearTimeout(debounceRef.current)
+      debounceRef.current = setTimeout(() => saveAndRefresh(true), 2000)
+    }
+  }
 
   async function handleSave() {
     setSaving(true)
@@ -1465,49 +1740,49 @@ export default function ConfiguratorPage() {
           {widget.type === 'whatsapp' && (
             <WhatsAppForm
               config={config as Partial<WhatsAppConfig>}
-              onChange={c => setConfig(c as Record<string, unknown>)}
+              onChange={c => handleConfigChange(c as Record<string, unknown>)}
             />
           )}
           {widget.type === 'testimonials' && (
             <TestimonialsForm
               config={config as Partial<TestimonialsConfig>}
-              onChange={c => setConfig(c as Record<string, unknown>)}
+              onChange={c => handleConfigChange(c as Record<string, unknown>)}
             />
           )}
           {widget.type === 'youtube_feed' && (
             <YouTubeFeedForm
               config={config as Partial<YouTubeFeedConfig>}
-              onChange={c => setConfig(c as Record<string, unknown>)}
+              onChange={c => handleConfigChange(c as Record<string, unknown>)}
             />
           )}
           {widget.type === 'countdown_timer' && (
             <CountdownTimerForm
               config={config as Partial<CountdownTimerConfig>}
-              onChange={c => setConfig(c as Record<string, unknown>)}
+              onChange={c => handleConfigChange(c as Record<string, unknown>)}
             />
           )}
           {widget.type === 'announcement_bar' && (
             <AnnouncementBarForm
               config={config as Partial<AnnouncementBarConfig>}
-              onChange={c => setConfig(c as Record<string, unknown>)}
+              onChange={c => handleConfigChange(c as Record<string, unknown>)}
             />
           )}
           {widget.type === 'google_reviews' && (
             <GoogleReviewsForm
               config={config as Partial<GoogleReviewsConfig>}
-              onChange={c => setConfig(c as Record<string, unknown>)}
+              onChange={c => handleConfigChange(c as Record<string, unknown>)}
             />
           )}
           {widget.type === 'contact_form' && (
             <ContactFormForm
               config={config as Partial<ContactFormConfig>}
-              onChange={c => setConfig(c as Record<string, unknown>)}
+              onChange={c => handleConfigChange(c as Record<string, unknown>)}
             />
           )}
           {widget.type === 'social_follow' && (
             <SocialFollowForm
               config={config as Partial<SocialFollowConfig>}
-              onChange={c => setConfig(c as Record<string, unknown>)}
+              onChange={c => handleConfigChange(c as Record<string, unknown>)}
             />
           )}
         </div>
@@ -1526,20 +1801,33 @@ export default function ConfiguratorPage() {
       <div className="flex-1 flex flex-col gap-4 min-w-0 overflow-y-auto">
         <EmbedCode widgetId={id} />
 
-        <div className="bg-white rounded-xl border border-gray-200 flex-1 flex flex-col overflow-hidden">
-          <div className="px-5 py-3 border-b border-gray-100 flex items-center justify-between">
+        <div className="bg-white rounded-xl border border-gray-200 flex flex-col overflow-hidden">
+          <div className="px-5 py-3 border-b border-gray-100 flex items-center justify-between gap-4">
             <h3 className="font-semibold text-gray-900 text-sm">Preview</h3>
-            <button
-              onClick={() => setPreviewKey(k => k + 1)}
-              className="text-xs text-blue-600 hover:underline"
-            >
-              Refresh
-            </button>
+            <div className="flex items-center gap-3">
+              <label className="flex items-center gap-1.5 cursor-pointer text-xs text-gray-500">
+                <button
+                  type="button"
+                  onClick={() => setAutoPreview(a => !a)}
+                  className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors ${autoPreview ? 'bg-blue-600' : 'bg-gray-200'}`}
+                >
+                  <span className={`inline-block h-3.5 w-3.5 rounded-full bg-white shadow transition-transform ${autoPreview ? 'translate-x-[18px]' : 'translate-x-1'}`} />
+                </button>
+                Auto-preview
+              </label>
+              <button
+                onClick={() => saveAndRefresh()}
+                disabled={previewSaving}
+                className="text-xs font-medium text-blue-600 hover:underline disabled:opacity-50"
+              >
+                {previewSaving ? 'Saving…' : 'Refresh preview'}
+              </button>
+            </div>
           </div>
           <iframe
             key={previewKey}
             src={`/widget-preview/${id}`}
-            className="flex-1 w-full border-0"
+            style={{ width: '100%', height: 500, border: 'none', background: '#f5f5f5' }}
             title="Widget preview"
           />
         </div>

@@ -31,6 +31,11 @@ export interface WhatsAppConfig {
   position: 'bottom-right' | 'bottom-left'
   show_on_mobile: boolean
   show_on_desktop: boolean
+  tooltip_text?: string
+  tooltip_delay?: number
+  button_size?: 'small' | 'medium' | 'large'
+  pulse_animation?: boolean
+  open_in?: 'new_tab' | 'same_tab'
 }
 
 export interface TestimonialsConfig {
@@ -45,6 +50,13 @@ export interface TestimonialsConfig {
   autoplay_speed: number
   show_rating: boolean
   theme: 'light' | 'dark'
+  layout?: 'slider' | 'grid'
+  columns?: 1 | 2 | 3
+  show_arrows?: boolean
+  show_dots?: boolean
+  card_shadow?: 'none' | 'small' | 'medium' | 'large'
+  avatar_shape?: 'circle' | 'square' | 'rounded'
+  show_quote_icon?: boolean
 }
 
 export interface YouTubeFeedConfig {
@@ -59,6 +71,10 @@ export interface YouTubeFeedConfig {
   show_date: boolean
   theme: 'light' | 'dark'
   accent_color: string
+  show_subscriber_count?: boolean
+  show_view_count?: boolean
+  subscribe_button_color?: string
+  header_style?: 'full' | 'compact' | 'none'
 }
 
 export interface CountdownTimerConfig {
@@ -78,6 +94,9 @@ export interface CountdownTimerConfig {
   show_minutes: boolean
   show_seconds: boolean
   show_labels: boolean
+  font_family?: 'system' | 'mono' | 'serif'
+  separator_style?: 'colon' | 'slash' | 'dot' | 'none'
+  expire_action?: 'nothing' | 'message' | 'redirect' | 'hide'
 }
 
 export interface AnnouncementBarConfig {
