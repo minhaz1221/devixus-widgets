@@ -14,7 +14,7 @@ export async function sendWelcomeEmail(email: string, name?: string) {
         <body style="font-family: -apple-system, sans-serif;
           max-width: 600px; margin: 0 auto; padding: 40px 20px;
           color: #1a1a1a;">
-          <div style="background: #ff6914; padding: 24px;
+          <div style="background: #6366f1; padding: 24px;
             border-radius: 12px 12px 0 0; text-align: center;">
             <h1 style="color: white; margin: 0; font-size: 24px;">
               Devixus Widgets
@@ -35,7 +35,7 @@ export async function sendWelcomeEmail(email: string, name?: string) {
             </ol>
             <div style="text-align: center; margin: 32px 0;">
               <a href="https://devixus-widgets-web.vercel.app/dashboard"
-                style="background: #ff6914; color: white;
+                style="background: #6366f1; color: white;
                 padding: 14px 28px; border-radius: 8px;
                 text-decoration: none; font-weight: 600;
                 display: inline-block;">
@@ -71,7 +71,7 @@ export async function sendUpgradeEmail(
         <html>
         <body style="font-family: -apple-system, sans-serif;
           max-width: 600px; margin: 0 auto; padding: 40px 20px;">
-          <div style="background: #ff6914; padding: 24px;
+          <div style="background: #6366f1; padding: 24px;
             border-radius: 12px 12px 0 0; text-align: center;">
             <h1 style="color: white; margin: 0;">Devixus Widgets</h1>
           </div>
@@ -97,7 +97,7 @@ export async function sendUpgradeEmail(
             </ul>
             <div style="text-align: center; margin: 32px 0;">
               <a href="https://devixus-widgets-web.vercel.app/dashboard"
-                style="background: #ff6914; color: white;
+                style="background: #6366f1; color: white;
                 padding: 14px 28px; border-radius: 8px;
                 text-decoration: none; font-weight: 600;
                 display: inline-block;">

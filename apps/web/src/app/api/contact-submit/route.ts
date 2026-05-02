@@ -59,7 +59,7 @@ export async function POST(request: NextRequest) {
         <body style="font-family: -apple-system, sans-serif;
           max-width: 600px; margin: 0 auto;
           padding: 40px 20px; color: #1a1a1a;">
-          <div style="background: #ff6914; padding: 20px 24px;
+          <div style="background: #6366f1; padding: 20px 24px;
             border-radius: 12px 12px 0 0;">
             <h2 style="color: white; margin: 0; font-size: 18px;">
               New Contact Form Submission
@@ -77,7 +77,7 @@ export async function POST(request: NextRequest) {
               <div style="margin-bottom: 16px;">
                 <strong>Email:</strong><br/>
                 <a href="mailto:${email}"
-                   style="color: #ff6914;">
+                   style="color: #6366f1;">
                   ${email}
                 </a>
               </div>` : ''}
