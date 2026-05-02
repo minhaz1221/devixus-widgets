@@ -2,28 +2,43 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { X } from 'lucide-react'
+import { X, MessageCircle, Star, Play, Globe, Timer, Megaphone, Mail, Share2, Camera, Music, Lock } from 'lucide-react'
+import type { LucideIcon } from 'lucide-react'
 
 interface Props {
   onClose: () => void
 }
 
-const WIDGET_TYPES = [
+type Category = 'all' | 'social' | 'tools' | 'forms' | 'reviews'
+
+interface WidgetType {
+  type: string
+  label: string
+  description: string
+  icon: LucideIcon
+  color: string
+  category: Category
+  available: boolean
+  comingSoon?: boolean
+  navigateTo?: string
+  defaultConfig: Record<string, unknown>
+}
+
+const WIDGET_TYPES: WidgetType[] = [
   {
     type: 'whatsapp',
     label: 'WhatsApp Chat',
-    description: 'Floating chat button that opens WhatsApp',
-    icon: '💬',
-    bg: 'bg-green-50',
-    border: 'border-green-200',
-    activeBorder: 'hover:border-green-400',
-    badge: 'bg-green-100 text-green-700',
+    description: 'Floating chat button that opens WhatsApp directly',
+    icon: MessageCircle,
+    color: '#25D366',
+    category: 'social',
     available: true,
     defaultConfig: {
       phone_number: '',
       welcome_message: 'Hello! How can I help you?',
       button_color: '#25D366',
       position: 'bottom-right',
+      button_size: 'medium',
       show_on_mobile: true,
       show_on_desktop: true,
     },
@@ -31,12 +46,10 @@ const WIDGET_TYPES = [
   {
     type: 'testimonials',
     label: 'Testimonials',
-    description: 'Scrollable customer testimonial cards',
-    icon: '⭐',
-    bg: 'bg-blue-50',
-    border: 'border-blue-200',
-    activeBorder: 'hover:border-blue-400',
-    badge: 'bg-blue-100 text-blue-700',
+    description: 'Scrollable customer testimonial cards or grid',
+    icon: Star,
+    color: '#f59e0b',
+    category: 'reviews',
     available: true,
     defaultConfig: {
       testimonials: [],
@@ -50,11 +63,9 @@ const WIDGET_TYPES = [
     type: 'google_reviews',
     label: 'Google Reviews',
     description: 'Display your Google Business reviews',
-    icon: '🏢',
-    bg: 'bg-yellow-50',
-    border: 'border-yellow-200',
-    activeBorder: 'hover:border-yellow-400',
-    badge: 'bg-yellow-100 text-yellow-700',
+    icon: Globe,
+    color: '#4285f4',
+    category: 'reviews',
     available: true,
     defaultConfig: {
       place_id: '',
@@ -75,12 +86,10 @@ const WIDGET_TYPES = [
   {
     type: 'countdown_timer',
     label: 'Countdown Timer',
-    description: 'Create urgency with a live countdown',
-    icon: '⏱',
-    bg: 'bg-purple-50',
-    border: 'border-purple-200',
-    activeBorder: 'hover:border-purple-400',
-    badge: 'bg-purple-100 text-purple-700',
+    description: 'Create urgency with a live countdown to any date',
+    icon: Timer,
+    color: '#8b5cf6',
+    category: 'tools',
     available: true,
     defaultConfig: {
       target_date: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
@@ -104,12 +113,10 @@ const WIDGET_TYPES = [
   {
     type: 'contact_form',
     label: 'Contact Form',
-    description: 'Beautiful popup or inline contact form',
-    icon: '✉',
-    bg: 'bg-orange-50',
-    border: 'border-orange-200',
-    activeBorder: 'hover:border-orange-400',
-    badge: 'bg-orange-100 text-orange-700',
+    description: 'Beautiful popup or inline contact & lead form',
+    icon: Mail,
+    color: '#10b981',
+    category: 'forms',
     available: true,
     defaultConfig: {
       title: 'Contact Us',
@@ -131,12 +138,10 @@ const WIDGET_TYPES = [
   {
     type: 'social_follow',
     label: 'Social Follow',
-    description: 'Social media follow buttons bundle',
-    icon: '📱',
-    bg: 'bg-pink-50',
-    border: 'border-pink-200',
-    activeBorder: 'hover:border-pink-400',
-    badge: 'bg-pink-100 text-pink-700',
+    description: 'Multi-platform social media follow buttons',
+    icon: Share2,
+    color: '#ec4899',
+    category: 'social',
     available: true,
     defaultConfig: {
       networks: { facebook: '', instagram: '', twitter: '', youtube: '' },
@@ -154,12 +159,10 @@ const WIDGET_TYPES = [
   {
     type: 'youtube_feed',
     label: 'YouTube Feed',
-    description: 'Show your latest YouTube videos',
-    icon: '▶',
-    bg: 'bg-red-50',
-    border: 'border-red-200',
-    activeBorder: 'hover:border-red-400',
-    badge: 'bg-red-100 text-red-700',
+    description: 'Show your latest YouTube videos in a grid',
+    icon: Play,
+    color: '#ff0000',
+    category: 'social',
     available: true,
     defaultConfig: {
       channel_id: '',
@@ -178,15 +181,13 @@ const WIDGET_TYPES = [
   {
     type: 'announcement_bar',
     label: 'Announcement Bar',
-    description: 'Sticky top or bottom bar for promotions',
-    icon: '📢',
-    bg: 'bg-indigo-50',
-    border: 'border-indigo-200',
-    activeBorder: 'hover:border-indigo-400',
-    badge: 'bg-indigo-100 text-indigo-700',
+    description: 'Sticky top or bottom banner for promotions',
+    icon: Megaphone,
+    color: '#6366f1',
+    category: 'tools',
     available: true,
     defaultConfig: {
-      message: '🎉 Special offer — Limited time only!',
+      message: 'Special offer — Limited time only!',
       link_text: 'Shop now',
       link_url: '',
       position: 'top',
@@ -203,13 +204,12 @@ const WIDGET_TYPES = [
   {
     type: 'instagram_feed',
     label: 'Instagram Feed',
-    description: 'Display your Instagram posts',
-    icon: '📸',
-    bg: 'bg-pink-50',
-    border: 'border-pink-200',
-    activeBorder: 'hover:border-pink-400',
-    badge: 'bg-pink-100 text-pink-700',
+    description: 'Display your latest Instagram posts',
+    icon: Camera,
+    color: '#e4405f',
+    category: 'social',
     available: true,
+    comingSoon: false,
     navigateTo: '/dashboard/widgets/new/instagram_feed',
     defaultConfig: {
       username: '',
@@ -228,13 +228,12 @@ const WIDGET_TYPES = [
   {
     type: 'tiktok_feed',
     label: 'TikTok Feed',
-    description: 'Embed your TikTok videos',
-    icon: '🎵',
-    bg: 'bg-gray-50',
-    border: 'border-gray-200',
-    activeBorder: 'hover:border-gray-400',
-    badge: 'bg-gray-100 text-gray-700',
+    description: 'Embed your TikTok videos in a grid or carousel',
+    icon: Music,
+    color: '#2d2d2d',
+    category: 'social',
     available: true,
+    comingSoon: false,
     navigateTo: '/dashboard/widgets/new/tiktok_feed',
     defaultConfig: {
       username: '',
@@ -253,32 +252,27 @@ const WIDGET_TYPES = [
   },
 ]
 
+const CATEGORY_LABELS: { id: Category; label: string }[] = [
+  { id: 'all',     label: 'All' },
+  { id: 'social',  label: 'Social' },
+  { id: 'tools',   label: 'Tools' },
+  { id: 'forms',   label: 'Forms' },
+  { id: 'reviews', label: 'Reviews' },
+]
+
 export function NewWidgetModal({ onClose }: Props) {
   const router = useRouter()
   const [creating, setCreating] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
-  const [filter, setFilter] = useState<'all' | 'social' | 'tools' | 'forms'>('all')
+  const [filter, setFilter] = useState<Category>('all')
 
-  const CATEGORIES: Record<string, 'social' | 'tools' | 'forms'> = {
-    whatsapp: 'social',
-    social_follow: 'social',
-    instagram_feed: 'social',
-    tiktok_feed: 'social',
-    youtube_feed: 'social',
-    testimonials: 'tools',
-    google_reviews: 'tools',
-    countdown_timer: 'tools',
-    announcement_bar: 'tools',
-    contact_form: 'forms',
-  }
+  const filtered = WIDGET_TYPES.filter(w => filter === 'all' || w.category === filter)
 
-  const filtered = WIDGET_TYPES.filter(w => filter === 'all' || CATEGORIES[w.type] === filter)
+  async function handleSelect(wt: WidgetType) {
+    if (!wt.available || creating || wt.comingSoon) return
 
-  async function handleSelect(wt: typeof WIDGET_TYPES[0]) {
-    if (!wt.available || creating) return
-
-    if ('navigateTo' in wt && wt.navigateTo) {
-      router.push(wt.navigateTo as string)
+    if (wt.navigateTo) {
+      router.push(wt.navigateTo)
       onClose()
       return
     }
@@ -309,33 +303,38 @@ export function NewWidgetModal({ onClose }: Props) {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-      <div className="absolute inset-0 bg-black/50" onClick={onClose} />
+      <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={onClose} />
 
-      <div className="relative bg-white rounded-2xl shadow-xl w-full max-w-2xl max-h-[90vh] overflow-hidden flex flex-col modal-animate">
+      <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-hidden flex flex-col modal-animate">
         {/* Header */}
         <div className="flex items-center justify-between px-6 py-5 border-b border-gray-100 shrink-0">
           <div>
-            <h2 className="text-lg font-bold text-gray-900">Choose a widget type</h2>
-            <p className="text-sm text-gray-500 mt-0.5">Select the widget you want to add to your site</p>
+            <h2 className="text-lg font-bold text-gray-900">Add a widget</h2>
+            <p className="text-sm text-gray-400 mt-0.5">Choose the widget type to embed on your site</p>
           </div>
-          <button onClick={onClose} className="text-gray-400 hover:text-gray-600 transition-colors">
-            <X size={20} />
+          <button
+            onClick={onClose}
+            className="w-8 h-8 flex items-center justify-center text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
+          >
+            <X size={18} />
           </button>
         </div>
 
         {/* Category tabs */}
-        <div className="px-6 pt-3 pb-0 border-b border-gray-100 shrink-0">
-          <div className="flex gap-1">
-            {(['all', 'social', 'tools', 'forms'] as const).map(f => (
+        <div className="px-6 border-b border-gray-100 shrink-0">
+          <div className="flex gap-0">
+            {CATEGORY_LABELS.map(({ id, label }) => (
               <button
-                key={f}
-                onClick={() => setFilter(f)}
+                key={id}
+                onClick={() => setFilter(id)}
                 className={[
-                  'px-4 py-2 text-sm font-medium border-b-2 -mb-px capitalize transition-colors',
-                  filter === f ? 'border-indigo-600 text-indigo-600' : 'border-transparent text-gray-500 hover:text-gray-700',
+                  'px-4 py-3 text-sm font-medium border-b-2 -mb-px transition-colors',
+                  filter === id
+                    ? 'border-indigo-600 text-indigo-600'
+                    : 'border-transparent text-gray-500 hover:text-gray-700',
                 ].join(' ')}
               >
-                {f === 'all' ? 'All' : f.charAt(0).toUpperCase() + f.slice(1)}
+                {label}
               </button>
             ))}
           </div>
@@ -344,41 +343,70 @@ export function NewWidgetModal({ onClose }: Props) {
         {/* Widget grid */}
         <div className="overflow-y-auto p-6">
           <div className="grid grid-cols-2 gap-3">
-            {filtered.map((wt, i) => (
-              <button
-                key={wt.type}
-                disabled={!wt.available || creating !== null}
-                onClick={() => handleSelect(wt)}
-                className={[
-                  'relative text-left rounded-xl border-2 p-4 transition-all card-animate',
-                  wt.available
-                    ? `${wt.border} ${wt.activeBorder} hover:shadow-md cursor-pointer`
-                    : 'border-gray-100 bg-gray-50 cursor-not-allowed opacity-60',
-                  creating === wt.type ? 'opacity-70' : '',
-                ].join(' ')}
-                style={{ animationDelay: `${i * 30}ms` }}
-              >
-                <div className="flex items-start gap-3">
-                  <div className={`w-10 h-10 rounded-xl ${wt.bg} flex items-center justify-center text-xl shrink-0`}>
-                    {wt.icon}
+            {filtered.map((wt, i) => {
+              const Icon = wt.icon
+              const isLoading = creating === wt.type
+              const isDisabled = !wt.available || !!creating
+
+              return (
+                <button
+                  key={wt.type}
+                  disabled={isDisabled || !!wt.comingSoon}
+                  onClick={() => handleSelect(wt)}
+                  className={[
+                    'relative text-left rounded-xl border-2 p-4 transition-all card-animate group',
+                    wt.comingSoon
+                      ? 'border-gray-100 bg-gray-50 cursor-not-allowed opacity-70'
+                      : isDisabled
+                      ? 'border-gray-100 bg-gray-50 cursor-not-allowed opacity-60'
+                      : 'border-gray-200 hover:border-indigo-300 hover:shadow-md cursor-pointer',
+                    isLoading ? 'opacity-70' : '',
+                  ].join(' ')}
+                  style={{ animationDelay: `${i * 30}ms` }}
+                >
+                  <div className="flex items-start gap-3">
+                    {/* Brand icon */}
+                    <div
+                      className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0 transition-transform group-hover:scale-105"
+                      style={{ background: `${wt.color}15` }}
+                    >
+                      <Icon size={20} style={{ color: wt.color }} />
+                    </div>
+
+                    <div className="min-w-0 flex-1">
+                      {/* Type badge */}
+                      <span
+                        className="inline-block text-[11px] font-semibold px-2 py-0.5 rounded-full mb-1"
+                        style={{ background: `${wt.color}15`, color: wt.color }}
+                      >
+                        {wt.label}
+                      </span>
+                      <p className="text-xs text-gray-500 leading-relaxed">{wt.description}</p>
+                    </div>
                   </div>
-                  <div className="min-w-0">
-                    <span className={`inline-block text-xs font-semibold px-2 py-0.5 rounded-full mb-1 ${wt.badge}`}>
-                      {wt.label}
-                    </span>
-                    <p className="text-xs text-gray-500 leading-relaxed">{wt.description}</p>
-                  </div>
-                </div>
-                {creating === wt.type && (
-                  <p className="text-xs text-indigo-600 mt-2 font-semibold">Creating…</p>
-                )}
-              </button>
-            ))}
+
+                  {isLoading && (
+                    <p className="text-xs text-indigo-600 mt-2 font-semibold">Creating…</p>
+                  )}
+
+                  {/* Coming soon overlay */}
+                  {wt.comingSoon && (
+                    <div className="absolute inset-0 rounded-xl bg-white/80 flex items-center justify-center">
+                      <div className="flex items-center gap-1.5 px-3 py-1.5 bg-gray-100 rounded-full">
+                        <Lock size={11} className="text-gray-500" />
+                        <span className="text-xs font-semibold text-gray-600">Coming Soon</span>
+                      </div>
+                    </div>
+                  )}
+                </button>
+              )
+            })}
           </div>
         </div>
 
+        {/* Error */}
         {error && (
-          <div className="mx-6 mb-6 rounded-lg bg-red-50 border border-red-200 px-4 py-3 text-sm text-red-700 shrink-0">
+          <div className="mx-6 mb-6 rounded-xl bg-red-50 border border-red-200 px-4 py-3 text-sm text-red-700 shrink-0">
             {error}
           </div>
         )}

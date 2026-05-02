@@ -1,4 +1,4 @@
-"use strict";(()=>{(function(){"use strict";let T="https://devixus-widgets-web.vercel.app",E="https://devixus-widgets-marketing.vercel.app";function R(){if(document.currentScript)return document.currentScript;let t=document.getElementsByTagName("script");return t[t.length-1]}async function B(t){let e=await fetch(`${T}/api/widget/${t}`,{method:"GET",headers:{"Content-Type":"application/json"}});if(!e.ok)throw new Error(`Widget not found: ${t}`);return e.json()}function F(t){let e=document.createElement("div");return e.setAttribute("data-devixus-widget","true"),e.style.cssText="all: initial; display: block;",t.appendChild(e),e.attachShadow({mode:"open"})}function H(t,e,h){let c=e.phone_number||"",i=encodeURIComponent(e.welcome_message||"Hello!"),r=e.button_color||"#25D366",s=e.position||"bottom-right",m={small:44,medium:56,large:68}[e.button_size||"medium"]||56,f=Math.round(m*.54),y=!!e.pulse_animation,v=e.open_in==="same_tab"?"_self":"_blank",b=e.tooltip_text||"",$=s==="bottom-right"?"bottom: 24px; right: 24px;":"bottom: 24px; left: 24px;",g=s==="bottom-right"?"flex-end":"flex-start";t.innerHTML=`
+"use strict";(()=>{(function(){"use strict";let C=document.currentScript||(()=>{let t=document.getElementsByTagName("script");return t[t.length-1]||null})(),T=(()=>{try{let t=C==null?void 0:C.src;if(t)return new URL(t).origin}catch(t){}return"https://devixus-widgets-web.vercel.app"})(),F="https://devixus-widgets-marketing.vercel.app";async function B(t){let e=await fetch(`${T}/api/widget/${t}`,{method:"GET",headers:{"Content-Type":"application/json"}});if(!e.ok)throw new Error(`Widget not found: ${t}`);return e.json()}function I(t){let e=document.createElement("div");return e.setAttribute("data-devixus-widget","true"),e.style.cssText="all: initial; display: block;",t.appendChild(e),e.attachShadow({mode:"open"})}function H(t,e,u){let p=e.phone_number||"",i=encodeURIComponent(e.welcome_message||"Hello!"),r=e.button_color||"#25D366",s=e.position||"bottom-right",h={small:44,medium:56,large:68}[e.button_size||"medium"]||56,f=Math.round(h*.54),y=!!e.pulse_animation,v=e.open_in==="same_tab"?"_self":"_blank",x=e.tooltip_text||"",$=s==="bottom-right"?"bottom: 24px; right: 24px;":"bottom: 24px; left: 24px;",g=s==="bottom-right"?"flex-end":"flex-start";t.innerHTML=`
       <style>
         * { box-sizing: border-box; margin: 0; padding: 0; }
         .wa-btn {
@@ -13,8 +13,8 @@
         }
         .wa-bubble-wrap { position: relative; display: inline-flex; }
         .wa-bubble {
-          width: ${m}px;
-          height: ${m}px;
+          width: ${h}px;
+          height: ${h}px;
           border-radius: 50%;
           background: ${r};
           display: flex;
@@ -50,7 +50,7 @@
           animation: wa-pulse 2s ease infinite;
           z-index: -1;
         }`:""}
-        ${b?`
+        ${x?`
         .wa-tooltip {
           position: absolute;
           bottom: calc(100% + 8px);
@@ -79,9 +79,9 @@
       </style>
       <div class="wa-btn">
         <div class="wa-bubble-wrap">
-          ${b?`<div class="wa-tooltip">${b}</div>`:""}
+          ${x?`<div class="wa-tooltip">${x}</div>`:""}
           <a class="wa-bubble"
-             href="https://wa.me/${c}?text=${i}"
+             href="https://wa.me/${p}?text=${i}"
              target="${v}"
              rel="noopener noreferrer"
              aria-label="Chat on WhatsApp">
@@ -90,18 +90,18 @@
             </svg>
           </a>
         </div>
-        ${h?`<a class="wa-branding" href="${E}" target="_blank" rel="noopener noreferrer">Powered by Devixus</a>`:""}
+        ${u?`<a class="wa-branding" href="${F}" target="_blank" rel="noopener noreferrer">Powered by Devixus</a>`:""}
       </div>
-    `}function U(t,e,h){var k,M;let c=e.testimonials||[],i=e.theme||"light",r=e.show_rating!==!1,s=e.layout||"slider",n=e.columns||2,m=e.show_arrows!==!1,f=!!e.show_dots,y=!!e.show_quote_icon,v=e.avatar_shape||"circle",b=e.card_shadow||"none",$=i==="dark"?"#1a1a1a":"#ffffff",g=i==="dark"?"#ffffff":"#1a1a1a",p=i==="dark"?"#aaaaaa":"#666666",w=i==="dark"?"#2a2a2a":"#f9f9f9",x={none:"none",small:"0 1px 4px rgba(0,0,0,.08)",medium:"0 4px 16px rgba(0,0,0,.1)",large:"0 8px 32px rgba(0,0,0,.14)"}[b]||"none",o=v==="circle"?"50%":v==="square"?"4px":"8px",a=c.map(u=>{let d=u.rating||5,z=r?`<div class="stars">${"\u2605".repeat(d)}${"\u2606".repeat(5-d)}</div>`:"",j=u.avatar_url?`<img src="${u.avatar_url}" class="avatar" alt="${u.author}" />`:`<div class="avatar-placeholder">${u.author.charAt(0).toUpperCase()}</div>`;return`
+    `}function U(t,e,u){var k,M;let p=e.testimonials||[],i=e.theme||"light",r=e.show_rating!==!1,s=e.layout||"slider",n=e.columns||2,h=e.show_arrows!==!1,f=!!e.show_dots,y=!!e.show_quote_icon,v=e.avatar_shape||"circle",x=e.card_shadow||"none",$=i==="dark"?"#1a1a1a":"#ffffff",g=i==="dark"?"#ffffff":"#1a1a1a",d=i==="dark"?"#aaaaaa":"#666666",w=i==="dark"?"#2a2a2a":"#f9f9f9",m={none:"none",small:"0 1px 4px rgba(0,0,0,.08)",medium:"0 4px 16px rgba(0,0,0,.1)",large:"0 8px 32px rgba(0,0,0,.14)"}[x]||"none",o=v==="circle"?"50%":v==="square"?"4px":"8px",a=p.map(b=>{let c=b.rating||5,z=r?`<div class="stars">${"\u2605".repeat(c)}${"\u2606".repeat(5-c)}</div>`:"",L=b.avatar_url?`<img src="${b.avatar_url}" class="avatar" alt="${b.author}" />`:`<div class="avatar-placeholder">${b.author.charAt(0).toUpperCase()}</div>`;return`
         <div class="card">
           ${y?'<div class="quote-icon">"</div>':""}
           ${z}
-          <p class="content">${u.content}</p>
+          <p class="content">${b.content}</p>
           <div class="author-row">
-            ${j}
+            ${L}
             <div>
-              <div class="author">${u.author}</div>
-              <div class="role">${u.role||""}</div>
+              <div class="author">${b.author}</div>
+              <div class="role">${b.role||""}</div>
             </div>
           </div>
         </div>
@@ -125,7 +125,7 @@
           display: flex;
           flex-direction: column;
           gap: 12px;
-          box-shadow: ${x};
+          box-shadow: ${m};
         }
         .quote-icon {
           font-size: 48px;
@@ -155,8 +155,8 @@
           flex-shrink: 0;
         }
         .author { color: ${g}; font-size: 13px; font-weight: 600; }
-        .role { color: ${p}; font-size: 12px; }
-        ${!l&&m?`
+        .role { color: ${d}; font-size: 12px; }
+        ${!l&&h?`
         .arrows {
           display: flex;
           gap: 8px;
@@ -193,23 +193,23 @@
         }
         .dot.active { background: #ff6914; }`:""}
         .branding { text-align: center; margin-top: 12px; font-size: 10px; }
-        .branding a { color: ${p}; text-decoration: none; opacity: 0.6; }
+        .branding a { color: ${d}; text-decoration: none; opacity: 0.6; }
         .branding a:hover { opacity: 1; }
       </style>
       <div class="wrap">
         <div class="track" id="t-track">${a}</div>
-        ${!l&&m?`
+        ${!l&&h?`
         <div class="arrows">
           <button class="arrow-btn" id="t-prev">\u2190</button>
           <button class="arrow-btn" id="t-next">\u2192</button>
         </div>`:""}
-        ${f&&c.length>0?`
+        ${f&&p.length>0?`
         <div class="dots" id="t-dots">
-          ${c.map((u,d)=>`<div class="dot${d===0?" active":""}" data-i="${d}"></div>`).join("")}
+          ${p.map((b,c)=>`<div class="dot${c===0?" active":""}" data-i="${c}"></div>`).join("")}
         </div>`:""}
-        ${h?`<div class="branding"><a href="${E}" target="_blank" rel="noopener noreferrer">Powered by Devixus Widgets</a></div>`:""}
+        ${u?`<div class="branding"><a href="${F}" target="_blank" rel="noopener noreferrer">Powered by Devixus Widgets</a></div>`:""}
       </div>
-    `,!l){let j=function(C){if(!u)return;let L=u.children;L[C]&&(z=C,L[C].scrollIntoView({behavior:"smooth",inline:"start",block:"nearest"}),d&&d.querySelectorAll(".dot").forEach((K,X)=>{K.classList.toggle("active",X===z)}))},u=t.getElementById("t-track"),d=f?t.getElementById("t-dots"):null,z=0;m&&((k=t.getElementById("t-prev"))==null||k.addEventListener("click",()=>{j(Math.max(0,z-1))}),(M=t.getElementById("t-next"))==null||M.addEventListener("click",()=>{j(Math.min(c.length-1,z+1))})),d&&d.querySelectorAll(".dot").forEach(C=>{C.addEventListener("click",()=>{var L;j(parseInt((L=C.dataset.i)!=null?L:"0"))})})}}function q(t,e,h,c){let i=e.theme||"light",r=i==="dark"?"#0f0f0f":"#ffffff",s=i==="dark"?"#ffffff":"#0f0f0f",n=i==="dark"?"#aaaaaa":"#606060",m=i==="dark"?"#1a1a1a":"#f9f9f9",f=e.accent_color||"#ff0000",y=e.columns||3,v=e.layout||"grid",b=e.subscribe_button_color||f,$=e.header_style||"full",g=e.show_subscriber_count!==!1;t.innerHTML=`
+    `,!l){let L=function(j){if(!b)return;let E=b.children;E[j]&&(z=j,E[j].scrollIntoView({behavior:"smooth",inline:"start",block:"nearest"}),c&&c.querySelectorAll(".dot").forEach((K,X)=>{K.classList.toggle("active",X===z)}))},b=t.getElementById("t-track"),c=f?t.getElementById("t-dots"):null,z=0;h&&((k=t.getElementById("t-prev"))==null||k.addEventListener("click",()=>{L(Math.max(0,z-1))}),(M=t.getElementById("t-next"))==null||M.addEventListener("click",()=>{L(Math.min(p.length-1,z+1))})),c&&c.querySelectorAll(".dot").forEach(j=>{j.addEventListener("click",()=>{var E;L(parseInt((E=j.dataset.i)!=null?E:"0"))})})}}function q(t,e,u,p){let i=e.theme||"light",r=i==="dark"?"#0f0f0f":"#ffffff",s=i==="dark"?"#ffffff":"#0f0f0f",n=i==="dark"?"#aaaaaa":"#606060",h=i==="dark"?"#1a1a1a":"#f9f9f9",f=e.accent_color||"#ff0000",y=e.columns||3,v=e.layout||"grid",x=e.subscribe_button_color||f,$=e.header_style||"full",g=e.show_subscriber_count!==!1;t.innerHTML=`
       <style>
         * { box-sizing: border-box; margin: 0; padding: 0; }
         .yt-wrap {
@@ -228,11 +228,11 @@
       <div class="yt-wrap">
         <div class="yt-loading">Loading videos...</div>
       </div>
-    `;let p=e.channel_id,w=e.max_results||6,S=`${c}/api/youtube?channel_id=${p}&max_results=${w}`;fetch(S).then(x=>x.json()).then(x=>{if(!x.videos||x.videos.length===0){t.innerHTML=`
+    `;let d=e.channel_id,w=e.max_results||6,S=`${p}/api/youtube?channel_id=${d}&max_results=${w}`;fetch(S).then(m=>m.json()).then(m=>{if(!m.videos||m.videos.length===0){t.innerHTML=`
             <div style="padding:20px;text-align:center;
               color:${n};font-family:sans-serif;">
               No videos found
-            </div>`;return}let o=x.channel,l=x.videos.map(k=>`
+            </div>`;return}let o=m.channel,l=m.videos.map(k=>`
           <a class="yt-card"
              href="${k.url}"
              target="_blank"
@@ -281,7 +281,7 @@
             }
             .yt-subscribe {
               margin-left: auto;
-              background: ${b};
+              background: ${x};
               color: white;
               border: none;
               padding: 8px 16px;
@@ -305,7 +305,7 @@
               display: block;
               border-radius: 8px;
               overflow: hidden;
-              background: ${m};
+              background: ${h};
               transition: transform 0.2s ease;
             }
             .yt-card:hover { transform: translateY(-2px); }
@@ -373,7 +373,7 @@
                 <div class="yt-channel-name">${o.name}</div>
                 ${g&&o.subscriber_count?`<div class="yt-subs">${o.subscriber_count} subscribers</div>`:""}
               </div>
-              <a href="https://youtube.com/channel/${p}"
+              <a href="https://youtube.com/channel/${d}"
                  class="yt-subscribe"
                  target="_blank"
                  rel="noopener noreferrer">
@@ -381,16 +381,16 @@
               </a>
             </div>`:""}
             <div class="yt-grid">${l}</div>
-            ${h?`
+            ${u?`
               <div class="yt-branding">
-                <a href="${c}"
+                <a href="${p}"
                    target="_blank"
                    rel="noopener noreferrer">
                   Powered by Devixus Widgets
                 </a>
               </div>`:""}
           </div>
-        `}).catch(()=>{let x=t.querySelector(".yt-loading");x&&(x.textContent="Failed to load videos")})}function D(t,e,h,c){let i=e.theme||"light",r=i==="dark"?"#1a1a1a":"#ffffff",s=i==="dark"?"#ffffff":"#1a1a1a",n=i==="dark"?"#aaaaaa":"#666666",m=i==="dark"?"#2a2a2a":"#f9f9f9",f=e.accent_color||"#4285f4",y=e.layout||"grid";if(t.innerHTML=`
+        `}).catch(()=>{let m=t.querySelector(".yt-loading");m&&(m.textContent="Failed to load videos")})}function D(t,e,u,p){let i=e.theme||"light",r=i==="dark"?"#1a1a1a":"#ffffff",s=i==="dark"?"#ffffff":"#1a1a1a",n=i==="dark"?"#aaaaaa":"#666666",h=i==="dark"?"#2a2a2a":"#f9f9f9",f=e.accent_color||"#4285f4",y=e.layout||"grid";if(t.innerHTML=`
       <style>
         * { box-sizing: border-box; margin: 0; padding: 0; }
         .gr-wrap {
@@ -409,11 +409,11 @@
       <div class="gr-wrap">
         <div class="gr-loading">Loading reviews...</div>
       </div>
-    `,!e.place_id){let g=t.querySelector(".gr-wrap");g&&(g.innerHTML=`<div class="gr-loading" style="color:${n}">No business configured</div>`);return}let v=e.max_reviews||6,b=e.min_rating||1,$=`${c}/api/google-reviews?place_id=${encodeURIComponent(e.place_id)}&max_reviews=${v}&min_rating=${b}`;fetch($).then(g=>g.json()).then(g=>{if(!g.reviews||g.reviews.length===0){t.innerHTML=`
+    `,!e.place_id){let g=t.querySelector(".gr-wrap");g&&(g.innerHTML=`<div class="gr-loading" style="color:${n}">No business configured</div>`);return}let v=e.max_reviews||6,x=e.min_rating||1,$=`${p}/api/google-reviews?place_id=${encodeURIComponent(e.place_id)}&max_reviews=${v}&min_rating=${x}`;fetch($).then(g=>g.json()).then(g=>{if(!g.reviews||g.reviews.length===0){t.innerHTML=`
             <div style="padding:20px;text-align:center;
               color:${n};font-family:sans-serif;background:${r};">
               No reviews found
-            </div>`;return}let p=g.place,w=g.reviews;function S(a){return Array.from({length:5},(l,_)=>`<span style="color:${_<a?"#fbbc04":"#dadce0"}">\u2605</span>`).join("")}let x=w.map(a=>`
+            </div>`;return}let d=g.place,w=g.reviews;function S(a){return Array.from({length:5},(l,_)=>`<span style="color:${_<a?"#fbbc04":"#dadce0"}">\u2605</span>`).join("")}let m=w.map(a=>`
           <div class="gr-card">
             <div class="gr-card-header">
               ${e.show_reviewer_photo!==!1&&a.author_photo?`<img src="${a.author_photo}" class="gr-avatar" alt="${a.author_name}" />`:`<div class="gr-avatar-placeholder">${a.author_name.charAt(0).toUpperCase()}</div>`}
@@ -487,7 +487,7 @@
             }
             .gr-grid::-webkit-scrollbar { display: none; }
             .gr-card {
-              background: ${m};
+              background: ${h};
               border-radius: 12px;
               padding: 16px;
               display: flex;
@@ -529,37 +529,37 @@
             .gr-branding a { color: ${n}; text-decoration: none; opacity: 0.6; }
           </style>
           <div class="gr-wrap">
-            ${e.show_header!==!1&&p?`
+            ${e.show_header!==!1&&d?`
             <div class="gr-header">
               <div>
-                <div class="gr-place-name">${p.name}</div>
-                <div class="gr-place-address">${p.address||""}</div>
-                ${e.write_review_link&&p.google_url?`
-                  <a href="${p.google_url}"
+                <div class="gr-place-name">${d.name}</div>
+                <div class="gr-place-address">${d.address||""}</div>
+                ${e.write_review_link&&d.google_url?`
+                  <a href="${d.google_url}"
                      class="gr-write-link"
                      target="_blank"
                      rel="noopener noreferrer">Write a review \u2197</a>`:""}
               </div>
               ${e.show_overall_rating!==!1?`
               <div class="gr-overall">
-                <div class="gr-overall-score">${p.overall_rating}</div>
-                <div class="gr-overall-stars">${S(Math.round(p.overall_rating))}</div>
-                <div class="gr-overall-count">${p.total_reviews} reviews</div>
+                <div class="gr-overall-score">${d.overall_rating}</div>
+                <div class="gr-overall-stars">${S(Math.round(d.overall_rating))}</div>
+                <div class="gr-overall-count">${d.total_reviews} reviews</div>
                 <div class="gr-google-badge">
                   <span class="gr-google-logo">G</span>
                   <span style="font-size:11px;color:${n}">Google Reviews</span>
                 </div>
               </div>`:""}
             </div>`:""}
-            <div class="gr-grid">${x}</div>
-            ${h?`
+            <div class="gr-grid">${m}</div>
+            ${u?`
               <div class="gr-branding">
-                <a href="${c}" target="_blank" rel="noopener noreferrer">
+                <a href="${p}" target="_blank" rel="noopener noreferrer">
                   Powered by Devixus Widgets
                 </a>
               </div>`:""}
           </div>
-        `}).catch(()=>{let g=t.querySelector(".gr-loading");g&&(g.textContent="Failed to load reviews")})}function A(t,e,h,c){var x;let i=e.theme||"light",r=e.bg_color||(i==="dark"?"#1a1a2e":"#ffffff"),s=e.text_color||(i==="dark"?"#ffffff":"#1a1a1a"),n=e.accent_color||"#ff6914",m=e.title||"Offer ends in",f=e.style||"blocks",y=e.font_family==="mono"?"'Courier New', monospace":e.font_family==="serif"?"Georgia, 'Times New Roman', serif":"-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",b=(x={colon:":",slash:"/",dot:"\xB7",none:""}[e.separator_style||"colon"])!=null?x:":",$=e.expire_action||"message";function g(){let o=new Date(e.target_date+"T"+(e.target_time||"00:00")).getTime(),a=Date.now(),l=o-a;return l<=0?null:{days:Math.floor(l/(1e3*60*60*24)),hours:Math.floor(l%(1e3*60*60*24)/(1e3*60*60)),minutes:Math.floor(l%(1e3*60*60)/(1e3*60)),seconds:Math.floor(l%(1e3*60)/1e3)}}function p(o){return String(o).padStart(2,"0")}function w(){let o=g();if(!o){if($==="hide"){t.innerHTML="";return}let k=e.expired_message||"This offer has ended";if($==="redirect"&&e.redirect_url&&(window.location.href=e.redirect_url),$==="nothing")return;t.innerHTML=`
+        `}).catch(()=>{let g=t.querySelector(".gr-loading");g&&(g.textContent="Failed to load reviews")})}function A(t,e,u,p){var m;let i=e.theme||"light",r=e.bg_color||(i==="dark"?"#1a1a2e":"#ffffff"),s=e.text_color||(i==="dark"?"#ffffff":"#1a1a1a"),n=e.accent_color||"#ff6914",h=e.title||"Offer ends in",f=e.style||"blocks",y=e.font_family==="mono"?"'Courier New', monospace":e.font_family==="serif"?"Georgia, 'Times New Roman', serif":"-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",x=(m={colon:":",slash:"/",dot:"\xB7",none:""}[e.separator_style||"colon"])!=null?m:":",$=e.expire_action||"message";function g(){let o=new Date(e.target_date+"T"+(e.target_time||"00:00")).getTime(),a=Date.now(),l=o-a;return l<=0?null:{days:Math.floor(l/(1e3*60*60*24)),hours:Math.floor(l%(1e3*60*60*24)/(1e3*60*60)),minutes:Math.floor(l%(1e3*60*60)/(1e3*60)),seconds:Math.floor(l%(1e3*60)/1e3)}}function d(o){return String(o).padStart(2,"0")}function w(){let o=g();if(!o){if($==="hide"){t.innerHTML="";return}let k=e.expired_message||"This offer has ended";if($==="redirect"&&e.redirect_url&&(window.location.href=e.redirect_url),$==="nothing")return;t.innerHTML=`
           <style>
             .ct-wrap {
               font-family: ${y};
@@ -574,7 +574,7 @@
           <div class="ct-wrap">
             <div class="ct-expired">${k}</div>
           </div>
-        `;return}let a=[];e.show_days!==!1&&a.push({value:p(o.days),label:"Days"}),e.show_hours!==!1&&a.push({value:p(o.hours),label:"Hours"}),e.show_minutes!==!1&&a.push({value:p(o.minutes),label:"Minutes"}),e.show_seconds!==!1&&a.push({value:p(o.seconds),label:"Seconds"});let l=f==="blocks"?`
+        `;return}let a=[];e.show_days!==!1&&a.push({value:d(o.days),label:"Days"}),e.show_hours!==!1&&a.push({value:d(o.hours),label:"Hours"}),e.show_minutes!==!1&&a.push({value:d(o.minutes),label:"Minutes"}),e.show_seconds!==!1&&a.push({value:d(o.seconds),label:"Seconds"});let l=f==="blocks"?`
         .ct-unit {
           background: ${n};
           border-radius: 8px;
@@ -651,7 +651,7 @@
           <div class="ct-value">${k.value}</div>
           ${e.show_labels!==!1?`<div class="ct-label">${k.label}</div>`:""}
         </div>
-      `).join(f==="minimal"?`<div class="ct-sep">${b}</div>`:"");t.innerHTML=`
+      `).join(f==="minimal"?`<div class="ct-sep">${x}</div>`:"");t.innerHTML=`
         <style>
           * { box-sizing: border-box; margin: 0; padding: 0; }
           .ct-wrap {
@@ -693,22 +693,22 @@
           }
         </style>
         <div class="ct-wrap">
-          ${m?`<div class="ct-title">${m}</div>`:""}
+          ${h?`<div class="ct-title">${h}</div>`:""}
           <div class="ct-units">${_}</div>
-          ${h?`
+          ${u?`
             <div class="ct-branding">
-              <a href="${c}" target="_blank" rel="noopener noreferrer">
+              <a href="${p}" target="_blank" rel="noopener noreferrer">
                 Powered by Devixus Widgets
               </a>
             </div>`:""}
         </div>
-      `}w();let S=setInterval(()=>{let o=g();if(!o){clearInterval(S),w();return}let a=t.querySelectorAll(".ct-value"),l=[];e.show_days!==!1&&l.push(p(o.days)),e.show_hours!==!1&&l.push(p(o.hours)),e.show_minutes!==!1&&l.push(p(o.minutes)),e.show_seconds!==!1&&l.push(p(o.seconds)),a.forEach((_,k)=>{l[k]&&(_.textContent=l[k])})},1e3)}function P(t,e,h,c){let i=e.message||"\u{1F389} Welcome to our website!",r=e.bg_color||"#ff6914",s=e.text_color||"#ffffff",n=e.link_color||"#ffffff",m=e.position||"top",f=e.is_sticky!==!1,y=e.show_close_button!==!1,v=e.show_emoji?e.emoji||"\u{1F389}":"",b=e.style||"solid",$=r;b==="gradient"?$=`linear-gradient(135deg, ${r}, ${r}dd)`:b==="striped"&&($=`repeating-linear-gradient(
+      `}w();let S=setInterval(()=>{let o=g();if(!o){clearInterval(S),w();return}let a=t.querySelectorAll(".ct-value"),l=[];e.show_days!==!1&&l.push(d(o.days)),e.show_hours!==!1&&l.push(d(o.hours)),e.show_minutes!==!1&&l.push(d(o.minutes)),e.show_seconds!==!1&&l.push(d(o.seconds)),a.forEach((_,k)=>{l[k]&&(_.textContent=l[k])})},1e3)}function P(t,e,u,p){let i=e.message||"\u{1F389} Welcome to our website!",r=e.bg_color||"#ff6914",s=e.text_color||"#ffffff",n=e.link_color||"#ffffff",h=e.position||"top",f=e.is_sticky!==!1,y=e.show_close_button!==!1,v=e.show_emoji?e.emoji||"\u{1F389}":"",x=e.style||"solid",$=r;x==="gradient"?$=`linear-gradient(135deg, ${r}, ${r}dd)`:x==="striped"&&($=`repeating-linear-gradient(
         45deg,
         ${r},
         ${r} 10px,
         ${r}ee 10px,
         ${r}ee 20px
-      )`);let g=f?`position: fixed; ${m}: 0; left: 0; right: 0; z-index: 999999;`:"position: relative;";if(t.innerHTML=`
+      )`);let g=f?`position: fixed; ${h}: 0; left: 0; right: 0; z-index: 999999;`:"position: relative;";if(t.innerHTML=`
       <style>
         * { box-sizing: border-box; margin: 0; padding: 0; }
         .ab-bar {
@@ -784,15 +784,15 @@
             </a>
           `:""}
         </div>
-        ${h?`
+        ${u?`
           <div class="ab-branding">
-            <a href="${c}" target="_blank" rel="noopener noreferrer">Devixus</a>
+            <a href="${p}" target="_blank" rel="noopener noreferrer">Devixus</a>
           </div>`:""}
         ${y?`
           <button class="ab-close" id="ab-close" aria-label="Close">\u2715</button>
         `:""}
       </div>
-    `,y){let p=t.getElementById("ab-close"),w=t.getElementById("ab-bar");p&&w&&p.addEventListener("click",()=>{w.style.display="none"})}}function W(t,e,h){let c=`${h}/dashboard/billing`;t.innerHTML=`
+    `,y){let d=t.getElementById("ab-close"),w=t.getElementById("ab-bar");d&&w&&d.addEventListener("click",()=>{w.style.display="none"})}}function W(t,e,u){let p=`${u}/dashboard/billing`;t.innerHTML=`
       <style>
         * { box-sizing: border-box; margin: 0; padding: 0; }
         .dv-overlay {
@@ -886,26 +886,26 @@
             This widget has used all its free views
             for this month. Upgrade to keep it running.
           </div>
-          <a href="${c}"
+          <a href="${p}"
              target="_blank"
              class="dv-btn">
             Upgrade plan \u2192
           </a>
           <div class="dv-powered">
-            <a href="${h}" target="_blank">
+            <a href="${u}" target="_blank">
               Powered by Devixus Widgets
             </a>
           </div>
         </div>
       </div>
-    `}function N(t,e){try{let h=window.location.hostname,c=JSON.stringify({widget_id:t,domain:h,event_type:"load"});navigator.sendBeacon?navigator.sendBeacon(`${e}/api/track`,new Blob([c],{type:"application/json"})):fetch(`${e}/api/track`,{method:"POST",body:c,headers:{"Content-Type":"application/json"},keepalive:!0}).catch(()=>{})}catch(h){}}function Y(t,e,h,c,i){let r=e.theme||"light",s=r==="dark"?"#1a1a1a":"#ffffff",n=r==="dark"?"#ffffff":"#1a1a1a",m=r==="dark"?"#aaaaaa":"#666666",f=r==="dark"?"#2a2a2a":"#f9f9f9",y=r==="dark"?"#333":"#e5e7eb",v=e.accent_color||"#ff6914",b=e.border_radius||8,$=e.display_mode==="popup",g=e.title||"Contact Us",p=e.subtitle||"Send us a message and we'll get back to you.",w=e.button_text||"Send Message",S=e.success_message||"Thank you! We'll be in touch soon.",x=e.fields||{name:!0,email:!0,phone:!1,subject:!1,message:!0},o=e.required_fields||{name:!0,email:!0,message:!0};function a(u){return`
-        <div class="cf-form-wrap" id="${u}">
+    `}function N(t,e){try{let u=window.location.hostname,p=JSON.stringify({widget_id:t,domain:u,event_type:"load"});navigator.sendBeacon?navigator.sendBeacon(`${e}/api/track`,new Blob([p],{type:"application/json"})):fetch(`${e}/api/track`,{method:"POST",body:p,headers:{"Content-Type":"application/json"},keepalive:!0}).catch(()=>{})}catch(u){}}function Y(t,e,u,p,i){let r=e.theme||"light",s=r==="dark"?"#1a1a1a":"#ffffff",n=r==="dark"?"#ffffff":"#1a1a1a",h=r==="dark"?"#aaaaaa":"#666666",f=r==="dark"?"#2a2a2a":"#f9f9f9",y=r==="dark"?"#333":"#e5e7eb",v=e.accent_color||"#ff6914",x=e.border_radius||8,$=e.display_mode==="popup",g=e.title||"Contact Us",d=e.subtitle||"Send us a message and we'll get back to you.",w=e.button_text||"Send Message",S=e.success_message||"Thank you! We'll be in touch soon.",m=e.fields||{name:!0,email:!0,phone:!1,subject:!1,message:!0},o=e.required_fields||{name:!0,email:!0,message:!0};function a(b){return`
+        <div class="cf-form-wrap" id="${b}">
           <div class="cf-header">
             <h3 class="cf-title">${g}</h3>
-            ${p?`<p class="cf-subtitle">${p}</p>`:""}
+            ${d?`<p class="cf-subtitle">${d}</p>`:""}
           </div>
           <form class="cf-form" id="cf-form-${i}">
-            ${x.name?`
+            ${m.name?`
               <div class="cf-field">
                 <label class="cf-label">
                   Name${o.name?' <span class="cf-req">*</span>':""}
@@ -914,7 +914,7 @@
                        placeholder="Your name"
                        ${o.name?"required":""} />
               </div>`:""}
-            ${x.email?`
+            ${m.email?`
               <div class="cf-field">
                 <label class="cf-label">
                   Email${o.email?' <span class="cf-req">*</span>':""}
@@ -923,7 +923,7 @@
                        placeholder="your@email.com"
                        ${o.email?"required":""} />
               </div>`:""}
-            ${x.phone?`
+            ${m.phone?`
               <div class="cf-field">
                 <label class="cf-label">
                   Phone${o.phone?' <span class="cf-req">*</span>':""}
@@ -932,13 +932,13 @@
                        placeholder="+1 234 567 8900"
                        ${o.phone?"required":""} />
               </div>`:""}
-            ${x.subject?`
+            ${m.subject?`
               <div class="cf-field">
                 <label class="cf-label">Subject</label>
                 <input type="text" name="subject" class="cf-input"
                        placeholder="What is this about?" />
               </div>`:""}
-            ${x.message?`
+            ${m.message?`
               <div class="cf-field">
                 <label class="cf-label">
                   Message${o.message?' <span class="cf-req">*</span>':""}
@@ -956,9 +956,9 @@
             <div class="cf-success-icon">\u2713</div>
             <p class="cf-success-msg">${S}</p>
           </div>
-          ${h?`
+          ${u?`
             <div class="cf-branding">
-              <a href="${c}" target="_blank" rel="noopener noreferrer">
+              <a href="${p}" target="_blank" rel="noopener noreferrer">
                 Powered by Devixus Widgets
               </a>
             </div>`:""}
@@ -983,7 +983,7 @@
           color: white;
           border: none;
           padding: 12px 20px;
-          border-radius: ${b}px;
+          border-radius: ${x}px;
           font-size: 14px;
           font-weight: 600;
           cursor: pointer;
@@ -1003,7 +1003,7 @@
         }
         .cf-popup-box {
           background: ${s};
-          border-radius: ${b+4}px;
+          border-radius: ${x+4}px;
           padding: 28px;
           width: 100%;
           max-width: 480px;
@@ -1019,7 +1019,7 @@
           border: none;
           font-size: 18px;
           cursor: pointer;
-          color: ${m};
+          color: ${h};
           width: 28px;
           height: 28px;
           display: flex;
@@ -1032,7 +1032,7 @@
           font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
           background: ${s};
           padding: ${$?"0":"24px"};
-          border-radius: ${b}px;
+          border-radius: ${x}px;
           color: ${n};
         }
         .cf-header { margin-bottom: 20px; }
@@ -1044,7 +1044,7 @@
         }
         .cf-subtitle {
           font-size: 13px;
-          color: ${m};
+          color: ${h};
           line-height: 1.5;
         }
         .cf-form { display: flex; flex-direction: column; gap: 14px; }
@@ -1054,7 +1054,7 @@
         .cf-input, .cf-textarea {
           background: ${f};
           border: 1px solid ${y};
-          border-radius: ${b-2}px;
+          border-radius: ${x-2}px;
           padding: 10px 12px;
           font-size: 14px;
           color: ${n};
@@ -1070,7 +1070,7 @@
           color: white;
           border: none;
           padding: 12px 20px;
-          border-radius: ${b-2}px;
+          border-radius: ${x-2}px;
           font-size: 14px;
           font-weight: 600;
           cursor: pointer;
@@ -1107,10 +1107,10 @@
           font-family: -apple-system, sans-serif;
         }
         .cf-branding { text-align: center; margin-top: 16px; font-size: 10px; }
-        .cf-branding a { color: ${m}; text-decoration: none; opacity: 0.6; }
+        .cf-branding a { color: ${h}; text-decoration: none; opacity: 0.6; }
       </style>
       ${l}
-    `,$){let u=t.getElementById("cf-trigger"),d=t.getElementById("cf-popup"),z=t.getElementById("cf-popup-close");u==null||u.addEventListener("click",()=>{d&&(d.style.display="flex")}),z==null||z.addEventListener("click",()=>{d&&(d.style.display="none")}),d==null||d.addEventListener("click",j=>{j.target===d&&(d.style.display="none")})}let _=t.getElementById(`cf-form-${i}`),k=t.getElementById(`cf-success-${i}`),M=t.getElementById(`cf-error-${i}`);_==null||_.addEventListener("submit",async u=>{u.preventDefault();let d=_.querySelector(".cf-btn");d&&(d.disabled=!0,d.textContent="Sending...");let z=new FormData(_);try{if((await fetch(`${c}/api/contact-submit`,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({widget_id:i,name:z.get("name"),email:z.get("email"),phone:z.get("phone"),subject:z.get("subject"),message:z.get("message")})})).ok)_.style.display="none",k&&(k.style.display="block");else throw new Error("Failed")}catch(j){d&&(d.disabled=!1,d.textContent=w);let C=M==null?void 0:M.querySelector(".cf-error-msg");C&&(C.textContent="Failed to send. Please try again."),M&&(M.style.display="block")}})}function G(t,e,h,c){var x;let i=e.theme||"light",r=e.style||"filled",s=e.size||"medium",n=e.layout||"horizontal",m=e.show_labels!==!1,f=e.animation||"hover_grow",y=(x=e.border_radius)!=null?x:50,v={small:{btn:"36px",icon:"18px",font:"12px"},medium:{btn:"44px",icon:"22px",font:"13px"},large:{btn:"56px",icon:"28px",font:"14px"}},b=v[s]||v.medium,$=e.networks||{},g={facebook:{label:"Facebook",color:"#1877F2",icon:"f"},instagram:{label:"Instagram",color:"#E4405F",icon:"\u{1F4F7}"},twitter:{label:"Twitter / X",color:"#000000",icon:"X"},tiktok:{label:"TikTok",color:"#000000",icon:"\u266A"},youtube:{label:"YouTube",color:"#FF0000",icon:"\u25B6"},linkedin:{label:"LinkedIn",color:"#0A66C2",icon:"in"},pinterest:{label:"Pinterest",color:"#E60023",icon:"P"},whatsapp:{label:"WhatsApp",color:"#25D366",icon:"\u{1F4AC}"}},p=Object.entries($).filter(([,o])=>o).map(([o,a])=>{let l=g[o];if(!l)return"";let _=r==="filled"?`background: ${l.color}; color: white; border: none;`:r==="outline"?`background: transparent; color: ${l.color}; border: 2px solid ${l.color};`:`background: transparent; color: ${l.color}; border: none;`,k=e.label_type==="follow_us"?"Follow us":e.label_type==="custom"&&e.custom_label||l.label;return`
+    `,$){let b=t.getElementById("cf-trigger"),c=t.getElementById("cf-popup"),z=t.getElementById("cf-popup-close");b==null||b.addEventListener("click",()=>{c&&(c.style.display="flex")}),z==null||z.addEventListener("click",()=>{c&&(c.style.display="none")}),c==null||c.addEventListener("click",L=>{L.target===c&&(c.style.display="none")})}let _=t.getElementById(`cf-form-${i}`),k=t.getElementById(`cf-success-${i}`),M=t.getElementById(`cf-error-${i}`);_==null||_.addEventListener("submit",async b=>{b.preventDefault();let c=_.querySelector(".cf-btn");c&&(c.disabled=!0,c.textContent="Sending...");let z=new FormData(_);try{if((await fetch(`${p}/api/contact-submit`,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({widget_id:i,name:z.get("name"),email:z.get("email"),phone:z.get("phone"),subject:z.get("subject"),message:z.get("message")})})).ok)_.style.display="none",k&&(k.style.display="block");else throw new Error("Failed")}catch(L){c&&(c.disabled=!1,c.textContent=w);let j=M==null?void 0:M.querySelector(".cf-error-msg");j&&(j.textContent="Failed to send. Please try again."),M&&(M.style.display="block")}})}function G(t,e,u,p){var m;let i=e.theme||"light",r=e.style||"filled",s=e.size||"medium",n=e.layout||"horizontal",h=e.show_labels!==!1,f=e.animation||"hover_grow",y=(m=e.border_radius)!=null?m:50,v={small:{btn:"36px",icon:"18px",font:"12px"},medium:{btn:"44px",icon:"22px",font:"13px"},large:{btn:"56px",icon:"28px",font:"14px"}},x=v[s]||v.medium,$=e.networks||{},g={facebook:{label:"Facebook",color:"#1877F2",icon:"f"},instagram:{label:"Instagram",color:"#E4405F",icon:"\u{1F4F7}"},twitter:{label:"Twitter / X",color:"#000000",icon:"X"},tiktok:{label:"TikTok",color:"#000000",icon:"\u266A"},youtube:{label:"YouTube",color:"#FF0000",icon:"\u25B6"},linkedin:{label:"LinkedIn",color:"#0A66C2",icon:"in"},pinterest:{label:"Pinterest",color:"#E60023",icon:"P"},whatsapp:{label:"WhatsApp",color:"#25D366",icon:"\u{1F4AC}"}},d=Object.entries($).filter(([,o])=>o).map(([o,a])=>{let l=g[o];if(!l)return"";let _=r==="filled"?`background: ${l.color}; color: white; border: none;`:r==="outline"?`background: transparent; color: ${l.color}; border: 2px solid ${l.color};`:`background: transparent; color: ${l.color}; border: none;`,k=e.label_type==="follow_us"?"Follow us":e.label_type==="custom"&&e.custom_label||l.label;return`
           <a href="${a}"
              target="_blank"
              rel="noopener noreferrer"
@@ -1118,7 +1118,7 @@
              aria-label="${l.label}"
              style="${_}">
             <span class="sf-icon">${l.icon}</span>
-            ${m?`<span class="sf-label">${k}</span>`:""}
+            ${h?`<span class="sf-label">${k}</span>`:""}
           </a>
         `}).join(""),w=n==="horizontal"?"flex-direction: row; flex-wrap: wrap;":n==="vertical"?"flex-direction: column;":"display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));",S=f==="hover_grow"?".sf-btn:hover { transform: scale(1.08); }":f==="hover_bounce"?`.sf-btn:hover { animation: sfbounce .3s ease; }
          @keyframes sfbounce {
@@ -1140,35 +1140,35 @@
           display: inline-flex;
           align-items: center;
           gap: 8px;
-          height: ${b.btn};
-          padding: 0 ${m?"14px":"0"};
-          ${m?"":`width: ${b.btn};`}
+          height: ${x.btn};
+          padding: 0 ${h?"14px":"0"};
+          ${h?"":`width: ${x.btn};`}
           justify-content: center;
           border-radius: ${y}px;
           text-decoration: none;
-          font-size: ${b.font};
+          font-size: ${x.font};
           font-weight: 600;
           cursor: pointer;
           transition: transform .2s, opacity .2s;
           white-space: nowrap;
         }
         .sf-btn:hover { opacity: .9; }
-        .sf-icon { font-size: ${b.icon}; line-height: 1; font-style: normal; }
-        .sf-label { font-size: ${b.font}; }
+        .sf-icon { font-size: ${x.icon}; line-height: 1; font-style: normal; }
+        .sf-label { font-size: ${x.font}; }
         ${S}
         .sf-branding { width: 100%; text-align: center; margin-top: 8px; font-size: 10px; }
         .sf-branding a { color: #999; text-decoration: none; opacity: 0.6; }
       </style>
       <div class="sf-wrap">
-        ${p}
-        ${h?`
+        ${d}
+        ${u?`
           <div class="sf-branding">
-            <a href="${c}" target="_blank" rel="noopener noreferrer">
+            <a href="${p}" target="_blank" rel="noopener noreferrer">
               Powered by Devixus Widgets
             </a>
           </div>`:""}
       </div>
-    `}function O(t,e,h,c){let i=e.theme||"light",r=i==="dark"?"#1a1a1a":"#ffffff",s=i==="dark"?"#ffffff":"#0f0f0f",n=i==="dark"?"#aaaaaa":"#666666",m=e.columns||3,f=e.layout||"grid",y=e.border_radius==="round"?"50%":e.border_radius||"8px",v=e.gap||"8px",b=e.num_posts||9,$=e.show_likes!==!1,g=!!e.show_caption,p=e.show_video_icon!==!1,w=e.link_behavior||"instagram",S=e.username||"";if(t.innerHTML=`
+    `}function O(t,e,u,p){let i=e.theme||"light",r=i==="dark"?"#1a1a1a":"#ffffff",s=i==="dark"?"#ffffff":"#0f0f0f",n=i==="dark"?"#aaaaaa":"#666666",h=e.columns||3,f=e.layout||"grid",y=e.border_radius==="round"?"50%":e.border_radius||"8px",v=e.gap||"8px",x=e.num_posts||9,$=e.show_likes!==!1,g=!!e.show_caption,d=e.show_video_icon!==!1,w=e.link_behavior||"instagram",S=e.username||"";if(t.innerHTML=`
       <style>
         * { box-sizing: border-box; margin: 0; padding: 0; }
         .ig-wrap {
@@ -1180,20 +1180,20 @@
         .ig-loading { text-align: center; padding: 40px; color: ${n}; font-size: 14px; }
       </style>
       <div class="ig-wrap"><div class="ig-loading">Loading Instagram posts...</div></div>
-    `,!S){let o=t.querySelector(".ig-wrap");o&&(o.innerHTML=`<div class="ig-loading" style="color:${n}">No Instagram username configured</div>`);return}function x(o){return o>=1e6?`${(o/1e6).toFixed(1)}M`:o>=1e3?`${(o/1e3).toFixed(1)}K`:String(o)}fetch(`${c}/api/widgets/instagram?username=${encodeURIComponent(S)}`).then(o=>o.json()).then(o=>{if(!o||!o.posts)return;let l=o.posts.slice(0,b).map(d=>{let z=w==="instagram"?`https://www.instagram.com/${S}/`:"#";return`
+    `,!S){let o=t.querySelector(".ig-wrap");o&&(o.innerHTML=`<div class="ig-loading" style="color:${n}">No Instagram username configured</div>`);return}function m(o){return o>=1e6?`${(o/1e6).toFixed(1)}M`:o>=1e3?`${(o/1e3).toFixed(1)}K`:String(o)}fetch(`${p}/api/widgets/instagram?username=${encodeURIComponent(S)}`).then(o=>o.json()).then(o=>{if(!o||!o.posts)return;let l=o.posts.slice(0,x).map(c=>{let z=w==="instagram"?`https://www.instagram.com/${S}/`:"#";return`
             <div class="ig-post" style="cursor:${w==="none"?"default":"pointer"}" data-href="${z}" data-behavior="${w}">
               <div class="ig-thumb-wrap">
-                <img src="${d.thumbnail}" alt="" class="ig-thumb" loading="lazy" />
-                ${d.type==="video"&&p?'<div class="ig-video-icon">\u25B6</div>':""}
+                <img src="${c.thumbnail}" alt="" class="ig-thumb" loading="lazy" />
+                ${c.type==="video"&&d?'<div class="ig-video-icon">\u25B6</div>':""}
                 ${$?`
                   <div class="ig-overlay">
-                    <span class="ig-stat">\u2665 ${x(d.likes)}</span>
-                    <span class="ig-stat">\u{1F4AC} ${d.comments}</span>
+                    <span class="ig-stat">\u2665 ${m(c.likes)}</span>
+                    <span class="ig-stat">\u{1F4AC} ${c.comments}</span>
                   </div>`:""}
               </div>
-              ${g?`<p class="ig-caption">${d.caption}</p>`:""}
+              ${g?`<p class="ig-caption">${c.caption}</p>`:""}
             </div>
-          `}).join(""),_=f==="grid"?`display: grid; grid-template-columns: repeat(${m}, 1fr); gap: ${v};`:f==="carousel"?`display: flex; gap: ${v}; overflow-x: auto; scrollbar-width: none;`:`column-count: ${m}; column-gap: ${v};`,k=f==="masonry"?`break-inside: avoid; margin-bottom: ${v};`:f==="carousel"?`flex: 0 0 ${Math.floor(280/m)}px;`:"",M=f!=="masonry"?"padding-top: 100%;":"",u=f!=="masonry"?"position: absolute; top: 0; left: 0; width: 100%; height: 100%;":"width: 100%; display: block;";t.innerHTML=`
+          `}).join(""),_=f==="grid"?`display: grid; grid-template-columns: repeat(${h}, 1fr); gap: ${v};`:f==="carousel"?`display: flex; gap: ${v}; overflow-x: auto; scrollbar-width: none;`:`column-count: ${h}; column-gap: ${v};`,k=f==="masonry"?`break-inside: avoid; margin-bottom: ${v};`:f==="carousel"?`flex: 0 0 ${Math.floor(280/h)}px;`:"",M=f!=="masonry"?"padding-top: 100%;":"",b=f!=="masonry"?"position: absolute; top: 0; left: 0; width: 100%; height: 100%;":"width: 100%; display: block;";t.innerHTML=`
           <style>
             * { box-sizing: border-box; margin: 0; padding: 0; }
             .ig-wrap {
@@ -1226,7 +1226,7 @@
               background: #eee;
             }
             .ig-thumb {
-              ${u}
+              ${b}
               object-fit: cover;
               transition: transform 0.3s ease;
             }
@@ -1276,17 +1276,17 @@
                 <div class="ig-bio">${o.bio||""}</div>
               </div>
               <div class="ig-followers">
-                <div class="ig-followers-num">${x(o.followers)}</div>
+                <div class="ig-followers-num">${m(o.followers)}</div>
                 <div class="ig-followers-label">followers</div>
               </div>
             </div>
             <div class="ig-grid">${l}</div>
-            ${h?`
+            ${u?`
               <div class="ig-footer">
-                <a href="${c}" target="_blank" rel="noopener noreferrer">\u{1F4F8} Powered by Devixus Widgets</a>
+                <a href="${p}" target="_blank" rel="noopener noreferrer">\u{1F4F8} Powered by Devixus Widgets</a>
               </div>`:""}
           </div>
-        `,w!=="none"&&t.querySelectorAll(".ig-post").forEach(d=>{let z=d.dataset.href;z&&z!=="#"&&d.addEventListener("click",()=>{window.open(z,"_blank","noopener noreferrer")})})}).catch(()=>{let o=t.querySelector(".ig-loading");o&&(o.textContent="Failed to load Instagram posts")})}function V(t,e,h,c){let i=e.theme||"light",r=i==="dark"?"#1a1a1a":"#ffffff",s=i==="dark"?"#ffffff":"#0f0f0f",n=i==="dark"?"#aaaaaa":"#666666",m=i==="dark"?"#2a2a2a":"#f9f9f9",f=e.columns||3,y=e.layout||"grid",v=e.border_radius==="round"?"50%":e.border_radius||"8px",b=e.gap||"8px",$=e.num_videos||9,g=e.show_duration!==!1,p=e.show_view_count!==!1,w=!!e.show_caption,S=e.show_like_count!==!1,x=e.username||"";if(t.innerHTML=`
+        `,w!=="none"&&t.querySelectorAll(".ig-post").forEach(c=>{let z=c.dataset.href;z&&z!=="#"&&c.addEventListener("click",()=>{window.open(z,"_blank","noopener noreferrer")})})}).catch(()=>{let o=t.querySelector(".ig-loading");o&&(o.textContent="Failed to load Instagram posts")})}function V(t,e,u,p){let i=e.theme||"light",r=i==="dark"?"#1a1a1a":"#ffffff",s=i==="dark"?"#ffffff":"#0f0f0f",n=i==="dark"?"#aaaaaa":"#666666",h=i==="dark"?"#2a2a2a":"#f9f9f9",f=e.columns||3,y=e.layout||"grid",v=e.border_radius==="round"?"50%":e.border_radius||"8px",x=e.gap||"8px",$=e.num_videos||9,g=e.show_duration!==!1,d=e.show_view_count!==!1,w=!!e.show_caption,S=e.show_like_count!==!1,m=e.username||"";if(t.innerHTML=`
       <style>
         * { box-sizing: border-box; margin: 0; padding: 0; }
         .tt-wrap {
@@ -1297,32 +1297,32 @@
         .tt-loading { text-align: center; padding: 40px; color: ${n}; font-size: 14px; }
       </style>
       <div class="tt-wrap"><div class="tt-loading">Loading TikTok videos...</div></div>
-    `,!x){let a=t.querySelector(".tt-wrap");a&&(a.innerHTML='<div class="tt-loading">No TikTok username configured</div>');return}function o(a){return a>=1e6?`${(a/1e6).toFixed(1)}M`:a>=1e3?`${(a/1e3).toFixed(1)}K`:String(a)}fetch(`${c}/api/widgets/tiktok?username=${encodeURIComponent(x)}`).then(a=>a.json()).then(a=>{if(!a||!a.videos)return;let l=a.videos.slice(0,$),_=`https://www.tiktok.com/@${x}`,k=l.map(u=>{if(y==="list")return`
+    `,!m){let a=t.querySelector(".tt-wrap");a&&(a.innerHTML='<div class="tt-loading">No TikTok username configured</div>');return}function o(a){return a>=1e6?`${(a/1e6).toFixed(1)}M`:a>=1e3?`${(a/1e3).toFixed(1)}K`:String(a)}fetch(`${p}/api/widgets/tiktok?username=${encodeURIComponent(m)}`).then(a=>a.json()).then(a=>{if(!a||!a.videos)return;let l=a.videos.slice(0,$),_=`https://www.tiktok.com/@${m}`,k=l.map(b=>{if(y==="list")return`
               <a class="tt-list-item" href="${_}" target="_blank" rel="noopener noreferrer">
                 <div class="tt-list-thumb">
-                  <img src="${u.thumbnail}" alt="" class="tt-list-img" loading="lazy" />
-                  ${g?`<div class="tt-duration">${u.duration}</div>`:""}
+                  <img src="${b.thumbnail}" alt="" class="tt-list-img" loading="lazy" />
+                  ${g?`<div class="tt-duration">${b.duration}</div>`:""}
                 </div>
                 <div class="tt-list-info">
-                  ${w?`<p class="tt-list-caption">${u.caption}</p>`:""}
+                  ${w?`<p class="tt-list-caption">${b.caption}</p>`:""}
                   <div class="tt-list-stats">
-                    ${p?`<span class="tt-stat">\u{1F441} ${o(u.views)}</span>`:""}
-                    ${S?`<span class="tt-stat">\u2665 ${o(u.likes)}</span>`:""}
+                    ${d?`<span class="tt-stat">\u{1F441} ${o(b.views)}</span>`:""}
+                    ${S?`<span class="tt-stat">\u2665 ${o(b.likes)}</span>`:""}
                   </div>
                 </div>
               </a>
-            `;let d=g?"36px":"6px";return`
+            `;let c=g?"36px":"6px";return`
             <a class="tt-card" href="${_}" target="_blank" rel="noopener noreferrer">
               <div class="tt-thumb-wrap">
-                <img src="${u.thumbnail}" alt="" class="tt-thumb" loading="lazy" />
+                <img src="${b.thumbnail}" alt="" class="tt-thumb" loading="lazy" />
                 <div class="tt-play-icon">\u25B6</div>
-                ${g?`<div class="tt-duration">${u.duration}</div>`:""}
-                ${p?`<div class="tt-views" style="bottom:${d}">\u{1F441} ${o(u.views)}</div>`:""}
+                ${g?`<div class="tt-duration">${b.duration}</div>`:""}
+                ${d?`<div class="tt-views" style="bottom:${c}">\u{1F441} ${o(b.views)}</div>`:""}
               </div>
-              ${S?`<div class="tt-card-footer"><span class="tt-likes">\u2665 ${o(u.likes)}</span></div>`:""}
-              ${w?`<p class="tt-caption">${u.caption}</p>`:""}
+              ${S?`<div class="tt-card-footer"><span class="tt-likes">\u2665 ${o(b.likes)}</span></div>`:""}
+              ${w?`<p class="tt-caption">${b.caption}</p>`:""}
             </a>
-          `}).join(""),M=y==="grid"?`display: grid; grid-template-columns: repeat(${f}, 1fr); gap: ${b};`:y==="carousel"?`display: flex; gap: ${b}; overflow-x: auto; scrollbar-width: none;`:`display: flex; flex-direction: column; gap: ${b};`;t.innerHTML=`
+          `}).join(""),M=y==="grid"?`display: grid; grid-template-columns: repeat(${f}, 1fr); gap: ${x};`:y==="carousel"?`display: flex; gap: ${x}; overflow-x: auto; scrollbar-width: none;`:`display: flex; flex-direction: column; gap: ${x};`;t.innerHTML=`
           <style>
             * { box-sizing: border-box; margin: 0; padding: 0; }
             .tt-wrap {
@@ -1353,7 +1353,7 @@
               display: block;
               border-radius: ${v};
               overflow: hidden;
-              background: ${m};
+              background: ${h};
               transition: transform 0.2s;
               ${y==="carousel"?`flex: 0 0 ${Math.floor(280/f)}px;`:""}
             }
@@ -1418,7 +1418,7 @@
               color: ${s};
               padding: 10px;
               border-radius: ${v};
-              background: ${m};
+              background: ${h};
               transition: opacity 0.2s;
               align-items: flex-start;
             }
@@ -1471,9 +1471,9 @@
               </div>
             </div>
             <div class="tt-grid">${k}</div>
-            ${h?`
+            ${u?`
               <div class="tt-footer">
-                <a href="${c}" target="_blank" rel="noopener noreferrer">Powered by Devixus Widgets</a>
+                <a href="${p}" target="_blank" rel="noopener noreferrer">Powered by Devixus Widgets</a>
               </div>`:""}
           </div>
-        `}).catch(()=>{let a=t.querySelector(".tt-loading");a&&(a.textContent="Failed to load TikTok videos")})}function J(t,e,h){switch(e.type){case"whatsapp":H(t,e.config,e.show_branding);break;case"testimonials":U(t,e.config,e.show_branding);break;case"youtube_feed":q(t,e.config,e.show_branding,T);break;case"google_reviews":D(t,e.config,e.show_branding,T);break;case"countdown_timer":A(t,e.config,e.show_branding,T);break;case"announcement_bar":P(t,e.config,e.show_branding,T);break;case"contact_form":Y(t,e.config,e.show_branding,T,h);break;case"social_follow":G(t,e.config,e.show_branding,T);break;case"instagram_feed":O(t,e.config,e.show_branding,T);break;case"tiktok_feed":V(t,e.config,e.show_branding,T);break;default:console.warn(`[Devixus] Unknown widget type: ${e.type}`)}}async function I(){let t=R();if(!t)return;let e=t.getAttribute("data-widget-id");if(!e){console.warn("[Devixus] Missing data-widget-id attribute on script tag");return}let h=t.getAttribute("data-mount")||null;try{let c=await B(e),i=h&&document.querySelector(h)||document.body;if(c.limit_reached){let s=F(i);W(s,c,T);return}let r=F(i);J(r,c,e),N(e,T)}catch(c){console.warn("[Devixus] Widget failed to load:",c)}}document.readyState==="loading"?document.addEventListener("DOMContentLoaded",I):I()})();})();
+        `}).catch(()=>{let a=t.querySelector(".tt-loading");a&&(a.textContent="Failed to load TikTok videos")})}function J(t,e,u){switch(e.type){case"whatsapp":H(t,e.config,e.show_branding);break;case"testimonials":U(t,e.config,e.show_branding);break;case"youtube_feed":q(t,e.config,e.show_branding,T);break;case"google_reviews":D(t,e.config,e.show_branding,T);break;case"countdown_timer":A(t,e.config,e.show_branding,T);break;case"announcement_bar":P(t,e.config,e.show_branding,T);break;case"contact_form":Y(t,e.config,e.show_branding,T,u);break;case"social_follow":G(t,e.config,e.show_branding,T);break;case"instagram_feed":O(t,e.config,e.show_branding,T);break;case"tiktok_feed":V(t,e.config,e.show_branding,T);break;default:console.warn(`[Devixus] Unknown widget type: ${e.type}`)}}async function R(){if(!C)return;let t=C.getAttribute("data-widget-id");if(!t){console.warn("[Devixus] Missing data-widget-id attribute on script tag");return}let e=C.getAttribute("data-mount")||null;try{let u=await B(t),p=e&&document.querySelector(e)||document.body;if(u.limit_reached){let r=I(p);W(r,u,T);return}let i=I(p);J(i,u,t),N(t,T)}catch(u){console.warn("[Devixus] Widget failed to load:",u)}}document.readyState==="loading"?document.addEventListener("DOMContentLoaded",R):R()})();})();

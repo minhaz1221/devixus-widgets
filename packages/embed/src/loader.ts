@@ -1,18 +1,25 @@
 (function() {
   'use strict'
 
-  const API_BASE = 'https://devixus-widgets-web.vercel.app'
-  const BRANDING_URL = 'https://devixus-widgets-marketing.vercel.app'
+  // Capture synchronously — document.currentScript is only valid during script execution,
+  // not inside async callbacks or event listeners (e.g. DOMContentLoaded).
+  const _scriptEl: HTMLScriptElement | null = (document.currentScript as HTMLScriptElement) ||
+    (() => {
+      const s = document.getElementsByTagName('script')
+      return (s[s.length - 1] as HTMLScriptElement) || null
+    })()
 
-  // Find the current script tag to read widget ID
-  function getCurrentScript(): HTMLScriptElement | null {
-    if (document.currentScript) {
-      return document.currentScript as HTMLScriptElement
-    }
-    // Fallback for older browsers
-    const scripts = document.getElementsByTagName('script')
-    return scripts[scripts.length - 1] as HTMLScriptElement
-  }
+  // Derive API base from where widget.js is hosted so preview works in local dev too.
+  // External embeds always reference our domain directly, so this is always correct.
+  const API_BASE = (() => {
+    try {
+      const src = _scriptEl?.src
+      if (src) return new URL(src).origin
+    } catch { /* ignore */ }
+    return 'https://devixus-widgets-web.vercel.app'
+  })()
+
+  const BRANDING_URL = 'https://devixus-widgets-marketing.vercel.app'
 
   // Fetch widget config from our API
   async function fetchWidgetConfig(widgetId: string) {
@@ -2291,16 +2298,15 @@
 
   // Bootstrap — entry point
   async function init() {
-    const script = getCurrentScript()
-    if (!script) return
+    if (!_scriptEl) return
 
-    const widgetId = script.getAttribute('data-widget-id')
+    const widgetId = _scriptEl.getAttribute('data-widget-id')
     if (!widgetId) {
       console.warn('[Devixus] Missing data-widget-id attribute on script tag')
       return
     }
 
-    const mountSelector = script.getAttribute('data-mount') || null
+    const mountSelector = _scriptEl.getAttribute('data-mount') || null
 
     try {
       const widget = await fetchWidgetConfig(widgetId)

@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import Link from 'next/link'
 import { User, Bell, Code2, AlertTriangle, Check, Download } from 'lucide-react'
 import { ToggleSwitch } from '@/components/ui/ToggleSwitch'
 
@@ -312,8 +313,6 @@ function DangerZoneTab() {
 }
 
 // ── Main page ────────────────────────────────────────────────────────────────
-import Link from 'next/link'
-
 export default function SettingsPage() {
   const [tab, setTab] = useState<Tab>('profile')
 

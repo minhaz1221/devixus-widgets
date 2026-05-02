@@ -3,14 +3,14 @@
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { useEffect, useState } from 'react'
-import { LayoutDashboard, Layers, BarChart2, Settings, CreditCard, Zap } from 'lucide-react'
+import { LayoutDashboard, Layers, BarChart2, Settings, CreditCard, Zap, ArrowUpRight } from 'lucide-react'
 
-const nav = [
-  { label: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
-  { label: 'My Widgets', href: '/dashboard/widgets', icon: Layers },
-  { label: 'Analytics', href: '/dashboard/analytics', icon: BarChart2 },
-  { label: 'Settings', href: '/dashboard/settings', icon: Settings },
-  { label: 'Billing', href: '/dashboard/billing', icon: CreditCard },
+const NAV = [
+  { label: 'Overview',   href: '/dashboard',            icon: LayoutDashboard },
+  { label: 'Widgets',    href: '/dashboard/widgets',    icon: Layers },
+  { label: 'Analytics',  href: '/dashboard/analytics',  icon: BarChart2 },
+  { label: 'Settings',   href: '/dashboard/settings',   icon: Settings },
+  { label: 'Billing',    href: '/dashboard/billing',    icon: CreditCard },
 ]
 
 const PLAN_BADGE: Record<string, { label: string; cls: string }> = {
@@ -31,26 +31,29 @@ export function Sidebar() {
   }, [])
 
   const badge = PLAN_BADGE[planName] ?? PLAN_BADGE.free
+  const isPro = planName !== 'free'
 
   return (
     <aside
       className="flex flex-col w-60 min-h-screen shrink-0 border-r border-gray-200"
-      style={{ background: 'linear-gradient(180deg, #f9fafb 0%, #ffffff 100%)' }}
+      style={{ background: 'linear-gradient(180deg, #f8faff 0%, #ffffff 60%)' }}
     >
       {/* Logo */}
-      <div className="px-6 py-5 border-b border-gray-100">
-        <div className="flex items-center gap-2">
-          <div className="w-7 h-7 rounded-lg bg-indigo-600 flex items-center justify-center">
-            <Zap size={14} className="text-white" />
+      <div className="px-5 py-4 border-b border-gray-100">
+        <div className="flex items-center gap-2.5">
+          <div className="w-8 h-8 rounded-xl bg-indigo-600 flex items-center justify-center shadow-sm">
+            <Zap size={15} className="text-white" strokeWidth={2.5} />
           </div>
-          <span className="font-bold text-lg tracking-tight text-gray-900">Devixus</span>
-          <span className="font-bold text-lg tracking-tight text-indigo-600">Widgets</span>
+          <div className="leading-none">
+            <span className="font-bold text-[15px] tracking-tight text-gray-900">Devixus</span>
+            <span className="font-semibold text-[15px] tracking-tight text-indigo-600 ml-1">Widgets</span>
+          </div>
         </div>
       </div>
 
       {/* Nav */}
       <nav className="flex-1 px-3 py-4 space-y-0.5">
-        {nav.map(({ label, href, icon: Icon }) => {
+        {NAV.map(({ label, href, icon: Icon }) => {
           const active = pathname === href || (href !== '/dashboard' && pathname.startsWith(href))
           return (
             <Link
@@ -60,34 +63,46 @@ export function Sidebar() {
                 'flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all relative',
                 active
                   ? 'text-indigo-700 bg-indigo-50'
-                  : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900',
+                  : 'text-gray-500 hover:bg-gray-100 hover:text-gray-900',
               ].join(' ')}
             >
               {active && (
                 <span className="absolute left-0 top-1/2 -translate-y-1/2 w-[3px] h-5 rounded-r-full bg-indigo-600" />
               )}
-              <Icon size={17} className={active ? 'text-indigo-600' : 'text-gray-400'} />
+              <Icon size={16} className={active ? 'text-indigo-600' : 'text-gray-400'} />
               {label}
             </Link>
           )
         })}
       </nav>
 
-      {/* Bottom */}
-      <div className="px-4 py-4 border-t border-gray-100 space-y-3">
-        <div className="flex items-center justify-between">
-          <span className="text-xs text-gray-400">Current plan</span>
-          <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${badge.cls}`}>
-            {badge.label}
-          </span>
+      {/* Upgrade card (Free plan only) */}
+      {!isPro && (
+        <div className="mx-3 mb-3 rounded-xl p-4 space-y-2.5" style={{ background: 'linear-gradient(135deg, #eef2ff 0%, #e0e7ff 100%)' }}>
+          <div className="flex items-center gap-2">
+            <div className="w-6 h-6 rounded-md bg-indigo-600 flex items-center justify-center">
+              <Zap size={12} className="text-white" strokeWidth={2.5} />
+            </div>
+            <span className="text-xs font-semibold text-indigo-900">Unlock Pro features</span>
+          </div>
+          <p className="text-[11px] text-indigo-700 leading-relaxed">
+            Unlimited views, remove branding, priority support.
+          </p>
+          <Link
+            href="/dashboard/billing"
+            className="flex items-center justify-center gap-1 w-full text-xs font-semibold py-1.5 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors"
+          >
+            Upgrade to Pro <ArrowUpRight size={11} />
+          </Link>
         </div>
-        <Link
-          href="/dashboard/billing"
-          className="block w-full text-center text-xs py-2 rounded-lg font-semibold bg-indigo-600 text-white hover:bg-indigo-700 transition-colors"
-        >
-          Upgrade plan
-        </Link>
-        <p className="text-xs text-gray-400 text-center">Devixus Widgets v1.0</p>
+      )}
+
+      {/* Bottom: plan badge */}
+      <div className="px-4 py-3 border-t border-gray-100 flex items-center justify-between">
+        <span className="text-xs text-gray-400">Plan</span>
+        <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${badge.cls}`}>
+          {badge.label}
+        </span>
       </div>
     </aside>
   )
