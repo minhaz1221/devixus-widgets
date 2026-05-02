@@ -123,7 +123,7 @@ function WhatsAppForm({ config, onChange }: { config: Partial<WhatsAppConfig>; o
       </ConfigSection>
 
       <ConfigSection title="Button">
-        <ColorPicker label="Button Color" value={config.button_color ?? '#25D366'} onChange={v => set('button_color', v)} presets={['#25D366', '#128C7E', '#6366f1', '#f97316', '#ef4444', '#3b82f6']} />
+        <ColorPicker label="Button Color" value={config.button_color ?? '#25D366'} onChange={v => set('button_color', v)} presets={['#25D366', '#128C7E', '#6366f1', '#8b5cf6', '#ef4444', '#3b82f6']} />
         <OptionPicker
           label="Position"
           value={config.position ?? 'bottom-right'}

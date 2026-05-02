@@ -30,7 +30,7 @@ const TYPE_META: Record<string, { label: string; icon: LucideIcon; color: string
 
 function barColor(pct: number) {
   if (pct >= 100) return '#ef4444'
-  if (pct >= 80)  return '#f97316'
+  if (pct >= 80)  return '#eab308'
   if (pct >= 50)  return '#eab308'
   return '#22c55e'
 }
