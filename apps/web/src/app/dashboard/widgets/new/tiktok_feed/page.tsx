@@ -83,7 +83,9 @@ function TikTokPreview({ profile, config }: { profile: TikTokProfile | null; con
     return (
       <div className="bg-gray-50 rounded-xl border-2 border-dashed border-gray-200 flex items-center justify-center min-h-[320px]">
         <div className="text-center px-6">
-          <div className="text-5xl mb-3">🎵</div>
+          <div className="w-14 h-14 rounded-2xl bg-black flex items-center justify-center mx-auto mb-3">
+              <svg width="28" height="28" viewBox="0 0 24 24" fill="white"><path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-2.88 2.5 2.89 2.89 0 0 1-2.89-2.89 2.89 2.89 0 0 1 2.89-2.89c.28 0 .54.04.79.1V9.01a6.33 6.33 0 0 0-.79-.05 6.34 6.34 0 0 0-6.34 6.34 6.34 6.34 0 0 0 6.34 6.34 6.34 6.34 0 0 0 6.33-6.34V8.94a8.16 8.16 0 0 0 4.77 1.52V7.03a4.85 4.85 0 0 1-1-.34z"/></svg>
+            </div>
           <p className="text-sm text-gray-500 font-medium">Enter a username and click &quot;Fetch Profile&quot;</p>
           <p className="text-xs text-gray-400 mt-1">Mock data will load instantly</p>
         </div>
@@ -137,7 +139,7 @@ function TikTokPreview({ profile, config }: { profile: TikTokProfile | null; con
             position: 'absolute', bottom: config.show_duration ? 30 : 6, right: 6,
             background: 'rgba(0,0,0,0.6)', color: 'white',
             fontSize: 10, padding: '2px 5px', borderRadius: 3,
-          }}>👁 {formatNumber(video.views)}</div>
+          }}>{formatNumber(video.views)} views</div>
         )}
       </div>
       {config.show_like_count && (
@@ -177,7 +179,7 @@ function TikTokPreview({ profile, config }: { profile: TikTokProfile | null; con
           </p>
         )}
         <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
-          {config.show_view_count && <span style={{ fontSize: 11, color: subtextColor }}>👁 {formatNumber(video.views)}</span>}
+          {config.show_view_count && <span style={{ fontSize: 11, color: subtextColor }}>{formatNumber(video.views)} views</span>}
           {config.show_like_count && <span style={{ fontSize: 11, color: subtextColor }}>♥ {formatNumber(video.likes)}</span>}
         </div>
       </div>
@@ -296,10 +298,10 @@ export default function NewTikTokFeedPage() {
         </Link>
         <div className="flex items-center gap-3">
           <div
-            className="w-10 h-10 rounded-xl flex items-center justify-center text-xl shrink-0"
+            className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0"
             style={{ background: '#010101' }}
           >
-            🎵
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="white"><path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-2.88 2.5 2.89 2.89 0 0 1-2.89-2.89 2.89 2.89 0 0 1 2.89-2.89c.28 0 .54.04.79.1V9.01a6.33 6.33 0 0 0-.79-.05 6.34 6.34 0 0 0-6.34 6.34 6.34 6.34 0 0 0 6.34 6.34 6.34 6.34 0 0 0 6.33-6.34V8.94a8.16 8.16 0 0 0 4.77 1.52V7.03a4.85 4.85 0 0 1-1-.34z"/></svg>
           </div>
           <div>
             <h1 className="text-xl font-bold text-gray-900">TikTok Feed</h1>

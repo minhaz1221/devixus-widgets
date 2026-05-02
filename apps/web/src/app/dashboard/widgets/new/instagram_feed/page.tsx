@@ -78,7 +78,9 @@ function InstagramPreview({ profile, config }: { profile: InstagramProfile | nul
     return (
       <div className="bg-gray-50 rounded-xl border-2 border-dashed border-gray-200 flex items-center justify-center min-h-[320px]">
         <div className="text-center px-6">
-          <div className="text-5xl mb-3">📸</div>
+          <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-purple-500 via-red-500 to-yellow-400 flex items-center justify-center mx-auto mb-3">
+              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/></svg>
+            </div>
           <p className="text-sm text-gray-500 font-medium">Enter a username and click &quot;Fetch Profile&quot;</p>
           <p className="text-xs text-gray-400 mt-1">Mock data will load instantly</p>
         </div>
@@ -127,7 +129,7 @@ function InstagramPreview({ profile, config }: { profile: InstagramProfile | nul
             }}
           >
             <span>♥ {formatNumber(post.likes)}</span>
-            <span>💬 {post.comments}</span>
+            <span>&#128172; {post.comments}</span>
           </div>
         )}
       </div>
@@ -197,7 +199,7 @@ function InstagramPreview({ profile, config }: { profile: InstagramProfile | nul
 
       {/* Footer */}
       <div style={{ textAlign: 'center', padding: '8px 16px', borderTop: `1px solid ${borderColor}` }}>
-        <span style={{ fontSize: 10, color: subtextColor, opacity: 0.7 }}>📸 Powered by Devixus Widgets</span>
+        <span style={{ fontSize: 10, color: subtextColor, opacity: 0.7 }}>Powered by Devixus Widgets</span>
       </div>
     </div>
   )
@@ -262,10 +264,10 @@ export default function NewInstagramFeedPage() {
         </Link>
         <div className="flex items-center gap-3">
           <div
-            className="w-10 h-10 rounded-xl flex items-center justify-center text-xl shrink-0"
+            className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0"
             style={{ background: 'linear-gradient(135deg, #833AB4, #FD1D1D, #FCAF45)' }}
           >
-            📸
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/></svg>
           </div>
           <div>
             <h1 className="text-xl font-bold text-gray-900">Instagram Feed</h1>

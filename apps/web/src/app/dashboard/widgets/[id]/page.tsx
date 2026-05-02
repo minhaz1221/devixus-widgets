@@ -1,8 +1,9 @@
 'use client'
 
-import { useEffect, useState, useCallback, useRef } from 'react'
+import { useEffect, useState, useCallback, useMemo } from 'react'
 import { useParams } from 'next/navigation'
 import { Copy, Check, Star, Trash2, Plus, Monitor, Smartphone, AlertTriangle } from 'lucide-react'
+import { generatePreviewHTML } from '@/lib/preview-renderer'
 import type {
   Widget,
   WhatsAppConfig,
@@ -746,14 +747,8 @@ export default function ConfiguratorPage() {
   const [name, setName] = useState('')
   const [saving, setSaving] = useState(false)
   const [toast, setToast] = useState<{ msg: string; ok: boolean } | null>(null)
-  const [autoPreview, setAutoPreview] = useState(false)
-  const [previewSaving, setPreviewSaving] = useState(false)
   const [previewDevice, setPreviewDevice] = useState<'desktop' | 'mobile'>('desktop')
   const [previewBg, setPreviewBg] = useState('#f3f4f6')
-  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null)
-  const configRef = useRef(config)
-  const nameRef = useRef(name)
-  const iframeRef = useRef<HTMLIFrameElement>(null)
 
   const showToast = (msg: string, ok: boolean) => {
     setToast({ msg, ok })
@@ -770,33 +765,15 @@ export default function ConfiguratorPage() {
   }, [id])
 
   useEffect(() => { load() }, [load])
-  useEffect(() => { configRef.current = config }, [config])
-  useEffect(() => { nameRef.current = name }, [name])
 
-  async function saveAndRefresh(silent = false) {
-    setPreviewSaving(true)
-    const res = await fetch(`/api/widgets/${id}`, {
-      method: 'PATCH',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ name: nameRef.current, config: configRef.current }),
-    })
-    setPreviewSaving(false)
-    if (res.ok) {
-      if (!silent) showToast('Saved successfully', true)
-      await new Promise(r => setTimeout(r, 500))
-      if (iframeRef.current) iframeRef.current.src = `/widget-preview/${id}?t=${Date.now()}`
-    } else if (!silent) {
-      const data = await res.json()
-      showToast(data.error ?? 'Save failed', false)
-    }
-  }
+  const previewHtml = useMemo(
+    () => widget ? generatePreviewHTML(widget.type, config) : '',
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [widget?.type, JSON.stringify(config)]
+  )
 
   function handleConfigChange(newConfig: Record<string, unknown>) {
     setConfig(newConfig)
-    if (autoPreview) {
-      if (debounceRef.current) clearTimeout(debounceRef.current)
-      debounceRef.current = setTimeout(() => saveAndRefresh(true), 2000)
-    }
   }
 
   async function handleSave() {
@@ -809,8 +786,6 @@ export default function ConfiguratorPage() {
     setSaving(false)
     if (res.ok) {
       showToast('Saved successfully', true)
-      await new Promise(r => setTimeout(r, 500))
-      if (iframeRef.current) iframeRef.current.src = `/widget-preview/${id}?t=${Date.now()}`
     } else {
       const data = await res.json()
       showToast(data.error ?? 'Save failed', false)
@@ -883,7 +858,7 @@ export default function ConfiguratorPage() {
         <div className="bg-white rounded-xl border border-gray-200 flex flex-col overflow-hidden flex-1">
           {/* Preview toolbar */}
           <div className="px-5 py-3 border-b border-gray-100 flex items-center justify-between gap-4 shrink-0">
-            <h3 className="font-semibold text-gray-900 text-sm">Preview</h3>
+            <h3 className="font-semibold text-gray-900 text-sm">Live Preview</h3>
             <div className="flex items-center gap-3">
               {/* Background picker */}
               <div className="flex items-center gap-1 border border-gray-200 rounded-lg p-0.5">
@@ -899,29 +874,18 @@ export default function ConfiguratorPage() {
                 <button type="button" onClick={() => setPreviewDevice('desktop')} className={`p-1.5 transition-colors ${previewDevice === 'desktop' ? 'bg-indigo-50 text-indigo-600' : 'text-gray-400 hover:text-gray-600'}`}><Monitor size={14} /></button>
                 <button type="button" onClick={() => setPreviewDevice('mobile')}  className={`p-1.5 transition-colors ${previewDevice === 'mobile'  ? 'bg-indigo-50 text-indigo-600' : 'text-gray-400 hover:text-gray-600'}`}><Smartphone size={14} /></button>
               </div>
-              {/* Auto-preview toggle */}
-              <label className="flex items-center gap-1.5 cursor-pointer text-xs text-gray-500">
-                <button type="button" onClick={() => setAutoPreview(a => !a)}
-                  className={`relative inline-flex h-5 w-9 items-center rounded-full toggle-track ${autoPreview ? 'bg-indigo-600' : 'bg-gray-200'}`}>
-                  <span className={`toggle-thumb inline-block h-3.5 w-3.5 rounded-full bg-white shadow ${autoPreview ? 'translate-x-[18px]' : 'translate-x-1'}`} />
-                </button>
-                Auto
-              </label>
-              <button onClick={() => saveAndRefresh()} disabled={previewSaving} className="text-xs font-semibold text-indigo-600 hover:underline disabled:opacity-50">
-                {previewSaving ? 'Saving…' : 'Refresh'}
-              </button>
             </div>
           </div>
 
-          {/* Preview iframe */}
+          {/* Preview iframe — inline srcDoc, always live */}
           <div className="flex-1 flex" style={{ background: previewBg, transition: 'background 200ms' }}>
             <div
               className="flex-1 flex transition-all duration-300"
               style={{ maxWidth: previewDevice === 'mobile' ? 375 : '100%', margin: '0 auto' }}
             >
               <iframe
-                ref={iframeRef}
-                src={`/widget-preview/${id}`}
+                srcDoc={previewHtml}
+                sandbox="allow-scripts"
                 style={{ width: '100%', minHeight: 400, border: 'none', background: 'transparent' }}
                 title="Widget preview"
               />
