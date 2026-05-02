@@ -4,12 +4,23 @@ export const dynamic = 'force-dynamic'
 
 const YT_BASE = 'https://www.googleapis.com/youtube/v3'
 
+async function resolveHandleViaSearch(handle: string, apiKey: string): Promise<{ id: string; name: string } | null> {
+  const res = await fetch(
+    `${YT_BASE}/search?part=snippet&type=channel&q=${encodeURIComponent('@' + handle)}&key=${apiKey}`
+  )
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const data = await res.json() as any
+  if (data.error || !data.items?.length) return null
+  const item = data.items[0]
+  return {
+    id: (item.id?.channelId ?? item.id) as string,
+    name: (item.snippet?.title ?? '') as string,
+  }
+}
+
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url)
   const url = searchParams.get('url')?.trim() ?? ''
-
-  console.log('YouTube API Key exists:', !!process.env.YOUTUBE_API_KEY)
-  console.log('Resolving URL:', url)
 
   if (!url) {
     return NextResponse.json({ error: 'url is required' }, { status: 400 })
@@ -33,32 +44,30 @@ export async function GET(request: NextRequest) {
       const match = url.match(/\/channel\/(UC[\w-]{22})/)
       channelId = match?.[1] ?? null
     }
-    // @handle (new-style) — forHandle param, handle WITHOUT the @ symbol
+    // @handle (new-style) — try channels?forHandle first, fall back to search
     else if (url.includes('@')) {
       const handle = url.match(/@([\w.-]+)/)?.[1]
       if (handle) {
-        console.log('Fetching @handle:', handle)
+        // Primary: channels?forHandle (may be blocked on some API key configs)
         const res = await fetch(
-          `${YT_BASE}/channels?part=snippet&forHandle=${handle}&key=${apiKey}`
+          `${YT_BASE}/channels?part=id,snippet&forHandle=${handle}&key=${apiKey}`
         )
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const data = await res.json() as any
-        console.log('YouTube @handle response:', JSON.stringify(data).slice(0, 500))
 
-        if (data.error) {
-          return NextResponse.json(
-            { error: `YouTube API error: ${data.error.message}` },
-            { status: 502 }
-          )
+        if (!data.error && data.items?.length) {
+          channelId = data.items[0].id as string
+          channelName = (data.items[0].snippet?.title ?? '') as string
+        } else {
+          // Fallback: search API (uses search.list, not channels.list)
+          const found = await resolveHandleViaSearch(handle, apiKey)
+          if (!found) {
+            const reason = data.error?.message ?? `No channel found for @${handle}`
+            return NextResponse.json({ error: reason }, { status: data.error ? 502 : 404 })
+          }
+          channelId = found.id
+          channelName = found.name
         }
-        if (!data.items?.length) {
-          return NextResponse.json(
-            { error: `No channel found for @${handle}` },
-            { status: 404 }
-          )
-        }
-        channelId = data.items[0].id
-        channelName = data.items[0].snippet?.title ?? ''
       }
     }
     // /c/name (legacy custom URL)
@@ -66,12 +75,10 @@ export async function GET(request: NextRequest) {
       const name = url.match(/\/c\/([\w.-]+)/)?.[1]
       if (name) {
         const res = await fetch(
-          `${YT_BASE}/channels?part=snippet&forUsername=${name}&key=${apiKey}`
+          `${YT_BASE}/channels?part=id,snippet&forUsername=${name}&key=${apiKey}`
         )
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const data = await res.json() as any
-        console.log('YouTube /c/ response:', JSON.stringify(data).slice(0, 500))
-
         if (data.error) {
           return NextResponse.json(
             { error: `YouTube API error: ${data.error.message}` },
@@ -79,13 +86,10 @@ export async function GET(request: NextRequest) {
           )
         }
         if (!data.items?.length) {
-          return NextResponse.json(
-            { error: `No channel found for /c/${name}` },
-            { status: 404 }
-          )
+          return NextResponse.json({ error: `No channel found for /c/${name}` }, { status: 404 })
         }
-        channelId = data.items[0].id
-        channelName = data.items[0].snippet?.title ?? ''
+        channelId = data.items[0].id as string
+        channelName = (data.items[0].snippet?.title ?? '') as string
       }
     }
     // /user/name (legacy)
@@ -93,12 +97,10 @@ export async function GET(request: NextRequest) {
       const name = url.match(/\/user\/([\w.-]+)/)?.[1]
       if (name) {
         const res = await fetch(
-          `${YT_BASE}/channels?part=snippet&forUsername=${name}&key=${apiKey}`
+          `${YT_BASE}/channels?part=id,snippet&forUsername=${name}&key=${apiKey}`
         )
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const data = await res.json() as any
-        console.log('YouTube /user/ response:', JSON.stringify(data).slice(0, 500))
-
         if (data.error) {
           return NextResponse.json(
             { error: `YouTube API error: ${data.error.message}` },
@@ -106,13 +108,10 @@ export async function GET(request: NextRequest) {
           )
         }
         if (!data.items?.length) {
-          return NextResponse.json(
-            { error: `No channel found for /user/${name}` },
-            { status: 404 }
-          )
+          return NextResponse.json({ error: `No channel found for /user/${name}` }, { status: 404 })
         }
-        channelId = data.items[0].id
-        channelName = data.items[0].snippet?.title ?? ''
+        channelId = data.items[0].id as string
+        channelName = (data.items[0].snippet?.title ?? '') as string
       }
     }
 
@@ -123,28 +122,20 @@ export async function GET(request: NextRequest) {
       )
     }
 
-    // Fetch channel name if we resolved a bare channel ID without a name yet
+    // If we resolved via channel ID without a name, try to fetch it — but don't fail if blocked
     if (!channelName) {
-      const res = await fetch(
-        `${YT_BASE}/channels?part=snippet&id=${channelId}&key=${apiKey}`
-      )
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const data = await res.json() as any
-      console.log('YouTube channel lookup response:', JSON.stringify(data).slice(0, 500))
-
-      if (data.error) {
-        return NextResponse.json(
-          { error: `YouTube API error: ${data.error.message}` },
-          { status: 502 }
+      try {
+        const res = await fetch(
+          `${YT_BASE}/channels?part=snippet&id=${channelId}&key=${apiKey}`
         )
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const data = await res.json() as any
+        if (!data.error && data.items?.[0]) {
+          channelName = (data.items[0].snippet?.title ?? '') as string
+        }
+      } catch {
+        // channel name is nice-to-have, not required
       }
-      if (!data.items?.length) {
-        return NextResponse.json(
-          { error: `Channel ${channelId} not found` },
-          { status: 404 }
-        )
-      }
-      channelName = data.items[0].snippet?.title ?? ''
     }
 
     return NextResponse.json({ channel_id: channelId, channel_name: channelName })

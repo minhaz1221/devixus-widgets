@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useCallback, useRef } from 'react'
 import { useParams } from 'next/navigation'
-import { Copy, Check, Star, Trash2, Plus, Monitor, Smartphone } from 'lucide-react'
+import { Copy, Check, Star, Trash2, Plus, Monitor, Smartphone, AlertTriangle } from 'lucide-react'
 import type {
   Widget,
   WhatsAppConfig,
@@ -314,6 +314,12 @@ function YouTubeFeedForm({ config, onChange }: { config: Partial<YouTubeFeedConf
           {config.channel_id && <p className="text-xs text-green-600 mt-1.5 flex items-center gap-1"><Check size={12} /> {channelName || config.channel_id}</p>}
           {fetchError && <p className="text-xs text-red-600 mt-1.5">{fetchError}</p>}
         </div>
+        {!config.channel_id && (
+          <div className="flex items-center gap-2 px-3 py-2.5 bg-amber-50 border border-amber-200 rounded-lg text-xs text-amber-700 font-medium">
+            <AlertTriangle size={13} className="shrink-0 text-amber-500" />
+            Using sample data — enter your YouTube channel URL above to see live videos
+          </div>
+        )}
         <ToggleSwitch label="Show channel header" checked={config.header_style !== 'none'} onChange={v => set('header_style', v ? 'full' : 'none')} />
       </ConfigSection>
 
