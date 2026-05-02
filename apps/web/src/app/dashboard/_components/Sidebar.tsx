@@ -22,11 +22,19 @@ const PLAN_BADGE: Record<string, { label: string; cls: string }> = {
 export function Sidebar() {
   const pathname = usePathname()
   const [planName, setPlanName] = useState<string>('free')
+  const [userInfo, setUserInfo] = useState<{ name: string; avatar: string } | null>(null)
 
   useEffect(() => {
     fetch('/api/plan')
       .then(r => r.json())
       .then(d => setPlanName(d.plan?.name?.toLowerCase() ?? 'free'))
+      .catch(() => {})
+    fetch('/api/user/profile')
+      .then(r => r.json())
+      .then(d => setUserInfo({
+        name:   d.profile?.full_name || d.profile?.email?.split('@')[0] || 'User',
+        avatar: d.profile?.avatar_url || '',
+      }))
       .catch(() => {})
   }, [])
 
@@ -97,12 +105,22 @@ export function Sidebar() {
         </div>
       )}
 
-      {/* Bottom: plan badge */}
-      <div className="px-4 py-3 border-t border-gray-100 flex items-center justify-between">
-        <span className="text-xs text-gray-400">Plan</span>
-        <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${badge.cls}`}>
-          {badge.label}
-        </span>
+      {/* Bottom: user + plan */}
+      <div className="px-4 py-3 border-t border-gray-100 flex items-center gap-2.5">
+        <div className="w-7 h-7 rounded-full overflow-hidden bg-indigo-600 flex items-center justify-center text-[11px] font-bold text-white shrink-0">
+          {userInfo?.avatar
+            ? <img src={userInfo.avatar} alt="" className="w-full h-full object-cover" />
+            : <span>{userInfo?.name?.[0]?.toUpperCase() ?? '?'}</span>
+          }
+        </div>
+        <div className="flex-1 min-w-0">
+          <p className="text-xs font-medium text-gray-800 truncate leading-none mb-0.5">
+            {userInfo?.name ?? ''}
+          </p>
+          <span className={`text-[10px] font-semibold px-1.5 py-px rounded-full ${badge.cls}`}>
+            {badge.label}
+          </span>
+        </div>
       </div>
     </aside>
   )

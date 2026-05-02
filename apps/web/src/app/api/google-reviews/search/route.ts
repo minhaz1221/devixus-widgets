@@ -4,6 +4,12 @@ export const dynamic = 'force-dynamic'
 
 const PLACES_BASE = 'https://maps.googleapis.com/maps/api/place'
 
+const MOCK_RESULTS = [
+  { place_id: 'ChIJMOCK001', name: 'Sample Business',   address: '123 Main St, Anytown, USA',    rating: 4.7, total_ratings: 128 },
+  { place_id: 'ChIJMOCK002', name: 'Example Company',   address: '456 Oak Ave, Somewhere, USA',  rating: 4.5, total_ratings: 89  },
+  { place_id: 'ChIJMOCK003', name: 'Demo Restaurant',   address: '789 Elm St, Yourtown, USA',    rating: 4.8, total_ratings: 243 },
+]
+
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url)
   const query = searchParams.get('query')
@@ -14,7 +20,7 @@ export async function GET(request: NextRequest) {
 
   const apiKey = process.env.YOUTUBE_API_KEY
   if (!apiKey) {
-    return NextResponse.json({ error: 'Google API not configured' }, { status: 500 })
+    return NextResponse.json({ results: MOCK_RESULTS, is_mock: true })
   }
 
   try {
@@ -30,10 +36,7 @@ export async function GET(request: NextRequest) {
     const data = await res.json() as any
 
     if (data.status !== 'OK' && data.status !== 'ZERO_RESULTS') {
-      return NextResponse.json(
-        { error: data.error_message ?? `Places API error: ${data.status}` },
-        { status: 400 }
-      )
+      return NextResponse.json({ results: MOCK_RESULTS, is_mock: true, api_error: data.error_message ?? `Places API error: ${data.status}` })
     }
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any

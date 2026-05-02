@@ -82,8 +82,8 @@ export async function GET(request: NextRequest) {
     // Check for YouTube API error in response body (API can return 200 with an error body)
     if (videosData.error) {
       return NextResponse.json(
-        { error: `YouTube API error: ${videosData.error.message}` },
-        { status: 502, headers: CORS }
+        { channel: MOCK_CHANNEL, videos: MOCK_VIDEOS.slice(0, maxResults), is_mock: true, api_error: videosData.error.message },
+        { headers: CORS }
       )
     }
 

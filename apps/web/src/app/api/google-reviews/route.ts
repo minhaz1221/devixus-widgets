@@ -9,6 +9,22 @@ const corsHeaders = {
   'Cache-Control': 'public, s-maxage=3600, stale-while-revalidate=86400',
 }
 
+const MOCK_PLACE = {
+  name: 'Your Business Name',
+  address: '123 Main St, Anytown, USA',
+  overall_rating: 4.7,
+  total_reviews: 128,
+  google_url: '#',
+}
+
+const MOCK_REVIEWS = [
+  { author_name: 'Sarah Johnson',    author_photo: '', rating: 5, text: 'Absolutely fantastic service! Highly recommend to everyone looking for quality.',    time: Math.floor(Date.now() / 1000) - 86400,   relative_time: '1 day ago' },
+  { author_name: 'Michael Chen',     author_photo: '', rating: 5, text: 'Exceptional quality and outstanding customer support. Will definitely return.',      time: Math.floor(Date.now() / 1000) - 172800,  relative_time: '2 days ago' },
+  { author_name: 'Emily Rodriguez',  author_photo: '', rating: 4, text: 'Really pleased with the experience. Great attention to detail and friendly staff.',  time: Math.floor(Date.now() / 1000) - 259200,  relative_time: '3 days ago' },
+  { author_name: 'David Kim',        author_photo: '', rating: 5, text: 'Outstanding! Best in class. Everything exceeded my expectations.',                   time: Math.floor(Date.now() / 1000) - 345600,  relative_time: '4 days ago' },
+  { author_name: 'Jessica Williams', author_photo: '', rating: 5, text: 'Top notch experience from start to finish. Highly recommend this business.',        time: Math.floor(Date.now() / 1000) - 432000,  relative_time: '5 days ago' },
+]
+
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url)
   const placeId = searchParams.get('place_id')
@@ -25,8 +41,8 @@ export async function GET(request: NextRequest) {
   const apiKey = process.env.YOUTUBE_API_KEY
   if (!apiKey) {
     return NextResponse.json(
-      { error: 'Google API not configured' },
-      { status: 500, headers: corsHeaders }
+      { place: MOCK_PLACE, reviews: MOCK_REVIEWS.slice(0, maxReviews), is_mock: true },
+      { headers: corsHeaders }
     )
   }
 
@@ -45,8 +61,8 @@ export async function GET(request: NextRequest) {
 
     if (data.status !== 'OK') {
       return NextResponse.json(
-        { error: data.error_message ?? `Places API error: ${data.status}` },
-        { status: 400, headers: corsHeaders }
+        { place: MOCK_PLACE, reviews: MOCK_REVIEWS.slice(0, maxReviews), is_mock: true, api_error: data.error_message ?? `Places API error: ${data.status}` },
+        { headers: corsHeaders }
       )
     }
 

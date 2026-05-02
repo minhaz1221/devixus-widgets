@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState, useCallback, useMemo } from 'react'
+import { useEffect, useState, useCallback, useMemo, useRef } from 'react'
 import { useParams } from 'next/navigation'
 import { Copy, Check, Star, Trash2, Plus, Monitor, Smartphone, AlertTriangle } from 'lucide-react'
 import { generatePreviewHTML } from '@/lib/preview-renderer'
@@ -746,9 +746,14 @@ export default function ConfiguratorPage() {
   const [config, setConfig] = useState<Record<string, unknown>>({})
   const [name, setName] = useState('')
   const [saving, setSaving] = useState(false)
+  const [autoSaveStatus, setAutoSaveStatus] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle')
   const [toast, setToast] = useState<{ msg: string; ok: boolean } | null>(null)
   const [previewDevice, setPreviewDevice] = useState<'desktop' | 'mobile'>('desktop')
   const [previewBg, setPreviewBg] = useState('#f3f4f6')
+  const configRef  = useRef<Record<string, unknown>>({})
+  const nameRef    = useRef<string>('')
+  const widgetRef  = useRef<Widget | null>(null)
+  const autoSaveRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   const showToast = (msg: string, ok: boolean) => {
     setToast({ msg, ok })
@@ -759,6 +764,9 @@ export default function ConfiguratorPage() {
     const res = await fetch(`/api/widgets/${id}`)
     if (!res.ok) return
     const { widget } = await res.json()
+    widgetRef.current = widget
+    configRef.current = widget.config ?? {}
+    nameRef.current   = widget.name ?? ''
     setWidget(widget)
     setConfig(widget.config ?? {})
     setName(widget.name ?? '')
@@ -772,8 +780,36 @@ export default function ConfiguratorPage() {
     [widget?.type, JSON.stringify(config)]
   )
 
+  function scheduleAutoSave() {
+    if (autoSaveRef.current) clearTimeout(autoSaveRef.current)
+    setAutoSaveStatus('idle')
+    autoSaveRef.current = setTimeout(async () => {
+      setAutoSaveStatus('saving')
+      try {
+        const res = await fetch(`/api/widgets/${id}`, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ name: nameRef.current, config: configRef.current }),
+        })
+        setAutoSaveStatus(res.ok ? 'saved' : 'error')
+        setTimeout(() => setAutoSaveStatus('idle'), 2500)
+      } catch {
+        setAutoSaveStatus('error')
+        setTimeout(() => setAutoSaveStatus('idle'), 2500)
+      }
+    }, 2000)
+  }
+
   function handleConfigChange(newConfig: Record<string, unknown>) {
+    configRef.current = newConfig
     setConfig(newConfig)
+    scheduleAutoSave()
+  }
+
+  function handleNameChange(newName: string) {
+    nameRef.current = newName
+    setName(newName)
+    scheduleAutoSave()
   }
 
   async function handleSave() {
@@ -819,7 +855,7 @@ export default function ConfiguratorPage() {
             <label className="block text-xs font-semibold text-gray-400 uppercase tracking-widest mb-1">Widget Name</label>
             <input
               value={name}
-              onChange={e => setName(e.target.value)}
+              onChange={e => handleNameChange(e.target.value)}
               className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm font-medium text-gray-800 bg-gray-50 focus:bg-white focus:ring-2 focus:ring-indigo-500 focus:border-indigo-400"
             />
           </div>
@@ -840,7 +876,16 @@ export default function ConfiguratorPage() {
         </div>
 
         {/* Sticky save button */}
-        <div className="px-5 py-4 border-t border-gray-100 shrink-0">
+        <div className="px-5 py-4 border-t border-gray-100 shrink-0 space-y-2">
+          {autoSaveStatus !== 'idle' && (
+            <p className={`text-xs text-center font-medium ${
+              autoSaveStatus === 'saving' ? 'text-gray-400' :
+              autoSaveStatus === 'saved'  ? 'text-green-600' : 'text-red-500'
+            }`}>
+              {autoSaveStatus === 'saving' ? 'Auto-saving…' :
+               autoSaveStatus === 'saved'  ? '✓ Auto-saved' : 'Auto-save failed'}
+            </p>
+          )}
           <button
             onClick={handleSave}
             disabled={saving}

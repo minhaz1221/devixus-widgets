@@ -15,7 +15,16 @@ export default async function DashboardLayout({ children }: { children: React.Re
   const plan = await getUserPlan(user.id)
   const planName = plan?.name ?? 'Free'
 
-  const displayName = user.user_metadata?.full_name ?? user.email ?? ''
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('avatar_url, full_name')
+    .eq('id', user.id)
+    .single()
+
+  const avatarUrl: string | null =
+    profile?.avatar_url ?? (user.user_metadata?.avatar_url as string | undefined) ?? null
+
+  const displayName = profile?.full_name ?? user.user_metadata?.full_name ?? user.email ?? ''
   const initials = displayName
     .split(/[\s@]/)
     .filter(Boolean)
@@ -65,8 +74,11 @@ export default async function DashboardLayout({ children }: { children: React.Re
 
             {/* Avatar + name + plan */}
             <div className="flex items-center gap-2 pl-1 border-l border-gray-200 ml-1">
-              <div className="w-7 h-7 rounded-full bg-indigo-600 flex items-center justify-center text-[11px] font-bold text-white shrink-0">
-                {initials || '?'}
+              <div className="w-7 h-7 rounded-full overflow-hidden bg-indigo-600 flex items-center justify-center text-[11px] font-bold text-white shrink-0">
+                {avatarUrl
+                  ? <img src={avatarUrl} alt="" className="w-full h-full object-cover" />
+                  : initials || '?'
+                }
               </div>
               <div className="hidden sm:block">
                 <p className="text-xs font-medium text-gray-800 leading-none">

@@ -1,9 +1,10 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import Link from 'next/link'
-import { User, Bell, Code2, AlertTriangle, Check, Download } from 'lucide-react'
+import { User, Bell, Code2, AlertTriangle, Check, Download, Camera, Loader2 } from 'lucide-react'
 import { ToggleSwitch } from '@/components/ui/ToggleSwitch'
+import { createClient } from '@/lib/supabase/client'
 
 type Tab = 'profile' | 'notifications' | 'embed' | 'danger'
 
@@ -16,26 +17,144 @@ const TABS: { id: Tab; label: string; icon: React.ReactNode }[] = [
 
 // ── Profile tab ─────────────────────────────────────────────────────────────
 function ProfileTab() {
-  const [name, setName]       = useState('')
-  const [company, setCompany] = useState('')
-  const [website, setWebsite] = useState('')
-  const [saved, setSaved]     = useState(false)
+  const [loading, setLoading]   = useState(true)
+  const [userId, setUserId]     = useState('')
+  const [name, setName]         = useState('')
+  const [company, setCompany]   = useState('')
+  const [website, setWebsite]   = useState('')
+  const [bio, setBio]           = useState('')
+  const [email, setEmail]       = useState('')
+  const [avatarUrl, setAvatarUrl] = useState('')
+  const [uploading, setUploading] = useState(false)
+  const [saving, setSaving]     = useState(false)
+  const [toast, setToast]       = useState<{ type: 'success' | 'error'; msg: string } | null>(null)
+  const fileRef = useRef<HTMLInputElement>(null)
 
-  function handleSave() {
-    setSaved(true)
-    setTimeout(() => setSaved(false), 2000)
+  useEffect(() => {
+    fetch('/api/user/profile')
+      .then(r => r.json())
+      .then(d => {
+        setUserId(d.user_id ?? '')
+        setName(d.profile?.full_name ?? '')
+        setCompany(d.profile?.company ?? '')
+        setWebsite(d.profile?.website ?? '')
+        setBio(d.profile?.bio ?? '')
+        setEmail(d.profile?.email ?? '')
+        setAvatarUrl(d.profile?.avatar_url ?? '')
+      })
+      .catch(() => {})
+      .finally(() => setLoading(false))
+  }, [])
+
+  function showToast(type: 'success' | 'error', msg: string) {
+    setToast({ type, msg })
+    setTimeout(() => setToast(null), 3000)
+  }
+
+  async function handleSave() {
+    setSaving(true)
+    try {
+      const res = await fetch('/api/user/profile', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ full_name: name, company, website, bio }),
+      })
+      if (res.ok) {
+        showToast('success', 'Profile saved!')
+      } else {
+        const d = await res.json()
+        showToast('error', d.error ?? 'Failed to save')
+      }
+    } catch {
+      showToast('error', 'Network error')
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  async function handleAvatarChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0]
+    if (!file || !userId) return
+    setUploading(true)
+    try {
+      const supabase = createClient()
+      const ext = file.name.split('.').pop() ?? 'jpg'
+      const path = `${userId}/avatar.${ext}`
+      const { error: uploadError } = await supabase.storage
+        .from('avatars')
+        .upload(path, file, { upsert: true })
+      if (uploadError) throw uploadError
+      const { data } = supabase.storage.from('avatars').getPublicUrl(path)
+      const url = data.publicUrl
+      const res = await fetch('/api/user/profile', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ avatar_url: url }),
+      })
+      if (res.ok) {
+        setAvatarUrl(url)
+        showToast('success', 'Avatar updated!')
+      } else {
+        showToast('error', 'Failed to save avatar URL')
+      }
+    } catch (err: unknown) {
+      showToast('error', (err as Error).message ?? 'Upload failed')
+    } finally {
+      setUploading(false)
+      if (fileRef.current) fileRef.current.value = ''
+    }
+  }
+
+  const initials = name
+    ? name.split(' ').slice(0, 2).map(s => s[0]?.toUpperCase() ?? '').join('')
+    : email ? email[0]?.toUpperCase() ?? '?' : '?'
+
+  if (loading) {
+    return (
+      <div className="h-40 flex items-center justify-center">
+        <Loader2 size={20} className="text-gray-300 animate-spin" />
+      </div>
+    )
   }
 
   return (
     <div className="space-y-6 max-w-lg">
+      {/* Toast */}
+      {toast && (
+        <div className={`flex items-center gap-2 px-4 py-2.5 rounded-lg text-sm font-medium ${
+          toast.type === 'success'
+            ? 'bg-green-50 text-green-700 border border-green-200'
+            : 'bg-red-50 text-red-700 border border-red-200'
+        }`}>
+          {toast.type === 'success' ? <Check size={14} /> : <AlertTriangle size={14} />}
+          {toast.msg}
+        </div>
+      )}
+
       {/* Avatar */}
       <div className="flex items-center gap-5">
-        <div className="w-20 h-20 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-600 font-bold text-2xl shrink-0">
-          ?
+        <div className="relative shrink-0">
+          <div className="w-20 h-20 rounded-full overflow-hidden bg-indigo-100 flex items-center justify-center">
+            {avatarUrl
+              ? <img src={avatarUrl} alt="Avatar" className="w-full h-full object-cover" />
+              : <span className="text-indigo-600 font-bold text-2xl">{initials}</span>
+            }
+          </div>
+          <button
+            onClick={() => fileRef.current?.click()}
+            disabled={uploading}
+            className="absolute -bottom-1 -right-1 w-7 h-7 rounded-full bg-indigo-600 flex items-center justify-center shadow-md hover:bg-indigo-700 transition-colors disabled:opacity-60"
+          >
+            {uploading
+              ? <Loader2 size={13} className="text-white animate-spin" />
+              : <Camera size={13} className="text-white" />
+            }
+          </button>
+          <input ref={fileRef} type="file" accept="image/*" className="hidden" onChange={handleAvatarChange} />
         </div>
         <div>
           <p className="text-sm font-medium text-gray-700">Profile photo</p>
-          <p className="text-xs text-gray-400 mt-0.5">Avatar upload coming soon</p>
+          <p className="text-xs text-gray-400 mt-0.5">Click the camera icon to upload a new photo</p>
         </div>
       </div>
 
@@ -72,24 +191,31 @@ function ProfileTab() {
       </div>
 
       <div>
+        <label className="block text-sm font-medium text-gray-700 mb-1.5">Bio</label>
+        <textarea
+          value={bio}
+          onChange={e => setBio(e.target.value)}
+          placeholder="Tell us a bit about yourself…"
+          rows={3}
+          className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm bg-white resize-none"
+        />
+      </div>
+
+      <div>
         <label className="block text-sm font-medium text-gray-700 mb-1.5">Email</label>
-        <div className="flex items-center gap-3">
-          <input
-            disabled
-            value="Connected via account"
-            className="flex-1 px-3 py-2 border border-gray-200 rounded-lg text-sm bg-gray-50 text-gray-400"
-          />
-          <button className="text-sm text-indigo-600 hover:underline font-medium whitespace-nowrap">
-            Change email
-          </button>
-        </div>
+        <input
+          disabled
+          value={email || '—'}
+          className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm bg-gray-50 text-gray-400"
+        />
       </div>
 
       <button
         onClick={handleSave}
-        className="inline-flex items-center gap-2 px-5 py-2.5 bg-indigo-600 text-white text-sm font-semibold rounded-lg hover:bg-indigo-700 transition-colors"
+        disabled={saving}
+        className="inline-flex items-center gap-2 px-5 py-2.5 bg-indigo-600 text-white text-sm font-semibold rounded-lg hover:bg-indigo-700 disabled:opacity-60 transition-colors"
       >
-        {saved ? <><Check size={15} /> Saved!</> : 'Save profile'}
+        {saving ? <><Loader2 size={15} className="animate-spin" /> Saving…</> : 'Save profile'}
       </button>
     </div>
   )
