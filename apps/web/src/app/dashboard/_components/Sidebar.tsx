@@ -3,7 +3,7 @@
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { useEffect, useState } from 'react'
-import { LayoutDashboard, Layers, BarChart2, Settings, CreditCard, Zap, ArrowUpRight } from 'lucide-react'
+import { LayoutDashboard, Layers, BarChart2, Settings, CreditCard, Zap, ArrowUpRight, X, Menu } from 'lucide-react'
 
 const NAV = [
   { label: 'Overview',   href: '/dashboard',            icon: LayoutDashboard },
@@ -19,7 +19,7 @@ const PLAN_BADGE: Record<string, { label: string; cls: string }> = {
   agency: { label: 'Agency', cls: 'bg-purple-600 text-white' },
 }
 
-export function Sidebar() {
+function SidebarContent({ onClose }: { onClose?: () => void }) {
   const pathname = usePathname()
   const [planName, setPlanName] = useState<string>('free')
   const [userInfo, setUserInfo] = useState<{ name: string; avatar: string } | null>(null)
@@ -47,7 +47,7 @@ export function Sidebar() {
       style={{ background: 'linear-gradient(180deg, #f8faff 0%, #ffffff 60%)' }}
     >
       {/* Logo */}
-      <div className="px-5 py-4 border-b border-gray-100">
+      <div className="px-5 py-4 border-b border-gray-100 flex items-center justify-between">
         <div className="flex items-center gap-2.5">
           <div className="w-8 h-8 rounded-xl bg-indigo-600 flex items-center justify-center shadow-sm">
             <Zap size={15} className="text-white" strokeWidth={2.5} />
@@ -57,6 +57,11 @@ export function Sidebar() {
             <span className="font-semibold text-[15px] tracking-tight text-indigo-600 ml-1">Widgets</span>
           </div>
         </div>
+        {onClose && (
+          <button onClick={onClose} className="lg:hidden p-1 text-gray-400 hover:text-gray-600">
+            <X size={18} />
+          </button>
+        )}
       </div>
 
       {/* Nav */}
@@ -67,6 +72,7 @@ export function Sidebar() {
             <Link
               key={href}
               href={href}
+              onClick={onClose}
               className={[
                 'flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all relative',
                 active
@@ -98,6 +104,7 @@ export function Sidebar() {
           </p>
           <Link
             href="/dashboard/billing"
+            onClick={onClose}
             className="flex items-center justify-center gap-1 w-full text-xs font-semibold py-1.5 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors"
           >
             Upgrade to Pro <ArrowUpRight size={11} />
@@ -123,5 +130,44 @@ export function Sidebar() {
         </div>
       </div>
     </aside>
+  )
+}
+
+export function Sidebar() {
+  const [mobileOpen, setMobileOpen] = useState(false)
+  const pathname = usePathname()
+
+  // Close mobile sidebar on route change
+  useEffect(() => { setMobileOpen(false) }, [pathname])
+
+  return (
+    <>
+      {/* Mobile hamburger trigger — placed in the header area via portal-like approach */}
+      <button
+        className="lg:hidden fixed top-3.5 left-4 z-50 w-8 h-8 flex items-center justify-center text-gray-500 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors"
+        onClick={() => setMobileOpen(true)}
+        aria-label="Open menu"
+      >
+        <Menu size={18} />
+      </button>
+
+      {/* Desktop sidebar — always visible */}
+      <div className="hidden lg:flex">
+        <SidebarContent />
+      </div>
+
+      {/* Mobile sidebar — slide in */}
+      {mobileOpen && (
+        <>
+          <div
+            className="fixed inset-0 z-40 bg-black/40 lg:hidden"
+            onClick={() => setMobileOpen(false)}
+          />
+          <div className="fixed inset-y-0 left-0 z-50 flex lg:hidden">
+            <SidebarContent onClose={() => setMobileOpen(false)} />
+          </div>
+        </>
+      )}
+    </>
   )
 }

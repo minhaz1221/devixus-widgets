@@ -50,7 +50,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
 
       <div className="flex flex-col flex-1 min-w-0">
         {/* Header bar */}
-        <header className="bg-white border-b border-gray-200 px-6 h-14 flex items-center gap-4 shrink-0">
+        <header className="bg-white border-b border-gray-200 pl-14 pr-6 lg:px-6 h-14 flex items-center gap-4 shrink-0">
           {/* Page title (reads route client-side) */}
           <div className="flex-1 min-w-0">
             <PageTitle />

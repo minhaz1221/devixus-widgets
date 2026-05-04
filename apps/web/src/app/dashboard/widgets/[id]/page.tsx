@@ -2,7 +2,8 @@
 
 import { useEffect, useState, useCallback, useMemo, useRef } from 'react'
 import { useParams } from 'next/navigation'
-import { Copy, Check, Star, Trash2, Plus, Monitor, Smartphone, AlertTriangle } from 'lucide-react'
+import Link from 'next/link'
+import { Copy, Check, Star, Trash2, Plus, Monitor, Smartphone, AlertTriangle, Lock, Code2 } from 'lucide-react'
 import { generatePreviewHTML } from '@/lib/preview-renderer'
 import type {
   Widget,
@@ -739,6 +740,62 @@ function TikTokFeedForm({ config, onChange }: { config: Partial<TikTokFeedConfig
   )
 }
 
+type ConfigTab = 'settings' | 'css'
+
+// ── Widget templates ───────────────────────────────────────────────────────
+const WIDGET_TEMPLATES: Record<string, { name: string; config: Record<string, unknown> }[]> = {
+  testimonials: [
+    { name: 'Minimal', config: { layout: 'grid', columns: 2, theme: 'light', card_shadow: 'none', show_quote_icon: false, avatar_shape: 'circle' } },
+    { name: 'Cards',   config: { layout: 'grid', columns: 3, theme: 'light', card_shadow: 'medium', show_quote_icon: true, avatar_shape: 'rounded' } },
+    { name: 'Dark Slider', config: { layout: 'slider', theme: 'dark', card_shadow: 'large', show_quote_icon: true, show_arrows: true, show_dots: true, avatar_shape: 'circle' } },
+  ],
+  youtube_feed: [
+    { name: 'Classic Grid', config: { layout: 'grid', columns: 3, theme: 'light', header_style: 'full', show_title: true, show_date: true } },
+    { name: 'Dark List',    config: { layout: 'list',  columns: 1, theme: 'dark',  header_style: 'full', show_title: true, show_date: true } },
+    { name: 'Carousel',     config: { layout: 'carousel', columns: 3, theme: 'light', header_style: 'none', show_title: true, show_date: false } },
+  ],
+  google_reviews: [
+    { name: 'Clean Grid',    config: { layout: 'grid',     theme: 'light', show_header: true,  show_overall_rating: true,  min_rating: 4 } },
+    { name: 'Dark Cards',    config: { layout: 'grid',     theme: 'dark',  show_header: true,  show_overall_rating: true,  min_rating: 4 } },
+    { name: 'Carousel',      config: { layout: 'carousel', theme: 'light', show_header: false, show_overall_rating: false, min_rating: 5 } },
+  ],
+  countdown_timer: [
+    { name: 'Product Launch', config: { style: 'blocks', theme: 'light', title: 'Product launches in', accent_color: '#6366f1' } },
+    { name: 'Sale Ends',      config: { style: 'flip',   theme: 'dark',  title: 'Sale ends in',       accent_color: '#ef4444' } },
+    { name: 'Event',          config: { style: 'minimal', theme: 'light', title: 'Event starts in',   accent_color: '#10b981' } },
+  ],
+  contact_form: [
+    { name: 'Simple',   config: { theme: 'light', display_mode: 'inline', accent_color: '#6366f1', border_radius: 8,  fields: { name: true, email: true, phone: false, subject: false, message: true } } },
+    { name: 'Full',     config: { theme: 'light', display_mode: 'inline', accent_color: '#10b981', border_radius: 12, fields: { name: true, email: true, phone: true, subject: true, message: true } } },
+    { name: 'Dark Popup', config: { theme: 'dark', display_mode: 'popup', accent_color: '#8b5cf6', border_radius: 16, trigger_text: '✉ Get in touch', fields: { name: true, email: true, phone: false, subject: false, message: true } } },
+  ],
+  whatsapp: [
+    { name: 'Classic',  config: { button_color: '#25D366', button_size: 'medium', position: 'bottom-right', pulse_animation: false } },
+    { name: 'Pulsing',  config: { button_color: '#25D366', button_size: 'large',  position: 'bottom-right', pulse_animation: true,  tooltip_text: 'Chat with us!' } },
+    { name: 'Indigo',   config: { button_color: '#6366f1', button_size: 'medium', position: 'bottom-right', pulse_animation: false, tooltip_text: 'Need help?' } },
+  ],
+  announcement_bar: [
+    { name: 'Sale',    config: { style: 'solid',    bg_color: '#ef4444', text_color: '#ffffff', position: 'top', is_sticky: true, show_close_button: true } },
+    { name: 'Info',    config: { style: 'gradient', bg_color: '#6366f1', text_color: '#ffffff', position: 'top', is_sticky: true, show_close_button: true } },
+    { name: 'Subtle',  config: { style: 'solid',    bg_color: '#1e293b', text_color: '#94a3b8', position: 'top', is_sticky: false, show_close_button: false } },
+  ],
+  social_follow: [
+    { name: 'Filled',   config: { style: 'filled',  layout: 'horizontal', size: 'medium', show_labels: true,  animation: 'hover_grow',   border_radius: 8 } },
+    { name: 'Outline',  config: { style: 'outline', layout: 'horizontal', size: 'medium', show_labels: true,  animation: 'hover_bounce',  border_radius: 50 } },
+    { name: 'Icons Only', config: { style: 'filled', layout: 'horizontal', size: 'large',  show_labels: false, animation: 'hover_grow',   border_radius: 50 } },
+  ],
+  instagram_feed: [
+    { name: 'Square Grid',  config: { layout: 'grid',     columns: 3, gap: '8px',  border_radius: '0px',  show_likes: false } },
+    { name: 'Rounded Cards', config: { layout: 'grid',    columns: 3, gap: '12px', border_radius: '16px', show_likes: true } },
+    { name: 'Masonry',       config: { layout: 'masonry', columns: 3, gap: '8px',  border_radius: '8px',  show_likes: true, show_caption: true } },
+  ],
+  tiktok_feed: [
+    { name: 'Grid',     config: { layout: 'grid',     columns: 3, gap: '8px',  border_radius: '8px',  show_duration: true, show_view_count: true } },
+    { name: 'Carousel', config: { layout: 'carousel', columns: 3, gap: '12px', border_radius: '16px', show_duration: true, show_view_count: true } },
+    { name: 'List',     config: { layout: 'list',     columns: 1, gap: '8px',  border_radius: '8px',  show_duration: true, show_caption: true } },
+  ],
+}
+
 // ── Main configurator page ─────────────────────────────────────────────────
 export default function ConfiguratorPage() {
   const { id } = useParams<{ id: string }>()
@@ -750,6 +807,8 @@ export default function ConfiguratorPage() {
   const [toast, setToast] = useState<{ msg: string; ok: boolean } | null>(null)
   const [previewDevice, setPreviewDevice] = useState<'desktop' | 'mobile'>('desktop')
   const [previewBg, setPreviewBg] = useState('#f3f4f6')
+  const [configTab, setConfigTab] = useState<ConfigTab>('settings')
+  const [planName, setPlanName] = useState<string>('free')
   const configRef  = useRef<Record<string, unknown>>({})
   const nameRef    = useRef<string>('')
   const widgetRef  = useRef<Widget | null>(null)
@@ -773,6 +832,10 @@ export default function ConfiguratorPage() {
   }, [id])
 
   useEffect(() => { load() }, [load])
+
+  useEffect(() => {
+    fetch('/api/plan').then(r => r.json()).then(d => setPlanName(d.plan?.name?.toLowerCase() ?? 'free')).catch(() => {})
+  }, [])
 
   const previewHtml = useMemo(
     () => widget ? generatePreviewHTML(widget.type, config) : '',
@@ -850,7 +913,7 @@ export default function ConfiguratorPage() {
       {/* LEFT — Settings panel (420px, scrollable) */}
       <div className="w-[420px] shrink-0 flex flex-col bg-white rounded-xl border border-gray-200 overflow-hidden">
         {/* Panel header */}
-        <div className="px-5 py-4 border-b border-gray-100 shrink-0">
+        <div className="px-5 py-4 border-b border-gray-100 shrink-0 space-y-3">
           <div>
             <label className="block text-xs font-semibold text-gray-400 uppercase tracking-widest mb-1">Widget Name</label>
             <input
@@ -859,20 +922,93 @@ export default function ConfiguratorPage() {
               className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm font-medium text-gray-800 bg-gray-50 focus:bg-white focus:ring-2 focus:ring-indigo-500 focus:border-indigo-400"
             />
           </div>
+          {/* Templates */}
+          {WIDGET_TEMPLATES[widget.type] && (
+            <div>
+              <p className="text-xs font-semibold text-gray-400 uppercase tracking-widest mb-1.5">Templates</p>
+              <div className="flex gap-1.5 flex-wrap">
+                {WIDGET_TEMPLATES[widget.type].map(t => (
+                  <button
+                    key={t.name}
+                    type="button"
+                    onClick={() => {
+                      const merged = { ...config, ...t.config }
+                      handleConfigChange(merged)
+                    }}
+                    className="px-2.5 py-1 text-xs font-medium border border-gray-200 rounded-lg hover:bg-indigo-50 hover:border-indigo-300 hover:text-indigo-700 transition-colors text-gray-600"
+                  >
+                    {t.name}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+          {/* Tab switcher */}
+          <div className="flex border border-gray-200 rounded-lg overflow-hidden">
+            <button
+              type="button"
+              onClick={() => setConfigTab('settings')}
+              className={`flex-1 flex items-center justify-center gap-1.5 py-1.5 text-xs font-semibold transition-colors ${configTab === 'settings' ? 'bg-indigo-600 text-white' : 'text-gray-500 hover:bg-gray-50'}`}
+            >
+              Settings
+            </button>
+            <button
+              type="button"
+              onClick={() => setConfigTab('css')}
+              className={`flex-1 flex items-center justify-center gap-1.5 py-1.5 text-xs font-semibold transition-colors ${configTab === 'css' ? 'bg-indigo-600 text-white' : 'text-gray-500 hover:bg-gray-50'}`}
+            >
+              <Code2 size={11} /> CSS
+              {planName === 'free' && <Lock size={10} className="opacity-60" />}
+            </button>
+          </div>
         </div>
 
         {/* Scrollable form */}
         <div className="flex-1 overflow-y-auto px-5 py-5">
-          {widget.type === 'whatsapp'         && <WhatsAppForm      config={config as Partial<WhatsAppConfig>}      onChange={c => handleConfigChange(c as Record<string, unknown>)} />}
-          {widget.type === 'testimonials'     && <TestimonialsForm  config={config as Partial<TestimonialsConfig>}  onChange={c => handleConfigChange(c as Record<string, unknown>)} />}
-          {widget.type === 'youtube_feed'     && <YouTubeFeedForm   config={config as Partial<YouTubeFeedConfig>}   onChange={c => handleConfigChange(c as Record<string, unknown>)} />}
-          {widget.type === 'countdown_timer'  && <CountdownTimerForm config={config as Partial<CountdownTimerConfig>} onChange={c => handleConfigChange(c as Record<string, unknown>)} />}
-          {widget.type === 'announcement_bar' && <AnnouncementBarForm config={config as Partial<AnnouncementBarConfig>} onChange={c => handleConfigChange(c as Record<string, unknown>)} />}
-          {widget.type === 'google_reviews'   && <GoogleReviewsForm  config={config as Partial<GoogleReviewsConfig>}  onChange={c => handleConfigChange(c as Record<string, unknown>)} />}
-          {widget.type === 'contact_form'     && <ContactFormForm    config={config as Partial<ContactFormConfig>}    onChange={c => handleConfigChange(c as Record<string, unknown>)} />}
-          {widget.type === 'social_follow'    && <SocialFollowForm   config={config as Partial<SocialFollowConfig>}   onChange={c => handleConfigChange(c as Record<string, unknown>)} />}
-          {widget.type === 'instagram_feed'   && <InstagramFeedForm  config={config as Partial<InstagramFeedConfig>}  onChange={c => handleConfigChange(c as Record<string, unknown>)} />}
-          {widget.type === 'tiktok_feed'      && <TikTokFeedForm     config={config as Partial<TikTokFeedConfig>}     onChange={c => handleConfigChange(c as Record<string, unknown>)} />}
+          {configTab === 'settings' && (
+            <>
+              {widget.type === 'whatsapp'         && <WhatsAppForm      config={config as Partial<WhatsAppConfig>}      onChange={c => handleConfigChange(c as Record<string, unknown>)} />}
+              {widget.type === 'testimonials'     && <TestimonialsForm  config={config as Partial<TestimonialsConfig>}  onChange={c => handleConfigChange(c as Record<string, unknown>)} />}
+              {widget.type === 'youtube_feed'     && <YouTubeFeedForm   config={config as Partial<YouTubeFeedConfig>}   onChange={c => handleConfigChange(c as Record<string, unknown>)} />}
+              {widget.type === 'countdown_timer'  && <CountdownTimerForm config={config as Partial<CountdownTimerConfig>} onChange={c => handleConfigChange(c as Record<string, unknown>)} />}
+              {widget.type === 'announcement_bar' && <AnnouncementBarForm config={config as Partial<AnnouncementBarConfig>} onChange={c => handleConfigChange(c as Record<string, unknown>)} />}
+              {widget.type === 'google_reviews'   && <GoogleReviewsForm  config={config as Partial<GoogleReviewsConfig>}  onChange={c => handleConfigChange(c as Record<string, unknown>)} />}
+              {widget.type === 'contact_form'     && <ContactFormForm    config={config as Partial<ContactFormConfig>}    onChange={c => handleConfigChange(c as Record<string, unknown>)} />}
+              {widget.type === 'social_follow'    && <SocialFollowForm   config={config as Partial<SocialFollowConfig>}   onChange={c => handleConfigChange(c as Record<string, unknown>)} />}
+              {widget.type === 'instagram_feed'   && <InstagramFeedForm  config={config as Partial<InstagramFeedConfig>}  onChange={c => handleConfigChange(c as Record<string, unknown>)} />}
+              {widget.type === 'tiktok_feed'      && <TikTokFeedForm     config={config as Partial<TikTokFeedConfig>}     onChange={c => handleConfigChange(c as Record<string, unknown>)} />}
+            </>
+          )}
+          {configTab === 'css' && (
+            <div className="space-y-4">
+              <div>
+                <p className="text-xs text-gray-500 leading-relaxed mb-3">
+                  Add custom CSS that gets injected into your widget embed. Useful for fine-tuned styling beyond the visual settings.
+                </p>
+                {planName === 'free' ? (
+                  <div className="rounded-xl border border-indigo-200 bg-indigo-50 p-4 text-center space-y-2">
+                    <Lock size={20} className="text-indigo-400 mx-auto" />
+                    <p className="text-sm font-semibold text-indigo-800">Custom CSS requires Pro or Agency</p>
+                    <p className="text-xs text-indigo-600">Upgrade to inject custom styles into any widget.</p>
+                    <Link
+                      href="/dashboard/billing"
+                      className="inline-flex items-center gap-1 px-4 py-2 bg-indigo-600 text-white text-xs font-semibold rounded-lg hover:bg-indigo-700 transition-colors mt-1"
+                    >
+                      Upgrade to Pro →
+                    </Link>
+                  </div>
+                ) : (
+                  <textarea
+                    value={(config.custom_css as string) ?? ''}
+                    onChange={e => handleConfigChange({ ...config, custom_css: e.target.value })}
+                    placeholder={`/* Target elements inside your widget */\n.yt-card { border-radius: 16px; }\n.gr-card { box-shadow: 0 4px 20px rgba(0,0,0,0.1); }`}
+                    rows={16}
+                    className="w-full px-3 py-3 border border-gray-200 rounded-lg text-xs font-mono bg-gray-50 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-400 resize-none leading-relaxed"
+                  />
+                )}
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Sticky save button */}

@@ -268,8 +268,14 @@ export function AnalyticsClient({
         {recentEvents.length === 0 ? (
           <div className="px-6 py-14 text-center">
             <BarChart2 size={28} className="text-gray-300 mx-auto mb-3" />
-            <p className="text-sm text-gray-500 font-medium">No events yet</p>
-            <p className="text-sm text-gray-400 mt-1">Embed a widget on a website to start tracking loads.</p>
+            <p className="text-sm text-gray-500 font-medium">No views yet — install your widget to start tracking</p>
+            <p className="text-sm text-gray-400 mt-1 mb-4">Copy your embed code and paste it on any website.</p>
+            <Link
+              href="/dashboard/widgets"
+              className="inline-flex items-center gap-1.5 px-4 py-2 bg-indigo-600 text-white text-sm font-semibold rounded-lg hover:bg-indigo-700 transition-colors"
+            >
+              Get embed code <ArrowRight size={13} />
+            </Link>
           </div>
         ) : (
           <div className="overflow-x-auto">

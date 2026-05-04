@@ -21,6 +21,22 @@
 
   const BRANDING_URL = 'https://devixus-widgets-marketing.vercel.app'
 
+  // Dark colors per design spec
+  const DARK = { bg: '#0f172a', card: '#1e293b', text: '#f1f5f9', border: '#334155', muted: '#94a3b8' }
+  const LIGHT = { bg: '#ffffff', card: '#f9fafb', text: '#1a1a1a', border: '#e5e7eb', muted: '#6b7280' }
+
+  // Resolve 'auto' theme using OS preference
+  function resolveTheme(theme: string): 'light' | 'dark' {
+    if (theme === 'auto') {
+      return window.matchMedia?.('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'
+    }
+    return theme === 'dark' ? 'dark' : 'light'
+  }
+
+  function themeColors(theme: string) {
+    return resolveTheme(theme) === 'dark' ? DARK : LIGHT
+  }
+
   // Fetch widget config from our API
   async function fetchWidgetConfig(widgetId: string) {
     const response = await fetch(`${API_BASE}/api/widget/${widgetId}`, {
@@ -172,10 +188,11 @@
     const avatarShape = (config.avatar_shape as string) || 'circle'
     const shadowLevel = (config.card_shadow as string) || 'none'
 
-    const bg = theme === 'dark' ? '#1a1a1a' : '#ffffff'
-    const text = theme === 'dark' ? '#ffffff' : '#1a1a1a'
-    const subtext = theme === 'dark' ? '#aaaaaa' : '#666666'
-    const cardBg = theme === 'dark' ? '#2a2a2a' : '#f9f9f9'
+    const tc = themeColors(theme)
+    const bg = tc.bg
+    const text = tc.text
+    const subtext = tc.muted
+    const cardBg = tc.card
 
     const shadowMap: Record<string, string> = {
       none: 'none',
@@ -368,10 +385,11 @@
     apiBase: string
   ) {
     const theme = (config.theme as string) || 'light'
-    const bg = theme === 'dark' ? '#0f0f0f' : '#ffffff'
-    const text = theme === 'dark' ? '#ffffff' : '#0f0f0f'
-    const subtext = theme === 'dark' ? '#aaaaaa' : '#606060'
-    const cardBg = theme === 'dark' ? '#1a1a1a' : '#f9f9f9'
+    const tc = themeColors(theme)
+    const bg = tc.bg
+    const text = tc.text
+    const subtext = tc.muted
+    const cardBg = tc.card
     const accent = (config.accent_color as string) || '#ff0000'
     const columns = (config.columns as number) || 3
     const layout = (config.layout as string) || 'grid'
@@ -611,10 +629,11 @@
     apiBase: string
   ) {
     const theme = config.theme || 'light'
-    const bg = theme === 'dark' ? '#1a1a1a' : '#ffffff'
-    const text = theme === 'dark' ? '#ffffff' : '#1a1a1a'
-    const subtext = theme === 'dark' ? '#aaaaaa' : '#666666'
-    const cardBg = theme === 'dark' ? '#2a2a2a' : '#f9f9f9'
+    const tc = themeColors(theme)
+    const bg = tc.bg
+    const text = tc.text
+    const subtext = tc.muted
+    const cardBg = tc.card
     const accent = config.accent_color || '#4285f4'
     const layout = config.layout || 'grid'
 
@@ -851,10 +870,9 @@
     apiBase: string
   ) {
     const theme = config.theme || 'light'
-    const bgColor = config.bg_color ||
-      (theme === 'dark' ? '#1a1a2e' : '#ffffff')
-    const textColor = config.text_color ||
-      (theme === 'dark' ? '#ffffff' : '#1a1a1a')
+    const tc = themeColors(theme)
+    const bgColor = config.bg_color || tc.bg
+    const textColor = config.text_color || tc.text
     const accentColor = config.accent_color || '#ff6914'
     const title = config.title || 'Offer ends in'
     const style = config.style || 'blocks'
@@ -1370,12 +1388,13 @@
     widgetId: string
   ) {
     const theme = config.theme || 'light'
-    const bg = theme === 'dark' ? '#1a1a1a' : '#ffffff'
-    const text = theme === 'dark' ? '#ffffff' : '#1a1a1a'
-    const subtext = theme === 'dark' ? '#aaaaaa' : '#666666'
-    const inputBg = theme === 'dark' ? '#2a2a2a' : '#f9f9f9'
-    const borderColor = theme === 'dark' ? '#333' : '#e5e7eb'
-    const accent = config.accent_color || '#ff6914'
+    const tc = themeColors(theme)
+    const bg = tc.bg
+    const text = tc.text
+    const subtext = tc.muted
+    const inputBg = tc.card
+    const borderColor = tc.border
+    const accent = config.accent_color || '#6366f1'
     const radius = config.border_radius || 8
     const isPopup = config.display_mode === 'popup'
     const title = config.title || 'Contact Us'
@@ -1798,9 +1817,10 @@
     apiBase: string
   ) {
     const theme = config.theme || 'light'
-    const bg = theme === 'dark' ? '#1a1a1a' : '#ffffff'
-    const text = theme === 'dark' ? '#ffffff' : '#0f0f0f'
-    const subtext = theme === 'dark' ? '#aaaaaa' : '#666666'
+    const tc = themeColors(theme)
+    const bg = tc.bg
+    const text = tc.text
+    const subtext = tc.muted
     const columns = config.columns || 3
     const layout = config.layout || 'grid'
     const borderRadius = config.border_radius === 'round' ? '50%'
@@ -2007,10 +2027,11 @@
     apiBase: string
   ) {
     const theme = config.theme || 'light'
-    const bg = theme === 'dark' ? '#1a1a1a' : '#ffffff'
-    const text = theme === 'dark' ? '#ffffff' : '#0f0f0f'
-    const subtext = theme === 'dark' ? '#aaaaaa' : '#666666'
-    const cardBg = theme === 'dark' ? '#2a2a2a' : '#f9f9f9'
+    const tc = themeColors(theme)
+    const bg = tc.bg
+    const text = tc.text
+    const subtext = tc.muted
+    const cardBg = tc.card
     const columns = config.columns || 3
     const layout = config.layout || 'grid'
     const borderRadius = config.border_radius === 'round' ? '50%'
@@ -2322,6 +2343,15 @@
 
       const shadow = createContainer(targetEl)
       renderWidget(shadow, widget, widgetId)
+
+      // Inject custom CSS (Pro/Agency plan feature)
+      if (widget.config?.custom_css) {
+        const styleEl = document.createElement('style')
+        styleEl.textContent = widget.config.custom_css as string
+        // Wait one tick for async renderers to finish building the shadow DOM
+        setTimeout(() => shadow.appendChild(styleEl), 100)
+      }
+
       trackLoad(widgetId, API_BASE)
     } catch (err) {
       console.warn('[Devixus] Widget failed to load:', err)

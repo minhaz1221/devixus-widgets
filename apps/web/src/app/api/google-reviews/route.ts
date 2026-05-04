@@ -38,7 +38,7 @@ export async function GET(request: NextRequest) {
     )
   }
 
-  const apiKey = process.env.YOUTUBE_API_KEY
+  const apiKey = process.env.GOOGLE_PLACES_API_KEY
   if (!apiKey) {
     return NextResponse.json(
       { place: MOCK_PLACE, reviews: MOCK_REVIEWS.slice(0, maxReviews), is_mock: true },

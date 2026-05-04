@@ -198,18 +198,25 @@ export default async function DashboardPage() {
               <h2 className="font-semibold text-gray-900 mb-3 text-sm">Getting Started</h2>
               <ul className="space-y-3">
                 {[
-                  { label: 'Create your account',            done: true },
-                  { label: 'Create your first widget',       done: hasWidget },
-                  { label: 'Add widget to your website',     done: hasInstall },
-                  { label: 'Upgrade for unlimited views',    done: (plan?.name ?? 'free').toLowerCase() !== 'free' },
+                  { label: 'Create your account',         done: true,       href: null },
+                  { label: 'Create your first widget',    done: hasWidget,  href: '/dashboard/widgets?new=1' },
+                  { label: 'Copy your embed code',        done: hasWidget,  href: hasWidget ? `/dashboard/widgets/${allWidgets[0]?.id}` : '/dashboard/widgets' },
+                  { label: 'Add widget to your website',  done: hasInstall, href: '/dashboard/widgets' },
+                  { label: 'Upgrade for unlimited views', done: (plan?.name ?? 'free').toLowerCase() !== 'free', href: '/dashboard/billing' },
                 ].map(item => (
                   <li key={item.label} className="flex items-start gap-2.5">
                     {item.done
                       ? <CheckCircle2 size={15} className="text-green-500 shrink-0 mt-0.5" />
                       : <Circle      size={15} className="text-gray-300 shrink-0 mt-0.5" />}
-                    <span className={`text-sm leading-tight ${item.done ? 'text-gray-400 line-through' : 'text-gray-700'}`}>
-                      {item.label}
-                    </span>
+                    {!item.done && item.href ? (
+                      <Link href={item.href} className="text-sm leading-tight text-indigo-600 hover:underline">
+                        {item.label}
+                      </Link>
+                    ) : (
+                      <span className={`text-sm leading-tight ${item.done ? 'text-gray-400 line-through' : 'text-gray-700'}`}>
+                        {item.label}
+                      </span>
+                    )}
                   </li>
                 ))}
               </ul>

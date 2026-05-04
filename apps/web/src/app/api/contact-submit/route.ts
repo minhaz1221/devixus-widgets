@@ -48,6 +48,12 @@ export async function POST(request: NextRequest) {
       )
     }
 
+    // Store submission in DB (fire-and-forget — don't fail the request if insert fails)
+    void supabase.from('widget_submissions').insert({
+      widget_id,
+      data: { name, email, phone, subject, message },
+    })
+
     await resend.emails.send({
       from: 'Devixus Widgets <forms@devixus.com>',
       to: to,

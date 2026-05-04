@@ -18,7 +18,7 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: 'query is required' }, { status: 400 })
   }
 
-  const apiKey = process.env.YOUTUBE_API_KEY
+  const apiKey = process.env.GOOGLE_PLACES_API_KEY
   if (!apiKey) {
     return NextResponse.json({ results: MOCK_RESULTS, is_mock: true })
   }
