@@ -65,6 +65,7 @@ export async function POST(request: NextRequest) {
       'countdown', 'contact_form', 'social_follow',
       'youtube_feed', 'countdown_timer', 'announcement_bar',
       'instagram_feed', 'tiktok_feed',
+      'faq_accordion', 'number_counter', 'google_maps',
     ]
 
     if (!validTypes.includes(type)) {
