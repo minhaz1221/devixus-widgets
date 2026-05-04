@@ -3,14 +3,20 @@
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { useEffect, useState } from 'react'
-import { LayoutDashboard, Layers, BarChart2, Settings, CreditCard, Zap, ArrowUpRight, X, Menu } from 'lucide-react'
+import {
+  LayoutDashboard, BarChart2, Settings, CreditCard, Zap, ArrowUpRight,
+  X, Menu, MessageCircle, Star, Play, Globe, Timer, Megaphone, Mail,
+  Share2, Camera, Music, BookOpen, LayoutGrid, Plus, ChevronDown, ChevronRight,
+  type LucideIcon,
+} from 'lucide-react'
 
-const NAV = [
-  { label: 'Overview',   href: '/dashboard',            icon: LayoutDashboard },
-  { label: 'Widgets',    href: '/dashboard/widgets',    icon: Layers },
-  { label: 'Analytics',  href: '/dashboard/analytics',  icon: BarChart2 },
-  { label: 'Settings',   href: '/dashboard/settings',   icon: Settings },
-  { label: 'Billing',    href: '/dashboard/billing',    icon: CreditCard },
+const BOTTOM_NAV = [
+  { label: 'Overview',  href: '/dashboard',           icon: LayoutDashboard },
+  { label: 'Analytics', href: '/dashboard/analytics', icon: BarChart2 },
+  { label: 'Catalog',   href: '/dashboard/catalog',   icon: LayoutGrid },
+  { label: 'Templates', href: '/dashboard/templates', icon: BookOpen },
+  { label: 'Settings',  href: '/dashboard/settings',  icon: Settings },
+  { label: 'Billing',   href: '/dashboard/billing',   icon: CreditCard },
 ]
 
 const PLAN_BADGE: Record<string, { label: string; cls: string }> = {
@@ -19,10 +25,29 @@ const PLAN_BADGE: Record<string, { label: string; cls: string }> = {
   agency: { label: 'Agency', cls: 'bg-purple-600 text-white' },
 }
 
-function SidebarContent({ onClose }: { onClose?: () => void }) {
+const TYPE_ICONS: Record<string, { Icon: LucideIcon; color: string; label: string }> = {
+  whatsapp:         { Icon: MessageCircle, color: '#25D366', label: 'WhatsApp Chat' },
+  testimonials:     { Icon: Star,          color: '#f59e0b', label: 'Testimonials' },
+  youtube_feed:     { Icon: Play,          color: '#ff0000', label: 'YouTube Feed' },
+  google_reviews:   { Icon: Globe,         color: '#4285f4', label: 'Google Reviews' },
+  countdown_timer:  { Icon: Timer,         color: '#8b5cf6', label: 'Countdown Timer' },
+  announcement_bar: { Icon: Megaphone,     color: '#6366f1', label: 'Announcement Bar' },
+  contact_form:     { Icon: Mail,          color: '#10b981', label: 'Contact Form' },
+  social_follow:    { Icon: Share2,        color: '#ec4899', label: 'Social Follow' },
+  instagram_feed:   { Icon: Camera,        color: '#e4405f', label: 'Instagram Feed' },
+  tiktok_feed:      { Icon: Music,         color: '#2d2d2d', label: 'TikTok Feed' },
+}
+
+interface SidebarContentProps {
+  onClose?: () => void
+  widgetTypes?: string[]
+}
+
+function SidebarContent({ onClose, widgetTypes = [] }: SidebarContentProps) {
   const pathname = usePathname()
   const [planName, setPlanName] = useState<string>('free')
   const [userInfo, setUserInfo] = useState<{ name: string; avatar: string } | null>(null)
+  const [appsOpen, setAppsOpen] = useState(true)
 
   useEffect(() => {
     fetch('/api/plan')
@@ -40,6 +65,10 @@ function SidebarContent({ onClose }: { onClose?: () => void }) {
 
   const badge = PLAN_BADGE[planName] ?? PLAN_BADGE.free
   const isPro = planName !== 'free'
+
+  function isActive(href: string) {
+    return pathname === href || (href !== '/dashboard' && pathname.startsWith(href))
+  }
 
   return (
     <aside
@@ -64,30 +93,88 @@ function SidebarContent({ onClose }: { onClose?: () => void }) {
         )}
       </div>
 
-      {/* Nav */}
-      <nav className="flex-1 px-3 py-4 space-y-0.5">
-        {NAV.map(({ label, href, icon: Icon }) => {
-          const active = pathname === href || (href !== '/dashboard' && pathname.startsWith(href))
-          return (
-            <Link
-              key={href}
-              href={href}
-              onClick={onClose}
-              className={[
-                'flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all relative',
-                active
-                  ? 'text-indigo-700 bg-indigo-50'
-                  : 'text-gray-500 hover:bg-gray-100 hover:text-gray-900',
-              ].join(' ')}
-            >
-              {active && (
-                <span className="absolute left-0 top-1/2 -translate-y-1/2 w-[3px] h-5 rounded-r-full bg-indigo-600" />
+      <nav className="flex-1 px-3 py-3 overflow-y-auto">
+
+        {/* My Apps section */}
+        <div className="mb-2">
+          <button
+            type="button"
+            onClick={() => setAppsOpen(o => !o)}
+            className="w-full flex items-center justify-between px-2 py-1.5 text-[11px] font-bold text-gray-400 uppercase tracking-widest hover:text-gray-600 transition-colors"
+          >
+            <span>My Apps</span>
+            {appsOpen ? <ChevronDown size={12} /> : <ChevronRight size={12} />}
+          </button>
+
+          {appsOpen && (
+            <div className="space-y-0.5 mt-1">
+              {widgetTypes.length === 0 ? (
+                <p className="px-3 py-2 text-[11px] text-gray-400">No widgets yet.</p>
+              ) : (
+                widgetTypes.map(type => {
+                  const meta = TYPE_ICONS[type]
+                  if (!meta) return null
+                  const href = `/dashboard/apps/${type}`
+                  const active = pathname.startsWith(href)
+                  return (
+                    <Link
+                      key={type}
+                      href={href}
+                      onClick={onClose}
+                      className={[
+                        'flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm font-medium transition-all relative',
+                        active ? 'text-indigo-700 bg-indigo-50' : 'text-gray-500 hover:bg-gray-100 hover:text-gray-900',
+                      ].join(' ')}
+                    >
+                      {active && <span className="absolute left-0 top-1/2 -translate-y-1/2 w-[3px] h-5 rounded-r-full bg-indigo-600" />}
+                      <div className="w-5 h-5 rounded-md flex items-center justify-center shrink-0" style={{ background: `${meta.color}20` }}>
+                        <meta.Icon size={12} style={{ color: meta.color }} />
+                      </div>
+                      <span className="truncate text-xs">{meta.label}</span>
+                    </Link>
+                  )
+                })
               )}
-              <Icon size={16} className={active ? 'text-indigo-600' : 'text-gray-400'} />
-              {label}
-            </Link>
-          )
-        })}
+
+              {/* Add widget link */}
+              <Link
+                href="/dashboard/widgets?new=1"
+                onClick={onClose}
+                className="flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-medium text-gray-400 hover:text-indigo-600 hover:bg-indigo-50 transition-all"
+              >
+                <div className="w-5 h-5 rounded-md border-2 border-dashed border-gray-300 flex items-center justify-center shrink-0">
+                  <Plus size={10} />
+                </div>
+                Add Widget
+              </Link>
+            </div>
+          )}
+        </div>
+
+        {/* Divider */}
+        <div className="h-px bg-gray-100 my-2" />
+
+        {/* Main nav items */}
+        <div className="space-y-0.5">
+          {BOTTOM_NAV.map(({ label, href, icon: Icon }) => {
+            const active = isActive(href)
+            return (
+              <Link
+                key={href}
+                href={href}
+                onClick={onClose}
+                className={[
+                  'flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all relative',
+                  active ? 'text-indigo-700 bg-indigo-50' : 'text-gray-500 hover:bg-gray-100 hover:text-gray-900',
+                ].join(' ')}
+              >
+                {active && <span className="absolute left-0 top-1/2 -translate-y-1/2 w-[3px] h-5 rounded-r-full bg-indigo-600" />}
+                <Icon size={16} className={active ? 'text-indigo-600' : 'text-gray-400'} />
+                {label}
+              </Link>
+            )
+          })}
+        </div>
       </nav>
 
       {/* Upgrade card (Free plan only) */}
@@ -97,11 +184,9 @@ function SidebarContent({ onClose }: { onClose?: () => void }) {
             <div className="w-6 h-6 rounded-md bg-indigo-600 flex items-center justify-center">
               <Zap size={12} className="text-white" strokeWidth={2.5} />
             </div>
-            <span className="text-xs font-semibold text-indigo-900">Unlock Pro features</span>
+            <span className="text-xs font-semibold text-indigo-900">Unlock Pro</span>
           </div>
-          <p className="text-[11px] text-indigo-700 leading-relaxed">
-            Unlimited views, remove branding, priority support.
-          </p>
+          <p className="text-[11px] text-indigo-700 leading-relaxed">Unlimited views, custom CSS, priority support.</p>
           <Link
             href="/dashboard/billing"
             onClick={onClose}
@@ -121,28 +206,26 @@ function SidebarContent({ onClose }: { onClose?: () => void }) {
           }
         </div>
         <div className="flex-1 min-w-0">
-          <p className="text-xs font-medium text-gray-800 truncate leading-none mb-0.5">
-            {userInfo?.name ?? ''}
-          </p>
-          <span className={`text-[10px] font-semibold px-1.5 py-px rounded-full ${badge.cls}`}>
-            {badge.label}
-          </span>
+          <p className="text-xs font-medium text-gray-800 truncate leading-none mb-0.5">{userInfo?.name ?? ''}</p>
+          <span className={`text-[10px] font-semibold px-1.5 py-px rounded-full ${badge.cls}`}>{badge.label}</span>
         </div>
       </div>
     </aside>
   )
 }
 
-export function Sidebar() {
+export interface SidebarProps {
+  widgetTypes?: string[]
+}
+
+export function Sidebar({ widgetTypes = [] }: SidebarProps) {
   const [mobileOpen, setMobileOpen] = useState(false)
   const pathname = usePathname()
 
-  // Close mobile sidebar on route change
   useEffect(() => { setMobileOpen(false) }, [pathname])
 
   return (
     <>
-      {/* Mobile hamburger trigger — placed in the header area via portal-like approach */}
       <button
         className="lg:hidden fixed top-3.5 left-4 z-50 w-8 h-8 flex items-center justify-center text-gray-500 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors"
         onClick={() => setMobileOpen(true)}
@@ -151,20 +234,15 @@ export function Sidebar() {
         <Menu size={18} />
       </button>
 
-      {/* Desktop sidebar — always visible */}
       <div className="hidden lg:flex">
-        <SidebarContent />
+        <SidebarContent widgetTypes={widgetTypes} />
       </div>
 
-      {/* Mobile sidebar — slide in */}
       {mobileOpen && (
         <>
-          <div
-            className="fixed inset-0 z-40 bg-black/40 lg:hidden"
-            onClick={() => setMobileOpen(false)}
-          />
+          <div className="fixed inset-0 z-40 bg-black/40 lg:hidden" onClick={() => setMobileOpen(false)} />
           <div className="fixed inset-y-0 left-0 z-50 flex lg:hidden">
-            <SidebarContent onClose={() => setMobileOpen(false)} />
+            <SidebarContent widgetTypes={widgetTypes} onClose={() => setMobileOpen(false)} />
           </div>
         </>
       )}

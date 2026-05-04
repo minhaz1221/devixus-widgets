@@ -6,7 +6,7 @@ import Link from 'next/link'
 import {
   Plus, Settings2, Trash2, Copy, Check, Search, Eye, Globe, Layers,
   MoreVertical, MessageCircle, Star, Play, Timer, Megaphone, Mail,
-  Share2, Camera, Music, PauseCircle, PlayCircle, type LucideIcon,
+  Share2, Camera, Music, PauseCircle, PlayCircle, BarChart2, type LucideIcon,
 } from 'lucide-react'
 import { NewWidgetModal } from './_components/NewWidgetModal'
 import type { Widget } from '@/types/widget'
