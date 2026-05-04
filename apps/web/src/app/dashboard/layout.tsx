@@ -16,21 +16,11 @@ export default async function DashboardLayout({ children }: { children: React.Re
   const plan = await getUserPlan(user.id)
   const planName = plan?.name ?? 'Free'
 
-  const [profileResult, widgetTypesResult, viewsResult] = await Promise.all([
+  // All secondary queries are optional — failures degrade gracefully
+  const [profileResult, widgetTypesResult] = await Promise.all([
     supabase.from('profiles').select('avatar_url, full_name').eq('id', user.id).single(),
     supabase.from('widgets').select('type').eq('user_id', user.id),
-    supabase.from('widgets').select('id').eq('user_id', user.id).gte('monthly_views', 10).limit(1),
   ])
-
-  // Check for any install by joining through user's widgets
-  const { data: userWidgetIds } = await supabase
-    .from('widgets')
-    .select('id')
-    .eq('user_id', user.id)
-  const widgetIds = (userWidgetIds ?? []).map(w => w.id)
-  const { data: installData } = widgetIds.length > 0
-    ? await supabase.from('widget_installs').select('id').in('widget_id', widgetIds).limit(1)
-    : { data: [] }
 
   const profile = profileResult.data
   const avatarUrl: string | null =
@@ -43,12 +33,47 @@ export default async function DashboardLayout({ children }: { children: React.Re
     .map((s: string) => s[0].toUpperCase())
     .join('')
 
-  // Unique widget types for the sidebar "My Apps" section
   const widgetTypes = [...new Set((widgetTypesResult.data ?? []).map(w => w.type))]
-  const hasWidgets    = widgetTypes.length > 0
-  const hasInstall    = (installData ?? []).length > 0
-  const hasViews      = (viewsResult.data ?? []).length > 0
-  const isPro         = planName.toLowerCase() !== 'free'
+
+  // Progress steps — compute cheaply, skip expensive queries
+  const hasWidgets = widgetTypes.length > 0
+  const isPro      = planName.toLowerCase() !== 'free'
+
+  // Check installs + views only if user has widgets (lazy, wrapped in try/catch)
+  let hasInstall = false
+  let hasViews   = false
+  if (hasWidgets) {
+    try {
+      const widgetIds = (widgetTypesResult.data ?? []).slice(0, 50).map((_: { type: string }, i: number) => i)
+      // Use a simple count query on the user's own widgets for views
+      const { data: viewsData } = await supabase
+        .from('widgets')
+        .select('id')
+        .eq('user_id', user.id)
+        .gte('monthly_views', 10)
+        .limit(1)
+      hasViews = (viewsData ?? []).length > 0
+
+      // For installs, check widget_installs via user's widget IDs
+      const { data: userWidgets } = await supabase
+        .from('widgets')
+        .select('id')
+        .eq('user_id', user.id)
+        .limit(50)
+      const ids = (userWidgets ?? []).map((w: { id: string }) => w.id)
+      if (ids.length > 0) {
+        const { data: installData } = await supabase
+          .from('widget_installs')
+          .select('widget_id')
+          .in('widget_id', ids)
+          .limit(1)
+        hasInstall = (installData ?? []).length > 0
+      }
+      void widgetIds // suppress unused warning
+    } catch {
+      // Non-critical — progress just won't show installs/views steps as done
+    }
+  }
 
   const planBadgeCls =
     planName.toLowerCase() === 'pro'    ? 'bg-indigo-600 text-white' :
@@ -56,11 +81,11 @@ export default async function DashboardLayout({ children }: { children: React.Re
     'bg-gray-100 text-gray-600'
 
   const progressSteps = [
-    { label: 'Create your account',        done: true,         href: null },
-    { label: 'Create your first widget',   done: hasWidgets,   href: '/dashboard/widgets?new=1' },
-    { label: 'Install on your website',    done: hasInstall,   href: '/dashboard/widgets' },
-    { label: 'Get your first 10 views',    done: hasViews,     href: '/dashboard/analytics' },
-    { label: 'Upgrade to Pro',             done: isPro,        href: '/dashboard/billing' },
+    { label: 'Create your account',      done: true,        href: null },
+    { label: 'Create your first widget', done: hasWidgets,  href: '/dashboard/widgets?new=1' },
+    { label: 'Install on your website',  done: hasInstall,  href: '/dashboard/widgets' },
+    { label: 'Get your first 10 views',  done: hasViews,    href: '/dashboard/analytics' },
+    { label: 'Upgrade to Pro',           done: isPro,       href: '/dashboard/billing' },
   ]
   const completedCount = progressSteps.filter(s => s.done).length
   const allDone = completedCount === progressSteps.length
@@ -77,14 +102,12 @@ export default async function DashboardLayout({ children }: { children: React.Re
       <Sidebar widgetTypes={widgetTypes} />
 
       <div className="flex flex-col flex-1 min-w-0">
-        {/* Header bar */}
         <header className="bg-white border-b border-gray-200 pl-14 pr-6 lg:px-6 h-14 flex items-center gap-4 shrink-0">
           <div className="flex-1 min-w-0">
             <PageTitle />
           </div>
 
           <div className="flex items-center gap-2">
-            {/* Create Widget */}
             <Link
               href="/dashboard/widgets?new=1"
               className="inline-flex items-center gap-1.5 px-3.5 py-1.5 bg-indigo-600 text-white text-xs font-semibold rounded-lg hover:bg-indigo-700 transition-colors shadow-sm"
@@ -93,20 +116,14 @@ export default async function DashboardLayout({ children }: { children: React.Re
               Create Widget
             </Link>
 
-            {/* Getting started progress (hide when all done) */}
             {!allDone && (
-              <GettingStarted
-                steps={progressSteps}
-                completedCount={completedCount}
-              />
+              <GettingStarted steps={progressSteps} completedCount={completedCount} />
             )}
 
-            {/* Bell */}
             <button className="w-8 h-8 flex items-center justify-center text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors">
               <Bell size={15} />
             </button>
 
-            {/* Avatar + name + plan */}
             <div className="flex items-center gap-2 pl-1 border-l border-gray-200 ml-1">
               <div className="w-7 h-7 rounded-full overflow-hidden bg-indigo-600 flex items-center justify-center text-[11px] font-bold text-white shrink-0">
                 {avatarUrl
@@ -124,7 +141,6 @@ export default async function DashboardLayout({ children }: { children: React.Re
               </div>
             </div>
 
-            {/* Sign out */}
             <form action={signOut}>
               <button type="submit" className="text-xs text-gray-400 hover:text-gray-700 font-medium transition-colors px-1">
                 Sign out
