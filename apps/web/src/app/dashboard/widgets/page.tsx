@@ -365,12 +365,19 @@ export default function WidgetsPage() {
                 )}
 
                 {/* Primary action */}
-                <div className="mt-auto">
+                <div className="mt-auto flex gap-2">
                   <Link
                     href={`/dashboard/widgets/${widget.id}`}
-                    className="flex items-center justify-center gap-1.5 w-full px-3 py-2.5 bg-indigo-600 text-white text-xs font-semibold rounded-lg hover:bg-indigo-700 transition-colors"
+                    className="flex items-center justify-center gap-1.5 flex-1 px-3 py-2.5 bg-indigo-600 text-white text-xs font-semibold rounded-lg hover:bg-indigo-700 transition-colors"
                   >
-                    <Settings2 size={13} /> Configure widget
+                    <Settings2 size={13} /> Configure
+                  </Link>
+                  <Link
+                    href={`/dashboard/analytics/${widget.id}`}
+                    className="flex items-center justify-center gap-1 px-2.5 py-2.5 border border-gray-200 text-gray-500 text-xs font-medium rounded-lg hover:bg-gray-50 hover:text-gray-700 transition-colors"
+                    title="View analytics"
+                  >
+                    <BarChart2 size={13} />
                   </Link>
                 </div>
               </div>

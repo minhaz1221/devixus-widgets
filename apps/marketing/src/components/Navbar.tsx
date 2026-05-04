@@ -18,6 +18,7 @@ function LogoIcon() {
 const NAV_LINKS = [
   { label: 'Widgets', href: '/widgets' },
   { label: 'Pricing', href: '/#pricing' },
+  { label: 'Blog', href: '/blog' },
 ]
 
 export function Navbar() {

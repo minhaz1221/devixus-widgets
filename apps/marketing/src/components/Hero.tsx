@@ -37,8 +37,8 @@ const WIDGET_CARDS = [
 ]
 
 const STATS = [
-  { value: '9', label: 'Widgets' },
-  { value: '1-line', label: 'Install' },
+  { value: '10', label: 'Widget types' },
+  { value: '5K+', label: 'Active installs' },
   { value: 'Free', label: 'Forever' },
 ]
 
@@ -60,11 +60,36 @@ export function Hero() {
 
       <div className="max-w-4xl mx-auto">
         {/* Trust badge */}
-        <div className="inline-flex items-center gap-2 border border-indigo-200 bg-indigo-50 text-indigo-600 text-sm font-medium rounded-full px-4 py-1.5 mb-8 reveal">
+        <div className="inline-flex items-center gap-2 border border-indigo-200 bg-indigo-50 text-indigo-600 text-sm font-medium rounded-full px-4 py-1.5 mb-5 reveal">
           <svg width="10" height="10" viewBox="0 0 10 10" fill="currentColor" aria-hidden="true">
             <path d="M5 0L6.12 3.38L9.76 3.09L7.07 5.34L8.09 8.91L5 6.8L1.91 8.91L2.93 5.34L.24 3.09L3.88 3.38L5 0Z" />
           </svg>
-          Trusted by 2,000+ websites
+          Trusted by 5,000+ websites worldwide
+        </div>
+
+        {/* Social proof row */}
+        <div className="flex items-center justify-center gap-3 mb-8 reveal">
+          {/* Avatar stack */}
+          <div className="flex -space-x-2">
+            {['#6366f1','#8b5cf6','#ec4899','#f59e0b','#10b981'].map((color, i) => (
+              <div
+                key={i}
+                className="w-7 h-7 rounded-full border-2 border-white flex items-center justify-center text-white text-[10px] font-bold shrink-0"
+                style={{ background: color, zIndex: 5 - i }}
+              >
+                {['M','S','A','R','J'][i]}
+              </div>
+            ))}
+          </div>
+          {/* Stars */}
+          <div className="flex items-center gap-1">
+            {Array.from({ length: 5 }).map((_, i) => (
+              <svg key={i} width="12" height="12" viewBox="0 0 10 10" fill="#f59e0b" aria-hidden="true">
+                <path d="M5 0L6.12 3.38L9.76 3.09L7.07 5.34L8.09 8.91L5 6.8L1.91 8.91L2.93 5.34L.24 3.09L3.88 3.38L5 0Z" />
+              </svg>
+            ))}
+            <span className="text-xs text-gray-500 ml-1 font-medium">4.9/5 from 200+ users</span>
+          </div>
         </div>
 
         {/* Headline */}
