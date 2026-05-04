@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { X, MessageCircle, Star, Play, Globe, Timer, Megaphone, Mail, Share2, Camera, Music, Lock } from 'lucide-react'
+import { X, MessageCircle, Star, Play, Globe, Timer, Megaphone, Mail, Share2, Camera, Music, Lock, HelpCircle, Hash, MapPin } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
 
 interface Props {
@@ -248,6 +248,54 @@ const WIDGET_TYPES: WidgetType[] = [
       num_videos: 9,
       autoplay_on_hover: false,
       theme: 'light',
+    },
+  },
+  {
+    type: 'faq_accordion',
+    label: 'FAQ',
+    description: 'Collapsible FAQ accordion — answer questions and boost SEO',
+    icon: HelpCircle,
+    color: '#f97316',
+    category: 'tools',
+    available: true,
+    defaultConfig: {
+      questions: [],
+      allow_multiple: false,
+      open_first: true,
+      theme: 'light',
+      accent_color: '#6366f1',
+      border_radius: 8,
+      show_icon: true,
+    },
+  },
+  {
+    type: 'number_counter',
+    label: 'Number Counter',
+    description: 'Animated stats and metrics to showcase your achievements',
+    icon: Hash,
+    color: '#06b6d4',
+    category: 'tools',
+    available: true,
+    defaultConfig: {
+      stats: [],
+      animate: true,
+      theme: 'light',
+      accent_color: '#6366f1',
+      columns: 3,
+    },
+  },
+  {
+    type: 'google_maps',
+    label: 'Google Maps',
+    description: 'Embed an interactive Google Map for your location',
+    icon: MapPin,
+    color: '#10b981',
+    category: 'tools',
+    available: true,
+    defaultConfig: {
+      embed_url: '',
+      height: 400,
+      border_radius: 12,
     },
   },
 ]

@@ -4,7 +4,7 @@ import { useState } from 'react'
 import Link from 'next/link'
 import {
   MessageCircle, Star, Play, Globe, Timer, Megaphone,
-  Mail, Share2, Camera, Music, type LucideIcon,
+  Mail, Share2, Camera, Music, HelpCircle, Hash, MapPin, type LucideIcon,
 } from 'lucide-react'
 
 interface WidgetDef {
@@ -88,6 +88,30 @@ const WIDGETS: Record<string, WidgetDef> = {
     icon: Music,
     color: '#2d2d2d',
     category: 'social',
+  },
+  faq_accordion: {
+    label: 'FAQ',
+    description: 'Collapsible FAQ accordion to answer common questions and boost SEO.',
+    icon: HelpCircle,
+    color: '#f97316',
+    category: 'tools',
+    badge: 'New',
+  },
+  number_counter: {
+    label: 'Number Counter',
+    description: 'Animated stats and metrics widget to showcase your achievements.',
+    icon: Hash,
+    color: '#06b6d4',
+    category: 'tools',
+    badge: 'New',
+  },
+  google_maps: {
+    label: 'Google Maps',
+    description: 'Embed an interactive Google Map showing your location or any address.',
+    icon: MapPin,
+    color: '#10b981',
+    category: 'tools',
+    badge: 'New',
   },
 }
 

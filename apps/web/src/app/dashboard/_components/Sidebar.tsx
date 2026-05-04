@@ -7,6 +7,7 @@ import {
   LayoutDashboard, BarChart2, Settings, CreditCard, Zap, ArrowUpRight,
   X, Menu, MessageCircle, Star, Play, Globe, Timer, Megaphone, Mail,
   Share2, Camera, Music, BookOpen, LayoutGrid, Plus, ChevronDown, ChevronRight,
+  HelpCircle, Hash, MapPin,
   type LucideIcon,
 } from 'lucide-react'
 
@@ -36,6 +37,9 @@ const TYPE_ICONS: Record<string, { Icon: LucideIcon; color: string; label: strin
   social_follow:    { Icon: Share2,        color: '#ec4899', label: 'Social Follow' },
   instagram_feed:   { Icon: Camera,        color: '#e4405f', label: 'Instagram Feed' },
   tiktok_feed:      { Icon: Music,         color: '#2d2d2d', label: 'TikTok Feed' },
+  faq_accordion:    { Icon: HelpCircle,    color: '#f97316', label: 'FAQ' },
+  number_counter:   { Icon: Hash,          color: '#06b6d4', label: 'Number Counter' },
+  google_maps:      { Icon: MapPin,        color: '#10b981', label: 'Google Maps' },
 }
 
 interface SidebarContentProps {

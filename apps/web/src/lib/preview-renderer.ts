@@ -40,6 +40,23 @@ ${getRenderer(widgetType)}
 function getMockData(widgetType: string): Record<string, unknown> {
   const colors = ['#FF6B6B','#4ECDC4','#45B7D1','#96CEB4','#FFEAA7','#DDA0DD','#98D8C8','#F7DC6F','#BB8FCE']
   const all: Record<string, unknown> = {
+    faq_accordion: {
+      questions: [
+        { q: 'How do I get started?', a: 'Simply sign up for a free account, choose a widget type, configure it visually, and copy the embed code to your website.' },
+        { q: 'Do I need coding skills?', a: 'Not at all! Our drag-and-drop editor makes it easy for anyone to create and customize widgets without any coding knowledge.' },
+        { q: 'Can I use this on multiple websites?', a: 'Yes! You can embed your widgets on as many websites as you like. Each widget tracks installs separately.' },
+        { q: 'What happens if I exceed my view limit?', a: 'On the free plan, widgets are paused when the monthly view limit is reached. Upgrading to Pro gives you unlimited views.' },
+        { q: 'Is there a free plan?', a: 'Yes! Our free plan lets you create widgets with up to 200 monthly views — perfect for getting started.' },
+      ]
+    },
+    number_counter: {
+      stats: [
+        { value: '10,000', label: 'Happy Customers', suffix: '+' },
+        { value: '98', label: 'Satisfaction Rate', suffix: '%' },
+        { value: '50', label: 'Countries Served', suffix: '+' },
+        { value: '24/7', label: 'Customer Support' },
+      ]
+    },
     youtube_feed: {
       channel: { name: 'MrBeast', subscribers: '247M' },
       videos: [
@@ -95,6 +112,9 @@ function getRenderer(widgetType: string): string {
     case 'social_follow':    return socialFollowRenderer()
     case 'instagram_feed':   return instagramRenderer()
     case 'tiktok_feed':      return tiktokRenderer()
+    case 'faq_accordion':    return faqRenderer()
+    case 'number_counter':   return numberCounterRenderer()
+    case 'google_maps':      return googleMapsRenderer()
     default:
       return `root.innerHTML='<div style="padding:40px;text-align:center;color:#94a3b8;font-size:13px;">Widget preview</div>';`
   }
@@ -554,6 +574,89 @@ videos.forEach(function(v) {
   html += '</div></div>';
 });
 html += '</div>';
+root.innerHTML = html;
+`
+}
+
+function faqRenderer(): string {
+  return `
+var isDark = C.theme === 'dark';
+var bg = isDark ? '#0f172a' : '#f8faff';
+var cardBg = isDark ? '#1e293b' : '#ffffff';
+var text = isDark ? '#f1f5f9' : '#1f2937';
+var sub = isDark ? '#94a3b8' : '#6b7280';
+var accent = C.accent_color || '#6366f1';
+var radius = (C.border_radius !== undefined ? C.border_radius : 8) + 'px';
+var questions = (C.questions && C.questions.length ? C.questions : M.questions) || [];
+var title = C.title || '';
+document.body.style.background = bg;
+document.body.style.padding = '16px';
+var html = '';
+if (title) html += '<h3 style="font-size:17px;font-weight:700;color:' + text + ';margin-bottom:14px;">' + title + '</h3>';
+html += '<div style="display:flex;flex-direction:column;gap:2px;">';
+questions.forEach(function(item, i) {
+  var isOpen = i === 0 && C.open_first !== false;
+  var id = 'faq-' + i;
+  html += '<div style="background:' + cardBg + ';border-radius:' + radius + ';border:1px solid ' + (isDark ? '#2d3748' : '#e5e7eb') + ';overflow:hidden;margin-bottom:2px;">';
+  html += '<button onclick="var el=document.getElementById(\'' + id + '\');var open=el.style.display!==\'none\';el.style.display=open?\'none\':\'block\';this.querySelector(\'.ico\').textContent=open?\'+\':\'-\';" style="width:100%;display:flex;align-items:center;justify-content:space-between;padding:14px 16px;background:transparent;border:none;cursor:pointer;text-align:left;font-size:13px;font-weight:600;color:' + text + ';font-family:inherit;">';
+  html += '<span>' + item.q + '</span><span class="ico" style="font-size:20px;color:' + accent + ';flex-shrink:0;margin-left:12px;">' + (isOpen ? '−' : '+') + '</span></button>';
+  html += '<div id="' + id + '" style="display:' + (isOpen ? 'block' : 'none') + ';padding:0 16px 14px;font-size:13px;color:' + sub + ';line-height:1.6;border-top:1px solid ' + (isDark ? '#2d3748' : '#f3f4f6') + ';">' + item.a + '</div>';
+  html += '</div>';
+});
+html += '</div>';
+root.innerHTML = html;
+`
+}
+
+function numberCounterRenderer(): string {
+  return `
+var isDark = C.theme === 'dark';
+var bg = isDark ? '#0f172a' : '#f8faff';
+var cardBg = isDark ? '#1e293b' : '#ffffff';
+var text = isDark ? '#f1f5f9' : '#1f2937';
+var sub = isDark ? '#94a3b8' : '#6b7280';
+var accent = C.accent_color || '#6366f1';
+var cols = C.columns || 3;
+var stats = (C.stats && C.stats.length ? C.stats : M.stats) || [];
+var title = C.title || '';
+document.body.style.background = bg;
+document.body.style.padding = '24px';
+var html = '';
+if (title) html += '<h3 style="font-size:17px;font-weight:700;color:' + text + ';margin-bottom:20px;text-align:center;">' + title + '</h3>';
+var gridCols = Math.min(cols, stats.length || 1);
+html += '<div style="display:grid;grid-template-columns:repeat(' + gridCols + ',1fr);gap:16px;">';
+stats.forEach(function(s) {
+  html += '<div style="background:' + cardBg + ';border-radius:12px;padding:20px;text-align:center;box-shadow:0 2px 8px rgba(0,0,0,0.06);">';
+  html += '<div style="font-size:32px;font-weight:800;color:' + accent + ';line-height:1.1;margin-bottom:6px;">' + (s.prefix || '') + s.value + (s.suffix || '') + '</div>';
+  html += '<div style="font-size:12px;font-weight:500;color:' + sub + ';text-transform:uppercase;letter-spacing:0.04em;">' + s.label + '</div>';
+  html += '</div>';
+});
+if (stats.length === 0) html += '<div style="padding:40px;text-align:center;color:' + sub + ';font-size:13px;">Add stats to preview</div>';
+html += '</div>';
+root.innerHTML = html;
+`
+}
+
+function googleMapsRenderer(): string {
+  return `
+var embedUrl = C.embed_url || '';
+var height = (C.height || 400) + 'px';
+var radius = (C.border_radius !== undefined ? C.border_radius : 12) + 'px';
+var title = C.title || '';
+document.body.style.background = '#f8faff';
+document.body.style.padding = '16px';
+var html = '';
+if (title) html += '<h3 style="font-size:15px;font-weight:700;color:#1f2937;margin-bottom:10px;">' + title + '</h3>';
+if (embedUrl) {
+  html += '<div style="border-radius:' + radius + ';overflow:hidden;box-shadow:0 4px 16px rgba(0,0,0,0.08);">';
+  html += '<iframe src="' + embedUrl + '" width="100%" height="' + height + '" style="border:0;display:block;" allowfullscreen loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>';
+  html += '</div>';
+} else {
+  html += '<div style="border-radius:' + radius + ';overflow:hidden;box-shadow:0 4px 16px rgba(0,0,0,0.08);height:' + height + ';background:#e8f0fe;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;">';
+  html += '<svg width="48" height="48" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z" fill="#4285f4"/><circle cx="12" cy="9" r="2.5" fill="white"/></svg>';
+  html += '<div style="text-align:center;"><div style="font-size:14px;font-weight:600;color:#1f2937;">Add your embed URL</div><div style="font-size:12px;color:#6b7280;margin-top:4px;">Google Maps → Share → Embed a map → copy src</div></div>';
+  html += '</div>';
+}
 root.innerHTML = html;
 `
 }

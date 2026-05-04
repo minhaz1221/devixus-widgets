@@ -8,12 +8,14 @@ import {
   ArrowLeft, X, Check, Copy, Plus, Trash2, Star, Monitor, Smartphone, Tablet,
   Lock, MessageCircle, Play, Globe, Timer, Megaphone, Mail, Share2,
   Camera, Music, AlertTriangle, ChevronDown, ExternalLink,
+  HelpCircle, Hash, MapPin,
 } from 'lucide-react'
 import { generatePreviewHTML } from '@/lib/preview-renderer'
 import type {
   Widget, WhatsAppConfig, TestimonialsConfig, YouTubeFeedConfig,
   CountdownTimerConfig, AnnouncementBarConfig, GoogleReviewsConfig,
   ContactFormConfig, SocialFollowConfig, InstagramFeedConfig, TikTokFeedConfig,
+  FAQConfig, NumberCounterConfig,
 } from '@/types/widget'
 import { ConfigSection } from '@/components/ui/ConfigSection'
 import { ToggleSwitch } from '@/components/ui/ToggleSwitch'
@@ -49,6 +51,9 @@ const TYPE_META: Record<string, { label: string; Icon: React.ElementType; color:
   social_follow:    { label: 'Social Follow',     Icon: Share2,        color: '#ec4899' },
   instagram_feed:   { label: 'Instagram Feed',    Icon: Camera,        color: '#e4405f' },
   tiktok_feed:      { label: 'TikTok Feed',       Icon: Music,         color: '#2d2d2d' },
+  faq_accordion:    { label: 'FAQ',               Icon: HelpCircle,    color: '#f97316' },
+  number_counter:   { label: 'Number Counter',    Icon: Hash,          color: '#06b6d4' },
+  google_maps:      { label: 'Google Maps',       Icon: MapPin,        color: '#10b981' },
 }
 
 // ── Small UI helpers ───────────────────────────────────────────────────────
@@ -237,6 +242,112 @@ function TestimonialsContent({ config, onChange }: { config: Record<string, unkn
   )
 }
 
+// ── FAQ sub-component ─────────────────────────────────────────────────────
+interface FAQItem { q: string; a: string }
+const BLANK_FAQ: FAQItem = { q: '', a: '' }
+
+function FAQContent({ config, onChange }: { config: Record<string, unknown>; onChange: (c: Record<string, unknown>) => void }) {
+  const c = config as Partial<FAQConfig>
+  const questions = (c.questions as FAQItem[]) ?? []
+  const [draft, setDraft] = useState<FAQItem>({ ...BLANK_FAQ })
+  const [adding, setAdding] = useState(false)
+
+  function add() {
+    if (!draft.q || !draft.a) return
+    onChange({ ...config, questions: [...questions, { ...draft }] })
+    setDraft({ ...BLANK_FAQ }); setAdding(false)
+  }
+
+  return (
+    <ConfigSection title={`Questions (${questions.length})`}>
+      <button type="button" onClick={() => setAdding(a => !a)} className="inline-flex items-center gap-1 text-xs text-indigo-600 font-semibold hover:underline mb-2">
+        <Plus size={12} /> Add question
+      </button>
+      {adding && (
+        <div className="border border-indigo-200 bg-indigo-50 rounded-xl p-3 space-y-2 mb-3">
+          <div>
+            <label className="block text-[11px] font-medium text-gray-500 mb-1">Question *</label>
+            <input value={draft.q} onChange={e => setDraft(d => ({ ...d, q: e.target.value }))} placeholder="How does it work?" className={INPUT} />
+          </div>
+          <div>
+            <label className="block text-[11px] font-medium text-gray-500 mb-1">Answer *</label>
+            <textarea value={draft.a} onChange={e => setDraft(d => ({ ...d, a: e.target.value }))} rows={3} placeholder="Type your answer here..." className={`${INPUT} resize-none`} />
+          </div>
+          <div className="flex justify-end gap-2">
+            <button type="button" onClick={() => { setAdding(false); setDraft({ ...BLANK_FAQ }) }} className="px-2.5 py-1 text-xs border border-gray-200 rounded-lg hover:bg-gray-50">Cancel</button>
+            <button type="button" onClick={add} disabled={!draft.q || !draft.a} className="px-2.5 py-1 text-xs font-semibold text-white bg-indigo-600 rounded-lg hover:bg-indigo-700 disabled:opacity-50">Add</button>
+          </div>
+        </div>
+      )}
+      {questions.length === 0 && !adding && <p className="text-xs text-gray-400">No questions yet.</p>}
+      <ul className="space-y-2">
+        {questions.map((item, i) => (
+          <li key={i} className="flex items-start justify-between gap-2 bg-gray-50 rounded-lg px-3 py-2">
+            <div className="min-w-0">
+              <p className="text-xs font-semibold text-gray-800 truncate">{item.q}</p>
+              <p className="text-[11px] text-gray-500 line-clamp-1">{item.a}</p>
+            </div>
+            <button type="button" onClick={() => onChange({ ...config, questions: questions.filter((_, idx) => idx !== i) })} className="shrink-0 text-gray-400 hover:text-red-500 transition-colors"><Trash2 size={13} /></button>
+          </li>
+        ))}
+      </ul>
+    </ConfigSection>
+  )
+}
+
+// ── Number Counter sub-component ───────────────────────────────────────────
+interface StatItem { value: string; label: string; prefix?: string; suffix?: string }
+const BLANK_STAT: StatItem = { value: '', label: '', prefix: '', suffix: '' }
+
+function NumberCounterContent({ config, onChange }: { config: Record<string, unknown>; onChange: (c: Record<string, unknown>) => void }) {
+  const c = config as Partial<NumberCounterConfig>
+  const stats = (c.stats as StatItem[]) ?? []
+  const [draft, setDraft] = useState<StatItem>({ ...BLANK_STAT })
+  const [adding, setAdding] = useState(false)
+
+  function add() {
+    if (!draft.value || !draft.label) return
+    onChange({ ...config, stats: [...stats, { ...draft }] })
+    setDraft({ ...BLANK_STAT }); setAdding(false)
+  }
+
+  return (
+    <ConfigSection title={`Stats (${stats.length})`}>
+      <button type="button" onClick={() => setAdding(a => !a)} className="inline-flex items-center gap-1 text-xs text-indigo-600 font-semibold hover:underline mb-2">
+        <Plus size={12} /> Add stat
+      </button>
+      {adding && (
+        <div className="border border-indigo-200 bg-indigo-50 rounded-xl p-3 space-y-2 mb-3">
+          <div className="grid grid-cols-2 gap-2">
+            <div><label className="block text-[11px] font-medium text-gray-500 mb-1">Value *</label><input value={draft.value} onChange={e => setDraft(d => ({ ...d, value: e.target.value }))} placeholder="10,000" className={INPUT} /></div>
+            <div><label className="block text-[11px] font-medium text-gray-500 mb-1">Label *</label><input value={draft.label} onChange={e => setDraft(d => ({ ...d, label: e.target.value }))} placeholder="Happy Customers" className={INPUT} /></div>
+          </div>
+          <div className="grid grid-cols-2 gap-2">
+            <div><label className="block text-[11px] font-medium text-gray-500 mb-1">Prefix</label><input value={draft.prefix ?? ''} onChange={e => setDraft(d => ({ ...d, prefix: e.target.value }))} placeholder="$" className={INPUT} /></div>
+            <div><label className="block text-[11px] font-medium text-gray-500 mb-1">Suffix</label><input value={draft.suffix ?? ''} onChange={e => setDraft(d => ({ ...d, suffix: e.target.value }))} placeholder="+" className={INPUT} /></div>
+          </div>
+          <div className="flex justify-end gap-2">
+            <button type="button" onClick={() => { setAdding(false); setDraft({ ...BLANK_STAT }) }} className="px-2.5 py-1 text-xs border border-gray-200 rounded-lg hover:bg-gray-50">Cancel</button>
+            <button type="button" onClick={add} disabled={!draft.value || !draft.label} className="px-2.5 py-1 text-xs font-semibold text-white bg-indigo-600 rounded-lg hover:bg-indigo-700 disabled:opacity-50">Add</button>
+          </div>
+        </div>
+      )}
+      {stats.length === 0 && !adding && <p className="text-xs text-gray-400">No stats yet.</p>}
+      <ul className="space-y-2">
+        {stats.map((s, i) => (
+          <li key={i} className="flex items-start justify-between gap-2 bg-gray-50 rounded-lg px-3 py-2">
+            <div className="min-w-0">
+              <p className="text-xs font-semibold text-gray-800">{s.prefix}{s.value}{s.suffix}</p>
+              <p className="text-[11px] text-gray-500">{s.label}</p>
+            </div>
+            <button type="button" onClick={() => onChange({ ...config, stats: stats.filter((_, idx) => idx !== i) })} className="shrink-0 text-gray-400 hover:text-red-500 transition-colors"><Trash2 size={13} /></button>
+          </li>
+        ))}
+      </ul>
+    </ConfigSection>
+  )
+}
+
 // ── Panel: Content (dispatcher) ────────────────────────────────────────────
 function ContentPanel({ type, config, onChange }: { type: string; config: Record<string, unknown>; onChange: (c: Record<string, unknown>) => void }) {
   const set = (k: string, v: unknown) => onChange({ ...config, [k]: v })
@@ -344,6 +455,31 @@ function ContentPanel({ type, config, onChange }: { type: string; config: Record
     )
   }
 
+  if (type === 'faq_accordion') return <FAQContent config={config} onChange={onChange} />
+  if (type === 'number_counter') return <NumberCounterContent config={config} onChange={onChange} />
+
+  if (type === 'google_maps') {
+    return (
+      <ConfigSection title="Map Source">
+        <label className="block text-xs font-medium text-gray-600 mb-1">Google Maps Embed URL</label>
+        <p className="text-[11px] text-gray-400 mb-2">Go to Google Maps → Share → Embed a map → copy the src URL</p>
+        <textarea
+          value={(config.embed_url as string) ?? ''}
+          onChange={e => set('embed_url', e.target.value)}
+          rows={4}
+          placeholder="https://www.google.com/maps/embed?pb=..."
+          className={`${INPUT} resize-none font-mono text-[11px]`}
+        />
+        <label className="block text-xs font-medium text-gray-600 mt-3 mb-1">Map Height</label>
+        <select value={(config.height as number) ?? 400} onChange={e => set('height', parseInt(e.target.value))} className={INPUT}>
+          {[300, 400, 450, 500, 600].map(n => <option key={n} value={n}>{n}px</option>)}
+        </select>
+        <label className="block text-xs font-medium text-gray-600 mt-3 mb-1">Optional Title</label>
+        <input type="text" value={(config.title as string) ?? ''} onChange={e => set('title', e.target.value)} placeholder="Find Us Here" className={INPUT} />
+      </ConfigSection>
+    )
+  }
+
   return <p className="text-xs text-gray-400 py-4">No content settings for this widget type.</p>
 }
 
@@ -393,6 +529,18 @@ function HeaderPanel({ type, config, onChange }: { type: string; config: Record<
         <ToggleSwitch label="Show minutes" checked={c.show_minutes !== false} onChange={v => set('show_minutes', v)} />
         <ToggleSwitch label="Show seconds" checked={c.show_seconds !== false} onChange={v => set('show_seconds', v)} />
         <ToggleSwitch label="Show labels"  checked={c.show_labels  !== false} onChange={v => set('show_labels', v)} />
+      </ConfigSection>
+    )
+  }
+
+  if (type === 'faq_accordion' || type === 'number_counter') {
+    const sectionTitle = type === 'faq_accordion' ? 'FAQ Section Header' : 'Section Header'
+    return (
+      <ConfigSection title={sectionTitle}>
+        <label className="block text-xs font-medium text-gray-600 mb-1">Title</label>
+        <input type="text" value={(config.title as string) ?? ''} onChange={e => set('title', e.target.value)} placeholder={type === 'faq_accordion' ? 'Frequently Asked Questions' : 'Our Numbers'} className={INPUT} />
+        <label className="block text-xs font-medium text-gray-600 mt-3 mb-1">Description</label>
+        <input type="text" value={(config.description as string) ?? ''} onChange={e => set('description', e.target.value)} placeholder="Optional subtitle text" className={INPUT} />
       </ConfigSection>
     )
   }
@@ -519,6 +667,24 @@ function LayoutPanel({ type, config, onChange }: { type: string; config: Record<
         <OptionPicker label="Videos" value={String(c.num_videos ?? 9)} onChange={v => set('num_videos', Number(v))} columns={3} options={[{ value: '6', label: '6' }, { value: '9', label: '9' }, { value: '12', label: '12' }]} />
         <OptionPicker label="Gap" value={c.gap ?? '8px'} onChange={v => set('gap', v)} columns={4} options={[{ value: '4px', label: '4px' }, { value: '8px', label: '8px' }, { value: '12px', label: '12px' }, { value: '16px', label: '16px' }]} />
         <OptionPicker label="Radius" value={c.border_radius ?? '8px'} onChange={v => set('border_radius', v)} columns={4} options={[{ value: '0px', label: 'None' }, { value: '8px', label: 'SM' }, { value: '16px', label: 'MD' }, { value: 'round', label: 'Full' }]} />
+      </ConfigSection>
+    )
+  }
+
+  if (type === 'number_counter') {
+    return (
+      <ConfigSection title="Layout">
+        <OptionPicker label="Columns" value={String((config.columns as number) ?? 3)} onChange={v => set('columns', Number(v))} columns={3} options={[{ value: '2', label: '2' }, { value: '3', label: '3' }, { value: '4', label: '4' }]} />
+        <ToggleSwitch label="Animate on scroll" checked={(config.animate as boolean) !== false} onChange={v => set('animate', v)} />
+      </ConfigSection>
+    )
+  }
+
+  if (type === 'faq_accordion') {
+    return (
+      <ConfigSection title="Behavior">
+        <ToggleSwitch label="Allow multiple open" checked={!!(config.allow_multiple as boolean)} onChange={v => set('allow_multiple', v)} />
+        <ToggleSwitch label="Open first item by default" checked={(config.open_first as boolean) !== false} onChange={v => set('open_first', v)} />
       </ConfigSection>
     )
   }
@@ -806,6 +972,33 @@ function StylePanel({ type, config, onChange }: { type: string; config: Record<s
     )
   }
 
+  if (type === 'faq_accordion') {
+    return (
+      <ConfigSection title="Design">
+        <OptionPicker label="Theme" value={(config.theme as string) ?? 'light'} onChange={v => set('theme', v)} columns={2} options={[{ value: 'light', label: 'Light' }, { value: 'dark', label: 'Dark' }]} />
+        <ColorPicker label="Accent Color" value={(config.accent_color as string) ?? '#6366f1'} onChange={v => set('accent_color', v)} presets={['#6366f1', '#8b5cf6', '#10b981', '#f59e0b', '#ef4444', '#3b82f6']} />
+        <RangeSlider label="Border Radius" value={(config.border_radius as number) ?? 8} onChange={v => set('border_radius', v)} min={0} max={20} unit="px" />
+      </ConfigSection>
+    )
+  }
+
+  if (type === 'number_counter') {
+    return (
+      <ConfigSection title="Design">
+        <OptionPicker label="Theme" value={(config.theme as string) ?? 'light'} onChange={v => set('theme', v)} columns={2} options={[{ value: 'light', label: 'Light' }, { value: 'dark', label: 'Dark' }]} />
+        <ColorPicker label="Number Color" value={(config.accent_color as string) ?? '#6366f1'} onChange={v => set('accent_color', v)} presets={['#6366f1', '#8b5cf6', '#10b981', '#f59e0b', '#06b6d4', '#3b82f6']} />
+      </ConfigSection>
+    )
+  }
+
+  if (type === 'google_maps') {
+    return (
+      <ConfigSection title="Map Style">
+        <RangeSlider label="Border Radius" value={(config.border_radius as number) ?? 12} onChange={v => set('border_radius', v)} min={0} max={24} unit="px" />
+      </ConfigSection>
+    )
+  }
+
   return <p className="text-xs text-gray-400 py-4">No style settings for this widget type.</p>
 }
 
@@ -956,6 +1149,7 @@ export default function ConfiguratorPage() {
   const configRef    = useRef<Record<string, unknown>>({})
   const nameRef      = useRef('')
   const autoSaveRef  = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const iframeRef    = useRef<HTMLIFrameElement>(null)
 
   const load = useCallback(async () => {
     const res = await fetch(`/api/widgets/${id}`)
@@ -980,6 +1174,12 @@ export default function ConfiguratorPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [widget?.type, JSON.stringify(config)]
   )
+
+  // Force iframe reload via direct IDL property — React's srcDoc prop uses setAttribute
+  // which doesn't trigger a reload in all browsers
+  useEffect(() => {
+    if (iframeRef.current) iframeRef.current.srcdoc = previewHtml
+  }, [previewHtml])
 
   function scheduleAutoSave() {
     if (autoSaveRef.current) clearTimeout(autoSaveRef.current)
@@ -1195,8 +1395,9 @@ export default function ConfiguratorPage() {
               style={{ width: DEVICE_WIDTHS[device] ?? '100%', minHeight: 480 }}
             >
               <iframe
+                ref={iframeRef}
                 srcDoc={previewHtml}
-                sandbox="allow-scripts"
+                sandbox="allow-scripts allow-same-origin"
                 style={{ width: '100%', minHeight: 480, border: 'none', background: 'transparent', display: 'block' }}
                 title="Widget preview"
               />

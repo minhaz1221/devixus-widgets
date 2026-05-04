@@ -10,6 +10,9 @@ export type WidgetType =
   | 'announcement_bar'
   | 'instagram_feed'
   | 'tiktok_feed'
+  | 'faq_accordion'
+  | 'number_counter'
+  | 'google_maps'
 
 export interface Widget {
   id: string
@@ -188,6 +191,35 @@ export interface TikTokFeedConfig {
   num_videos: 6 | 9 | 12
   autoplay_on_hover: boolean
   theme: 'light' | 'dark' | 'auto'
+}
+
+export interface FAQConfig {
+  questions: Array<{ q: string; a: string }>
+  allow_multiple: boolean
+  open_first: boolean
+  title?: string
+  description?: string
+  theme: 'light' | 'dark'
+  accent_color: string
+  border_radius: number
+  show_icon: boolean
+}
+
+export interface NumberCounterConfig {
+  stats: Array<{ value: string; label: string; prefix?: string; suffix?: string }>
+  animate: boolean
+  title?: string
+  description?: string
+  theme: 'light' | 'dark'
+  accent_color: string
+  columns: number
+}
+
+export interface GoogleMapsConfig {
+  embed_url: string
+  height: number
+  border_radius: number
+  title?: string
 }
 
 export interface SocialFollowConfig {
