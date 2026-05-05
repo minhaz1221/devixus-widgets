@@ -92,7 +92,7 @@ function WhatsAppContent({ config, onChange }: { config: Record<string, unknown>
   )
 }
 
-function YouTubeContent({ config, onChange }: { config: Record<string, unknown>; onChange: (c: Record<string, unknown>) => void }) {
+function YouTubeContent({ config, onChange, onPreviewData }: { config: Record<string, unknown>; onChange: (c: Record<string, unknown>) => void; onPreviewData?: (d: Record<string, unknown> | null) => void }) {
   const c = config as Partial<YouTubeFeedConfig>
   const set = (k: string, v: unknown) => onChange({ ...config, [k]: v })
   const [url, setUrl] = useState(c.channel_url ?? '')
@@ -107,8 +107,20 @@ function YouTubeContent({ config, onChange }: { config: Record<string, unknown>;
       const res = await fetch(`/api/youtube/resolve?url=${encodeURIComponent(url.trim())}`)
       const data = await res.json()
       if (!res.ok) throw new Error(data.error ?? 'Failed')
-      onChange({ ...config, channel_id: data.channel_id, channel_url: url.trim() })
+
+      const newConfig = { ...config, channel_id: data.channel_id, channel_url: url.trim() }
+      onChange(newConfig)
       setChannelName(data.channel_name)
+
+      // Fetch real video data for live preview (fire-and-forget on error)
+      try {
+        const maxV = (config.max_results as number) ?? 6
+        const feedRes = await fetch(`/api/youtube?channel_id=${data.channel_id}&max_results=${maxV}`)
+        const feedData = await feedRes.json()
+        if (!feedData.is_mock && feedData.videos?.length) {
+          onPreviewData?.({ channel: feedData.channel, videos: feedData.videos })
+        }
+      } catch { /* preview is nice-to-have */ }
     } catch (err) { setFetchError(err instanceof Error ? err.message : 'Failed') }
     finally { setFetching(false) }
   }
@@ -121,8 +133,17 @@ function YouTubeContent({ config, onChange }: { config: Record<string, unknown>;
         <button type="button" onClick={fetchChannel} disabled={!url.trim() || fetching} className={BTN}>{fetching ? '…' : 'Fetch'}</button>
       </div>
       {c.channel_id && <p className="text-xs text-green-600 mt-1 flex items-center gap-1"><Check size={12} /> {channelName || c.channel_id}</p>}
-      {fetchError && <p className="text-xs text-red-500 mt-1">{fetchError}</p>}
-      {!c.channel_id && (
+      {fetchError && (
+        fetchError.toLowerCase().includes('referrer') || fetchError.toLowerCase().includes('blocked')
+          ? (
+            <div className="mt-2 px-3 py-2.5 bg-amber-50 border border-amber-200 rounded-lg space-y-1">
+              <p className="text-xs font-semibold text-amber-800 flex items-center gap-1.5"><AlertTriangle size={12} className="shrink-0" /> YouTube API key restriction</p>
+              <p className="text-[11px] text-amber-700">Your API key has HTTP referrer restrictions that block server-side calls. In Google Cloud Console → Credentials, set the key restriction to <strong>IP addresses</strong> or <strong>None (unrestricted)</strong>.</p>
+            </div>
+          )
+          : <p className="text-xs text-red-500 mt-1">{fetchError}</p>
+      )}
+      {!c.channel_id && !fetchError && (
         <div className="flex items-center gap-2 px-3 py-2 bg-amber-50 border border-amber-200 rounded-lg text-xs text-amber-700 mt-2">
           <AlertTriangle size={13} className="shrink-0 text-amber-500" />
           Using sample data until a channel is connected
@@ -138,7 +159,7 @@ function YouTubeContent({ config, onChange }: { config: Record<string, unknown>;
 
 interface PlaceResult { place_id: string; name: string; address: string; rating: number; total_ratings: number }
 
-function GoogleReviewsContent({ config, onChange }: { config: Record<string, unknown>; onChange: (c: Record<string, unknown>) => void }) {
+function GoogleReviewsContent({ config, onChange, onPreviewData }: { config: Record<string, unknown>; onChange: (c: Record<string, unknown>) => void; onPreviewData?: (d: Record<string, unknown> | null) => void }) {
   const c = config as Partial<GoogleReviewsConfig>
   const [query, setQuery] = useState('')
   const [searching, setSearching] = useState(false)
@@ -158,9 +179,27 @@ function GoogleReviewsContent({ config, onChange }: { config: Record<string, unk
     finally { setSearching(false) }
   }
 
-  function selectPlace(place: PlaceResult) {
+  async function selectPlace(place: PlaceResult) {
     onChange({ ...config, place_id: place.place_id, place_name: place.name, place_address: place.address })
     setResults([]); setQuery('')
+
+    // Fetch real reviews for live preview
+    try {
+      const minRating = (config.min_rating as number) ?? 1
+      const maxReviews = (config.max_reviews as number) ?? 6
+      const reviewsRes = await fetch(`/api/google-reviews?place_id=${encodeURIComponent(place.place_id)}&min_rating=${minRating}&max_reviews=${maxReviews}`)
+      const reviewsData = await reviewsRes.json()
+      if (!reviewsData.error && reviewsData.reviews) {
+        onPreviewData?.({
+          business: {
+            name: place.name,
+            rating: place.rating,
+            total: place.total_ratings,
+          },
+          reviews: reviewsData.reviews,
+        })
+      }
+    } catch { /* preview is nice-to-have */ }
   }
 
   return (
@@ -349,12 +388,12 @@ function NumberCounterContent({ config, onChange }: { config: Record<string, unk
 }
 
 // ── Panel: Content (dispatcher) ────────────────────────────────────────────
-function ContentPanel({ type, config, onChange }: { type: string; config: Record<string, unknown>; onChange: (c: Record<string, unknown>) => void }) {
+function ContentPanel({ type, config, onChange, onPreviewData }: { type: string; config: Record<string, unknown>; onChange: (c: Record<string, unknown>) => void; onPreviewData?: (d: Record<string, unknown> | null) => void }) {
   const set = (k: string, v: unknown) => onChange({ ...config, [k]: v })
 
   if (type === 'whatsapp')       return <WhatsAppContent       config={config} onChange={onChange} />
-  if (type === 'youtube_feed')   return <YouTubeContent        config={config} onChange={onChange} />
-  if (type === 'google_reviews') return <GoogleReviewsContent  config={config} onChange={onChange} />
+  if (type === 'youtube_feed')   return <YouTubeContent        config={config} onChange={onChange} onPreviewData={onPreviewData} />
+  if (type === 'google_reviews') return <GoogleReviewsContent  config={config} onChange={onChange} onPreviewData={onPreviewData} />
   if (type === 'testimonials')   return <TestimonialsContent   config={config} onChange={onChange} />
 
   if (type === 'countdown_timer') {
@@ -569,6 +608,7 @@ function LayoutPanel({ type, config, onChange }: { type: string; config: Record<
         {(c.layout ?? 'grid') === 'grid' && (
           <OptionPicker label="Columns" value={String(c.columns ?? 3)} onChange={v => set('columns', Number(v))} columns={3} options={[{ value: '2', label: '2' }, { value: '3', label: '3' }, { value: '4', label: '4' }]} />
         )}
+        <OptionPicker label="Gap" value={c.gap ?? '16px'} onChange={v => set('gap', v)} columns={4} options={[{ value: '4px', label: '4px' }, { value: '8px', label: '8px' }, { value: '16px', label: '16px' }, { value: '24px', label: '24px' }]} />
       </ConfigSection>
     )
   }
@@ -578,7 +618,7 @@ function LayoutPanel({ type, config, onChange }: { type: string; config: Record<
     return (
       <div className="space-y-4">
         <ConfigSection title="Display">
-          <OptionPicker label="Layout" value={c.layout ?? 'grid'} onChange={v => set('layout', v)} columns={3} options={[{ value: 'grid', label: 'Grid' }, { value: 'list', label: 'List' }, { value: 'carousel', label: 'Carousel' }]} />
+          <OptionPicker label="Layout" value={c.layout ?? 'grid'} onChange={v => set('layout', v)} columns={4} options={[{ value: 'grid', label: 'Grid' }, { value: 'list', label: 'List' }, { value: 'carousel', label: 'Carousel' }, { value: 'badge', label: 'Badge' }]} />
           <label className="block text-xs font-medium text-gray-600 mt-3 mb-1">Max Reviews</label>
           <select value={c.max_reviews ?? 6} onChange={e => set('max_reviews', parseInt(e.target.value))} className={INPUT}>
             {[3, 6, 9, 12].map(n => <option key={n} value={n}>{n} reviews</option>)}
@@ -704,6 +744,7 @@ function CardPanel({ type, config, onChange }: { type: string; config: Record<st
         <label className="block text-xs font-medium text-gray-600 mt-3 mb-1">Tooltip Text</label>
         <input type="text" value={c.tooltip_text ?? ''} onChange={e => set('tooltip_text', e.target.value)} placeholder="Chat with us!" className={INPUT} />
         <ToggleSwitch label="Pulse animation" checked={!!c.pulse_animation} onChange={v => set('pulse_animation', v)} />
+        <RangeSlider label="Tooltip delay" value={c.tooltip_delay ?? 2} onChange={v => set('tooltip_delay', v)} min={0} max={10} unit="s" />
       </ConfigSection>
     )
   }
@@ -711,11 +752,15 @@ function CardPanel({ type, config, onChange }: { type: string; config: Record<st
   if (type === 'youtube_feed') {
     const c = config as Partial<YouTubeFeedConfig>
     return (
-      <ConfigSection title="Video Cards">
-        <ToggleSwitch label="Show title"        checked={c.show_title         !== false} onChange={v => set('show_title', v)} />
-        <ToggleSwitch label="Show publish date" checked={c.show_date          !== false} onChange={v => set('show_date', v)} />
-        <ToggleSwitch label="Show view count"   checked={!!c.show_view_count}            onChange={v => set('show_view_count', v)} />
-      </ConfigSection>
+      <div className="space-y-4">
+        <ConfigSection title="Video Cards">
+          <ToggleSwitch label="Show title"        checked={c.show_title !== false} onChange={v => set('show_title', v)} />
+          <ToggleSwitch label="Show publish date" checked={c.show_date  !== false} onChange={v => set('show_date', v)} />
+        </ConfigSection>
+        <ConfigSection title="Playback">
+          <OptionPicker label="Click behaviour" value={c.play_behavior ?? 'youtube'} onChange={v => set('play_behavior', v)} columns={2} options={[{ value: 'youtube', label: 'Open YouTube' }, { value: 'popup', label: 'Popup player' }]} />
+        </ConfigSection>
+      </div>
     )
   }
 
@@ -892,6 +937,9 @@ function StylePanel({ type, config, onChange }: { type: string; config: Record<s
         </ConfigSection>
         <ConfigSection title="Slider Controls">
           <ToggleSwitch label="Autoplay"    checked={c.autoplay    !== false} onChange={v => set('autoplay', v)} />
+          {c.autoplay !== false && (
+            <RangeSlider label="Autoplay speed" value={c.autoplay_speed ?? 4000} onChange={v => set('autoplay_speed', v)} min={1000} max={8000} step={500} unit="ms" />
+          )}
           <ToggleSwitch label="Show arrows" checked={c.show_arrows !== false} onChange={v => set('show_arrows', v)} />
           <ToggleSwitch label="Show dots"   checked={!!c.show_dots}           onChange={v => set('show_dots', v)} />
         </ConfigSection>
@@ -937,6 +985,7 @@ function StylePanel({ type, config, onChange }: { type: string; config: Record<s
       <ConfigSection title="Design">
         <OptionPicker label="Theme" value={c.theme ?? 'light'} onChange={v => set('theme', v)} columns={2} options={[{ value: 'light', label: 'Light' }, { value: 'dark', label: 'Dark' }]} />
         <ColorPicker label="Accent Color" value={c.accent_color ?? '#6366f1'} onChange={v => set('accent_color', v)} />
+        <ColorPicker label="Button Color" value={c.button_color ?? '#6366f1'} onChange={v => set('button_color', v)} presets={['#6366f1', '#8b5cf6', '#10b981', '#ef4444', '#f59e0b', '#3b82f6']} />
         <RangeSlider label="Border Radius" value={c.border_radius ?? 8} onChange={v => set('border_radius', v)} min={0} max={20} unit="px" />
       </ConfigSection>
     )
@@ -978,6 +1027,7 @@ function StylePanel({ type, config, onChange }: { type: string; config: Record<s
         <OptionPicker label="Theme" value={(config.theme as string) ?? 'light'} onChange={v => set('theme', v)} columns={2} options={[{ value: 'light', label: 'Light' }, { value: 'dark', label: 'Dark' }]} />
         <ColorPicker label="Accent Color" value={(config.accent_color as string) ?? '#6366f1'} onChange={v => set('accent_color', v)} presets={['#6366f1', '#8b5cf6', '#10b981', '#f59e0b', '#ef4444', '#3b82f6']} />
         <RangeSlider label="Border Radius" value={(config.border_radius as number) ?? 8} onChange={v => set('border_radius', v)} min={0} max={20} unit="px" />
+        <ToggleSwitch label="Show expand icon" checked={(config.show_icon as boolean) !== false} onChange={v => set('show_icon', v)} />
       </ConfigSection>
     )
   }
@@ -1145,6 +1195,8 @@ export default function ConfiguratorPage() {
   const [showInstall, setShowInstall] = useState(false)
   const [planName, setPlanName]       = useState('free')
   const [nameEditing, setNameEditing] = useState(false)
+  // Real data fetched after user connects a channel / place — used to show live preview
+  const [previewData, setPreviewData] = useState<Record<string, unknown> | null>(null)
 
   const configRef    = useRef<Record<string, unknown>>({})
   const nameRef      = useRef('')
@@ -1170,9 +1222,9 @@ export default function ConfiguratorPage() {
   }, [load])
 
   const previewHtml = useMemo(
-    () => widget ? generatePreviewHTML(widget.type, config) : '',
+    () => widget ? generatePreviewHTML(widget.type, config, previewData) : '',
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [widget?.type, JSON.stringify(config)]
+    [widget?.type, JSON.stringify(config), JSON.stringify(previewData)]
   )
 
   // Force iframe reload via direct IDL property — React's srcDoc prop uses setAttribute
@@ -1356,7 +1408,7 @@ export default function ConfiguratorPage() {
                 </p>
               </div>
               <div className="flex-1 overflow-y-auto px-4 py-4">
-                {activePanel === 'content'  && <ContentPanel  type={widget.type} config={config} onChange={handleConfigChange} />}
+                {activePanel === 'content'  && <ContentPanel  type={widget.type} config={config} onChange={handleConfigChange} onPreviewData={setPreviewData} />}
                 {activePanel === 'header'   && <HeaderPanel   type={widget.type} config={config} onChange={handleConfigChange} />}
                 {activePanel === 'layout'   && <LayoutPanel   type={widget.type} config={config} onChange={handleConfigChange} />}
                 {activePanel === 'card'     && <CardPanel     type={widget.type} config={config} onChange={handleConfigChange} />}

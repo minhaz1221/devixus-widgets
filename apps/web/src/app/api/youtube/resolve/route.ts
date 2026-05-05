@@ -4,18 +4,79 @@ export const dynamic = 'force-dynamic'
 
 const YT_BASE = 'https://www.googleapis.com/youtube/v3'
 
-async function resolveHandleViaSearch(handle: string, apiKey: string): Promise<{ id: string; name: string } | null> {
-  const res = await fetch(
-    `${YT_BASE}/search?part=snippet&type=channel&q=${encodeURIComponent('@' + handle)}&key=${apiKey}`
-  )
+// When an API key has HTTP-referrer restrictions, server-side Vercel calls have no
+// Referer header and get "ipRefererBlocked". Adding this header lets the call pass
+// through when the key is configured to allow the app's domain.
+const YT_HEADERS = {
+  'Referer': 'https://devixus-widgets-web.vercel.app',
+  'Origin': 'https://devixus-widgets-web.vercel.app',
+}
+
+function isBlocked(data: Record<string, unknown>): boolean {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const data = await res.json() as any
-  if (data.error || !data.items?.length) return null
-  const item = data.items[0]
-  return {
-    id: (item.id?.channelId ?? item.id) as string,
-    name: (item.snippet?.title ?? '') as string,
+  const errors = (data.error as any)?.errors as Array<{ reason: string }> | undefined
+  return errors?.some(e => e.reason === 'ipRefererBlocked') ?? false
+}
+
+/** Try channels.list?forHandle — costs 1 quota unit. Returns null on any error. */
+async function resolveViaHandle(handle: string, apiKey: string) {
+  try {
+    const res = await fetch(
+      `${YT_BASE}/channels?part=id,snippet&forHandle=${encodeURIComponent(handle)}&key=${apiKey}`,
+      { headers: YT_HEADERS }
+    )
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const data = await res.json() as any
+    if (!data.error && data.items?.length) {
+      return { id: data.items[0].id as string, name: (data.items[0].snippet?.title ?? '') as string }
+    }
+  } catch { /* fall through */ }
+  return null
+}
+
+/** Try channels.list?forUsername — costs 1 quota unit. Returns null on any error. */
+async function resolveViaUsername(username: string, apiKey: string) {
+  try {
+    const res = await fetch(
+      `${YT_BASE}/channels?part=id,snippet&forUsername=${encodeURIComponent(username)}&key=${apiKey}`,
+      { headers: YT_HEADERS }
+    )
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const data = await res.json() as any
+    if (!data.error && data.items?.length) {
+      return { id: data.items[0].id as string, name: (data.items[0].snippet?.title ?? '') as string }
+    }
+  } catch { /* fall through */ }
+  return null
+}
+
+/** Last resort: search.list — costs 100 quota units. Returns null on any error. */
+async function resolveViaSearch(handle: string, apiKey: string) {
+  try {
+    const res = await fetch(
+      `${YT_BASE}/search?part=snippet&type=channel&q=${encodeURIComponent(handle)}&maxResults=5&key=${apiKey}`,
+      { headers: YT_HEADERS }
+    )
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const data = await res.json() as any
+    if (!data.error && data.items?.length) {
+      // Prefer an exact handle match, otherwise take first result
+      const exact = data.items.find(
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        (it: any) => (it.snippet?.customUrl ?? '').toLowerCase() === `@${handle.toLowerCase()}`
+      ) ?? data.items[0]
+      return {
+        id: (exact.id?.channelId ?? exact.id) as string,
+        name: (exact.snippet?.title ?? '') as string,
+      }
+    }
+    if (isBlocked(data)) {
+      throw new Error('API key has HTTP referrer restrictions that block server-side calls. In Google Cloud Console, set the key restriction to "IP addresses" or "None (unrestricted)" for server-side use.')
+    }
+  } catch (err) {
+    if (err instanceof Error && err.message.includes('HTTP referrer')) throw err
   }
+  return null
 }
 
 export async function GET(request: NextRequest) {
@@ -28,119 +89,88 @@ export async function GET(request: NextRequest) {
 
   const apiKey = process.env.YOUTUBE_API_KEY
   if (!apiKey) {
-    return NextResponse.json({ error: 'YouTube API not configured' }, { status: 500 })
+    return NextResponse.json(
+      { error: 'YouTube API key is not configured. Add YOUTUBE_API_KEY to your environment variables.' },
+      { status: 500 }
+    )
   }
 
   try {
     let channelId: string | null = null
     let channelName = ''
 
-    // Direct channel ID: UCxxxxxxxxxxxxxxxxxxxxxxxx (24 chars)
+    // 1. Direct channel ID: UCxxxxxxxxxxxxxxxxxxxxxxxx (24 chars)
     if (/^UC[\w-]{22}$/.test(url)) {
       channelId = url
     }
-    // /channel/UCxxxxxxxxxxxxxxxxxxxxxxxx
+    // 2. URL containing /channel/UCxxxxxxxx
     else if (url.includes('/channel/')) {
       const match = url.match(/\/channel\/(UC[\w-]{22})/)
       channelId = match?.[1] ?? null
     }
-    // @handle (new-style) — try channels?forHandle first, fall back to search
+    // 3. @handle — most common modern format
     else if (url.includes('@')) {
-      const handle = url.match(/@([\w.-]+)/)?.[1]
+      const handle = url.match(/@([\w.-]+)/)?.[1] ?? ''
       if (handle) {
-        // Primary: channels?forHandle (may be blocked on some API key configs)
-        const res = await fetch(
-          `${YT_BASE}/channels?part=id,snippet&forHandle=${handle}&key=${apiKey}`
-        )
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const data = await res.json() as any
+        // Try forHandle first (1 quota unit), then username, then search (100 units)
+        const found = await resolveViaHandle(handle, apiKey)
+          ?? await resolveViaUsername(handle, apiKey)
+          ?? await resolveViaSearch(handle, apiKey)
 
-        if (!data.error && data.items?.length) {
-          channelId = data.items[0].id as string
-          channelName = (data.items[0].snippet?.title ?? '') as string
-        } else {
-          // Fallback: search API (uses search.list, not channels.list)
-          const found = await resolveHandleViaSearch(handle, apiKey)
-          if (!found) {
-            const reason = data.error?.message ?? `No channel found for @${handle}`
-            return NextResponse.json({ error: reason }, { status: data.error ? 502 : 404 })
-          }
-          channelId = found.id
-          channelName = found.name
-        }
-      }
-    }
-    // /c/name (legacy custom URL)
-    else if (url.includes('/c/')) {
-      const name = url.match(/\/c\/([\w.-]+)/)?.[1]
-      if (name) {
-        const res = await fetch(
-          `${YT_BASE}/channels?part=id,snippet&forUsername=${name}&key=${apiKey}`
-        )
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const data = await res.json() as any
-        if (data.error) {
+        if (!found) {
           return NextResponse.json(
-            { error: `YouTube API error: ${data.error.message}` },
-            { status: 502 }
+            { error: `No YouTube channel found for @${handle}. Check the URL and try again.` },
+            { status: 404 }
           )
         }
-        if (!data.items?.length) {
+        channelId = found.id
+        channelName = found.name
+      }
+    }
+    // 4. /c/name (legacy custom URL)
+    else if (url.includes('/c/')) {
+      const name = url.match(/\/c\/([\w.-]+)/)?.[1] ?? ''
+      if (name) {
+        const found = await resolveViaHandle(name, apiKey)
+          ?? await resolveViaUsername(name, apiKey)
+          ?? await resolveViaSearch(name, apiKey)
+        if (!found) {
           return NextResponse.json({ error: `No channel found for /c/${name}` }, { status: 404 })
         }
-        channelId = data.items[0].id as string
-        channelName = (data.items[0].snippet?.title ?? '') as string
+        channelId = found.id
+        channelName = found.name
       }
     }
-    // /user/name (legacy)
+    // 5. /user/name (legacy)
     else if (url.includes('/user/')) {
-      const name = url.match(/\/user\/([\w.-]+)/)?.[1]
+      const name = url.match(/\/user\/([\w.-]+)/)?.[1] ?? ''
       if (name) {
-        const res = await fetch(
-          `${YT_BASE}/channels?part=id,snippet&forUsername=${name}&key=${apiKey}`
-        )
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const data = await res.json() as any
-        if (data.error) {
-          return NextResponse.json(
-            { error: `YouTube API error: ${data.error.message}` },
-            { status: 502 }
-          )
-        }
-        if (!data.items?.length) {
+        const found = await resolveViaUsername(name, apiKey) ?? await resolveViaSearch(name, apiKey)
+        if (!found) {
           return NextResponse.json({ error: `No channel found for /user/${name}` }, { status: 404 })
         }
-        channelId = data.items[0].id as string
-        channelName = (data.items[0].snippet?.title ?? '') as string
+        channelId = found.id
+        channelName = found.name
       }
     }
 
     if (!channelId) {
       return NextResponse.json(
-        { error: 'Could not parse a channel ID or handle from this URL' },
+        { error: 'Could not parse a channel ID or handle from this URL. Try pasting the full channel URL (e.g. https://youtube.com/@channelname).' },
         { status: 400 }
       )
     }
 
-    // If we resolved via channel ID without a name, try to fetch it — but don't fail if blocked
+    // Fetch channel name if we only have an ID (best-effort, don't fail on error)
     if (!channelName) {
-      try {
-        const res = await fetch(
-          `${YT_BASE}/channels?part=snippet&id=${channelId}&key=${apiKey}`
-        )
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const data = await res.json() as any
-        if (!data.error && data.items?.[0]) {
-          channelName = (data.items[0].snippet?.title ?? '') as string
-        }
-      } catch {
-        // channel name is nice-to-have, not required
-      }
+      const result = await resolveViaHandle(channelId, apiKey)
+      if (result) channelName = result.name
     }
 
     return NextResponse.json({ channel_id: channelId, channel_name: channelName })
   } catch (error) {
-    console.error('YouTube resolve error:', error)
-    return NextResponse.json({ error: 'Failed to resolve channel' }, { status: 500 })
+    const msg = error instanceof Error ? error.message : 'Failed to resolve channel'
+    console.error('YouTube resolve error:', msg)
+    return NextResponse.json({ error: msg }, { status: 502 })
   }
 }

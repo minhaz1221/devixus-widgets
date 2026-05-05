@@ -1,4 +1,13 @@
-export function generatePreviewHTML(widgetType: string, config: Record<string, unknown>): string {
+/**
+ * @param realData  Optional live API data fetched after user connects a channel/place.
+ *                  When provided, overrides the built-in mock data so the preview shows
+ *                  real thumbnails, channel names, reviews, etc.
+ */
+export function generatePreviewHTML(
+  widgetType: string,
+  config: Record<string, unknown>,
+  realData?: Record<string, unknown> | null,
+): string {
   const mock = getMockData(widgetType)
   return `<!DOCTYPE html>
 <html>
@@ -8,6 +17,7 @@ export function generatePreviewHTML(widgetType: string, config: Record<string, u
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; }
 body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif; min-height: 100vh; }
+img { display: block; }
 </style>
 </head>
 <body>
@@ -16,6 +26,7 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sa
 (function() {
 var C = ${JSON.stringify(config)};
 var M = ${JSON.stringify(mock)};
+var R = ${JSON.stringify(realData ?? null)};
 var root = document.getElementById('root');
 function stars(n) {
   var s = '';
@@ -131,30 +142,49 @@ var accent = C.accent_color || '#ff0000';
 var cols = C.columns || 3;
 var maxV = C.max_results || 6;
 var layout = C.layout || 'grid';
-var videos = (M.videos || []).slice(0, maxV);
+// R = real API data when channel is connected; M = mock fallback
+var channel = (R && R.channel) || M.channel;
+var rawVideos = (R && R.videos) || M.videos || [];
+var videos = rawVideos.slice(0, maxV);
+var hasReal = !!(R && R.videos);
 document.body.style.background = bg;
 document.body.style.padding = '16px';
 var html = '';
 if (C.header_style !== 'none') {
   html += '<div style="display:flex;align-items:center;gap:12px;margin-bottom:16px;padding:14px 16px;background:' + cardBg + ';border-radius:12px;box-shadow:0 1px 4px rgba(0,0,0,0.06);">';
-  html += '<div style="width:44px;height:44px;border-radius:50%;background:' + accent + ';display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:700;color:#fff;flex-shrink:0;">' + (M.channel && M.channel.name ? M.channel.name[0] : 'C') + '</div>';
-  html += '<div><div style="font-weight:700;font-size:14px;color:' + text + ';">' + (M.channel ? M.channel.name : 'Channel') + '</div>';
-  if (C.show_subscriber_count !== false) html += '<div style="font-size:11px;color:' + sub + ';">' + (M.channel ? M.channel.subscribers : '') + ' subscribers</div>';
+  if (hasReal && channel && channel.avatar) {
+    html += '<img src="' + channel.avatar + '" width="44" height="44" style="border-radius:50%;flex-shrink:0;object-fit:cover;" loading="lazy">';
+  } else {
+    html += '<div style="width:44px;height:44px;border-radius:50%;background:' + accent + ';display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:700;color:#fff;flex-shrink:0;">' + (channel && channel.name ? channel.name[0] : 'C') + '</div>';
+  }
+  html += '<div><div style="font-weight:700;font-size:14px;color:' + text + ';">' + (channel ? channel.name : 'Channel') + '</div>';
+  if (C.show_subscriber_count !== false) {
+    var subs = channel ? (channel.subscriber_count || channel.subscribers || '') : '';
+    if (subs) html += '<div style="font-size:11px;color:' + sub + ';">' + subs + ' subscribers</div>';
+  }
   html += '</div>';
   html += '<button style="margin-left:auto;background:' + accent + ';color:#fff;border:none;padding:8px 14px;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer;">Subscribe</button>';
   html += '</div>';
+}
+function thumbBlock(v, w, h2) {
+  if (hasReal && v.thumbnail) {
+    var hStyle = h2 ? 'height:' + h2 + 'px;' : 'height:100%;position:absolute;top:0;left:0;';
+    return '<img src="' + v.thumbnail + '" width="' + (w||'100%') + '" style="width:100%;' + hStyle + 'object-fit:cover;display:block;" loading="lazy">';
+  }
+  var hStyle2 = h2 ? 'height:' + h2 + 'px;' : 'position:absolute;inset:0;';
+  return '<div style="width:100%;' + hStyle2 + 'background:' + (v.color || '#6366f1') + ';"></div>';
 }
 if (layout === 'list') {
   html += '<div style="display:flex;flex-direction:column;gap:10px;">';
   videos.forEach(function(v) {
     html += '<div style="display:flex;gap:12px;background:' + cardBg + ';border-radius:10px;overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,0.07);">';
-    html += '<div style="position:relative;width:140px;flex-shrink:0;background:' + v.color + ';min-height:80px;">';
-    html += '<div style="position:absolute;bottom:5px;right:5px;background:rgba(0,0,0,0.8);color:#fff;font-size:10px;padding:1px 4px;border-radius:3px;">' + v.duration + '</div>';
-    html += '<div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;"><div style="width:28px;height:28px;background:rgba(0,0,0,0.5);border-radius:50%;display:flex;align-items:center;justify-content:center;"><div style="width:0;height:0;border-top:6px solid transparent;border-bottom:6px solid transparent;border-left:10px solid #fff;margin-left:2px;"></div></div></div>';
+    html += '<div style="position:relative;width:140px;flex-shrink:0;overflow:hidden;">';
+    html += thumbBlock(v, 140, 80);
+    html += '<div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;pointer-events:none;"><div style="width:28px;height:28px;background:rgba(0,0,0,0.55);border-radius:50%;display:flex;align-items:center;justify-content:center;"><div style="width:0;height:0;border-top:6px solid transparent;border-bottom:6px solid transparent;border-left:10px solid #fff;margin-left:2px;"></div></div></div>';
     html += '</div>';
     html += '<div style="padding:10px;flex:1;min-width:0;">';
-    if (C.show_title !== false) html += '<p style="font-size:13px;font-weight:600;color:' + text + ';line-height:1.4;margin-bottom:4px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;">' + v.title + '</p>';
-    if (C.show_view_count) html += '<p style="font-size:11px;color:' + sub + ';">' + v.views + ' views</p>';
+    if (C.show_title !== false) html += '<p style="font-size:13px;font-weight:600;color:' + text + ';line-height:1.4;margin-bottom:4px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;">' + (v.title || '') + '</p>';
+    if (C.show_date !== false && v.published_at) html += '<p style="font-size:10px;color:' + sub + ';">' + new Date(v.published_at).toLocaleDateString() + '</p>';
     html += '</div></div>';
   });
   html += '</div>';
@@ -162,14 +192,14 @@ if (layout === 'list') {
   html += '<div style="display:grid;grid-template-columns:repeat(' + cols + ',1fr);gap:10px;">';
   videos.forEach(function(v) {
     html += '<div style="background:' + cardBg + ';border-radius:10px;overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,0.07);">';
-    html += '<div style="position:relative;padding-top:56.25%;background:' + v.color + ';">';
-    html += '<div style="position:absolute;bottom:5px;right:5px;background:rgba(0,0,0,0.8);color:#fff;font-size:10px;padding:1px 4px;border-radius:3px;">' + v.duration + '</div>';
-    html += '<div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;"><div style="width:32px;height:32px;background:rgba(0,0,0,0.5);border-radius:50%;display:flex;align-items:center;justify-content:center;"><div style="width:0;height:0;border-top:7px solid transparent;border-bottom:7px solid transparent;border-left:12px solid #fff;margin-left:3px;"></div></div></div>';
+    html += '<div style="position:relative;padding-top:56.25%;overflow:hidden;">';
+    html += thumbBlock(v, 0, 0);
+    html += '<div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;pointer-events:none;"><div style="width:32px;height:32px;background:rgba(0,0,0,0.55);border-radius:50%;display:flex;align-items:center;justify-content:center;"><div style="width:0;height:0;border-top:7px solid transparent;border-bottom:7px solid transparent;border-left:12px solid #fff;margin-left:3px;"></div></div></div>';
     html += '</div>';
     if (C.show_title !== false) {
       html += '<div style="padding:8px;">';
-      html += '<p style="font-size:11px;font-weight:600;color:' + text + ';line-height:1.4;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;">' + v.title + '</p>';
-      if (C.show_view_count) html += '<p style="font-size:10px;color:' + sub + ';margin-top:3px;">' + v.views + ' views</p>';
+      html += '<p style="font-size:11px;font-weight:600;color:' + text + ';line-height:1.4;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;">' + (v.title || '') + '</p>';
+      if (C.show_date !== false && v.published_at) html += '<p style="font-size:10px;color:' + sub + ';margin-top:3px;">' + new Date(v.published_at).toLocaleDateString() + '</p>';
       html += '</div>';
     }
     html += '</div>';
@@ -190,26 +220,29 @@ var sub = isDark ? '#94a3b8' : '#6b7280';
 var accent = C.accent_color || '#4285f4';
 var layout = C.layout || 'grid';
 var maxRev = C.max_reviews || 5;
-var reviews = (M.reviews || []).slice(0, maxRev);
+// R = real API data when business is connected; M = mock fallback
+var business = (R && R.business) || M.business;
+var allReviews = (R && R.reviews) || M.reviews || [];
+var reviews = allReviews.slice(0, maxRev);
 document.body.style.background = bg;
 document.body.style.padding = '16px';
 var html = '';
-if (C.show_header !== false && M.business) {
-  var ratingStr = (M.business.rating || 0).toFixed(1);
+if (C.show_header !== false && business) {
+  var ratingStr = (business.rating || 0).toFixed(1);
   html += '<div style="background:' + cardBg + ';border-radius:12px;padding:16px;margin-bottom:14px;box-shadow:0 1px 4px rgba(0,0,0,0.06);display:flex;align-items:center;gap:14px;">';
-  html += '<div style="width:48px;height:48px;border-radius:10px;background:' + accent + '20;display:flex;align-items:center;justify-content:center;font-size:22px;">G</div>';
-  html += '<div style="flex:1;">';
-  html += '<div style="font-weight:700;font-size:15px;color:' + text + ';">' + M.business.name + '</div>';
+  html += '<div style="width:48px;height:48px;border-radius:10px;background:' + accent + '20;display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0;">G</div>';
+  html += '<div style="flex:1;min-width:0;">';
+  html += '<div style="font-weight:700;font-size:15px;color:' + text + ';white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">' + (business.name || 'Your Business') + '</div>';
   if (C.show_overall_rating !== false) {
     html += '<div style="display:flex;align-items:center;gap:6px;margin-top:4px;">';
     html += '<span style="font-size:16px;font-weight:700;color:' + text + ';">' + ratingStr + '</span>';
-    html += '<span>' + stars(Math.round(M.business.rating)) + '</span>';
-    html += '<span style="font-size:12px;color:' + sub + ';">' + M.business.total + ' reviews</span>';
+    html += '<span>' + stars(Math.round(business.rating || 0)) + '</span>';
+    html += '<span style="font-size:12px;color:' + sub + ';">' + (business.total || 0) + ' reviews</span>';
     html += '</div>';
   }
   html += '</div>';
   if (C.write_review_link !== false) {
-    html += '<a style="background:' + accent + ';color:#fff;text-decoration:none;padding:8px 14px;border-radius:8px;font-size:12px;font-weight:600;">Write a review</a>';
+    html += '<a style="background:' + accent + ';color:#fff;text-decoration:none;padding:8px 14px;border-radius:8px;font-size:12px;font-weight:600;white-space:nowrap;flex-shrink:0;">Write a review</a>';
   }
   html += '</div>';
 }
@@ -222,14 +255,21 @@ if (layout === 'list') {
 reviews.forEach(function(r) {
   html += '<div style="background:' + cardBg + ';border-radius:10px;padding:14px;box-shadow:0 1px 3px rgba(0,0,0,0.06);">';
   html += '<div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;">';
+  var reviewerName = r.author_name || r.author || r.name || '';
+  var reviewerPhoto = r.author_photo || r.photo_url || '';
+  var initials2 = r.avatar || (reviewerName ? reviewerName.slice(0,2).toUpperCase() : '?');
   if (C.show_reviewer_photo !== false) {
-    html += '<div style="width:36px;height:36px;border-radius:50%;background:' + accent + ';display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:#fff;flex-shrink:0;">' + r.avatar + '</div>';
+    if (reviewerPhoto) {
+      html += '<img src="' + reviewerPhoto + '" width="36" height="36" style="border-radius:50%;flex-shrink:0;object-fit:cover;" loading="lazy">';
+    } else {
+      html += '<div style="width:36px;height:36px;border-radius:50%;background:' + accent + ';display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:#fff;flex-shrink:0;">' + initials2 + '</div>';
+    }
   }
-  html += '<div style="flex:1;min-width:0;"><div style="font-weight:600;font-size:13px;color:' + text + ';">' + r.author + '</div>';
-  html += '<div style="display:flex;align-items:center;gap:4px;">' + stars(r.rating);
-  if (C.show_review_date !== false) html += '<span style="font-size:10px;color:' + sub + ';margin-left:4px;">' + r.time + '</span>';
+  html += '<div style="flex:1;min-width:0;"><div style="font-weight:600;font-size:13px;color:' + text + ';white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">' + reviewerName + '</div>';
+  html += '<div style="display:flex;align-items:center;gap:4px;">' + stars(r.rating || 5);
+  if (C.show_review_date !== false) html += '<span style="font-size:10px;color:' + sub + ';margin-left:4px;">' + (r.relative_time || r.time || '') + '</span>';
   html += '</div></div></div>';
-  html += '<p style="font-size:12px;color:' + sub + ';line-height:1.5;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;">' + r.text + '</p>';
+  html += '<p style="font-size:12px;color:' + sub + ';line-height:1.5;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;">' + (r.text || r.review_text || '') + '</p>';
   html += '</div>';
 });
 html += '</div>';

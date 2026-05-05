@@ -9,6 +9,13 @@ const CORS = {
   'Cache-Control': 'public, s-maxage=3600, stale-while-revalidate=86400',
 }
 
+// HTTP-referrer-restricted API keys reject server-side calls with no Referer header.
+// Adding this lets calls through when the key allows the app's domain.
+const YT_HEADERS = {
+  'Referer': 'https://devixus-widgets-web.vercel.app',
+  'Origin': 'https://devixus-widgets-web.vercel.app',
+}
+
 function formatCount(n: string | undefined): string {
   if (!n) return ''
   const num = parseInt(n, 10)
@@ -73,16 +80,26 @@ export async function GET(request: NextRequest) {
   }
 
   try {
-    // Videos fetch is required — uses search.list which is broadly allowed
+    // Use playlistItems.list (1 quota unit) instead of search.list (100 quota units).
+    // Every YouTube channel has an auto-generated "uploads" playlist: channel UC→ playlist UU.
+    const uploadsPlaylistId = `UU${channelId.slice(2)}`
     const videosRes = await fetch(
-      `${YT_BASE}/search?part=snippet&channelId=${channelId}&maxResults=${maxResults}&order=date&type=video&key=${apiKey}`
+      `${YT_BASE}/playlistItems?part=snippet&playlistId=${uploadsPlaylistId}&maxResults=${maxResults}&key=${apiKey}`,
+      { headers: YT_HEADERS }
     )
     const videosData = await videosRes.json()
 
     // Check for YouTube API error in response body (API can return 200 with an error body)
     if (videosData.error) {
+      const errMsg: string = videosData.error.message ?? 'YouTube API error'
+      const isRefererBlocked = videosData.error.errors?.some(
+        (e: { reason: string }) => e.reason === 'ipRefererBlocked'
+      )
+      const userFacingError = isRefererBlocked
+        ? 'YouTube API key has HTTP referrer restrictions. In Google Cloud Console, set the key restriction to "IP addresses" or "None" for server-side use.'
+        : errMsg
       return NextResponse.json(
-        { channel: MOCK_CHANNEL, videos: MOCK_VIDEOS.slice(0, maxResults), is_mock: true, api_error: videosData.error.message },
+        { channel: MOCK_CHANNEL, videos: MOCK_VIDEOS.slice(0, maxResults), is_mock: true, api_error: userFacingError },
         { headers: CORS }
       )
     }
@@ -91,7 +108,8 @@ export async function GET(request: NextRequest) {
     let channel: typeof MOCK_CHANNEL | null = null
     try {
       const channelRes = await fetch(
-        `${YT_BASE}/channels?part=snippet,statistics&id=${channelId}&key=${apiKey}`
+        `${YT_BASE}/channels?part=snippet,statistics&id=${channelId}&key=${apiKey}`,
+        { headers: YT_HEADERS }
       )
       const channelData = await channelRes.json()
       if (!channelData.error && channelData.items?.[0]) {
@@ -109,20 +127,26 @@ export async function GET(request: NextRequest) {
       // channel info is optional — proceed without it
     }
 
+    // playlistItems returns resourceId.videoId (not id.videoId like search does)
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const videos = ((videosData.items ?? []) as any[]).map(item => ({
-      id: (item.id?.videoId ?? '') as string,
-      title: (item.snippet?.title ?? '') as string,
-      description: (item.snippet?.description ?? '') as string,
-      thumbnail: (
-        item.snippet?.thumbnails?.medium?.url ??
-        item.snippet?.thumbnails?.default?.url ??
-        ''
-      ) as string,
-      url: `https://www.youtube.com/watch?v=${item.id?.videoId ?? ''}`,
-      published_at: (item.snippet?.publishedAt ?? '') as string,
-      view_count: '',
-    }))
+    const videos = ((videosData.items ?? []) as any[]).map(item => {
+      const videoId = (item.snippet?.resourceId?.videoId ?? '') as string
+      return {
+        id: videoId,
+        title: (item.snippet?.title ?? '') as string,
+        description: (item.snippet?.description ?? '') as string,
+        thumbnail: (
+          item.snippet?.thumbnails?.maxres?.url ??
+          item.snippet?.thumbnails?.high?.url ??
+          item.snippet?.thumbnails?.medium?.url ??
+          item.snippet?.thumbnails?.default?.url ??
+          ''
+        ) as string,
+        url: `https://www.youtube.com/watch?v=${videoId}`,
+        published_at: (item.snippet?.publishedAt ?? '') as string,
+        view_count: '',
+      }
+    })
 
     if (videos.length === 0) {
       return NextResponse.json(

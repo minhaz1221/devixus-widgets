@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { rateLimit, getClientIp } from '@/lib/rate-limit'
 
 export const dynamic = 'force-dynamic'
 
@@ -26,14 +27,30 @@ const MOCK_REVIEWS = [
 ]
 
 export async function GET(request: NextRequest) {
+  const ip = getClientIp(request.headers)
+  const rl = rateLimit(`gr:${ip}`, 30, 60_000)
+  if (!rl.ok) {
+    return NextResponse.json(
+      { error: 'Rate limit exceeded. Try again in a minute.' },
+      { status: 429, headers: corsHeaders }
+    )
+  }
+
   const { searchParams } = new URL(request.url)
   const placeId = searchParams.get('place_id')
-  const maxReviews = Math.min(parseInt(searchParams.get('max_reviews') ?? '6'), 20)
-  const minRating = parseInt(searchParams.get('min_rating') ?? '1')
+  const maxReviews = Math.min(Math.max(1, parseInt(searchParams.get('max_reviews') ?? '6')), 20)
+  const minRating  = Math.min(Math.max(1, parseInt(searchParams.get('min_rating')  ?? '1')), 5)
 
   if (!placeId) {
     return NextResponse.json(
       { error: 'place_id is required' },
+      { status: 400, headers: corsHeaders }
+    )
+  }
+
+  if (!/^[A-Za-z0-9_-]{10,300}$/.test(placeId)) {
+    return NextResponse.json(
+      { error: 'Invalid place_id format' },
       { status: 400, headers: corsHeaders }
     )
   }
@@ -49,7 +66,7 @@ export async function GET(request: NextRequest) {
   try {
     const fields = 'name,rating,user_ratings_total,reviews,formatted_address,url'
     const res = await fetch(
-      `${PLACES_BASE}/details/json?place_id=${placeId}&fields=${fields}&key=${apiKey}`
+      `${PLACES_BASE}/details/json?place_id=${encodeURIComponent(placeId)}&fields=${fields}&key=${apiKey}`
     )
 
     if (!res.ok) {

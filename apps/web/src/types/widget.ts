@@ -80,6 +80,8 @@ export interface YouTubeFeedConfig {
   show_view_count?: boolean
   subscribe_button_color?: string
   header_style?: 'full' | 'compact' | 'none'
+  play_behavior?: 'youtube' | 'popup'
+  gap?: '4px' | '8px' | '16px' | '24px'
 }
 
 export interface CountdownTimerConfig {
