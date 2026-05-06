@@ -101,10 +101,25 @@ function getMockData(widgetType: string): Record<string, unknown> {
       ]
     },
     instagram_feed: {
-      posts: colors.map(function(c, i) { return { color: c, likes: [1204,893,2341,567,1876,3201,445,987,1543][i], comments: [43,21,87,12,65,102,8,34,56][i] } })
+      posts: ['a','b','c','d','e','f','g','h','i'].map(function(seed, i) {
+        return {
+          color:     colors[i],
+          thumbnail: 'https://picsum.photos/seed/ig_preview_' + seed + '/400/400',
+          likes:     [1204,893,2341,567,1876,3201,445,987,1543][i],
+          comments:  [43,21,87,12,65,102,8,34,56][i],
+        }
+      })
     },
     tiktok_feed: {
-      videos: colors.map(function(c, i) { return { color: c, views: ['1.2M','456K','2.1M','89K','567K','1.8M','345K','678K','901K'][i], likes: ['45K','12K','98K','3K','21K','67K','15K','28K','41K'][i], duration: ['0:45','1:23','0:58','2:01','1:15','0:37','1:42','0:53','1:08'][i] } })
+      videos: ['a','b','c','d','e','f','g','h','i'].map(function(seed, i) {
+        return {
+          color:           colors[i],
+          cover_image_url: 'https://picsum.photos/seed/tt_preview_' + seed + '/360/640',
+          views:  ['1.2M','456K','2.1M','89K','567K','1.8M','345K','678K','901K'][i],
+          likes:  ['45K','12K','98K','3K','21K','67K','15K','28K','41K'][i],
+          duration: ['0:45','1:23','0:58','2:01','1:15','0:37','1:42','0:53','1:08'][i],
+        }
+      })
     },
   }
   return (all[widgetType] as Record<string, unknown>) ?? {}
@@ -561,24 +576,27 @@ function instagramRenderer(): string {
   return `
 var isDark = C.theme === 'dark';
 var bg = isDark ? '#0f172a' : '#f8faff';
-var cardBg = isDark ? '#1e293b' : '#ffffff';
-var text = isDark ? '#f1f5f9' : '#1f2937';
-var sub = isDark ? '#94a3b8' : '#6b7280';
 var cols = C.columns || 3;
 var numPosts = C.num_posts || 9;
 var gap = parseInt(C.gap || '8') || 8;
 var borderRadius = C.border_radius === 'round' ? '50%' : (C.border_radius || '8px');
 var showLikes = C.show_likes !== false;
-var posts = (M.posts || []).slice(0, numPosts);
+// Use R.posts if available (real or rich mock), else fall back to M.posts
+var sourcePosts = (R && R.posts && R.posts.length) ? R.posts : M.posts || [];
+var posts = sourcePosts.slice(0, numPosts);
 document.body.style.background = bg;
 document.body.style.padding = '16px';
 var html = '<div style="display:grid;grid-template-columns:repeat(' + cols + ',1fr);gap:' + gap + 'px;">';
 posts.forEach(function(p) {
-  html += '<div style="position:relative;padding-top:100%;background:' + p.color + ';border-radius:' + borderRadius + ';overflow:hidden;cursor:pointer;">';
+  var thumbUrl = p.thumbnail || '';
+  html += '<div style="position:relative;padding-top:100%;background:' + (p.color || '#e4405f') + ';border-radius:' + borderRadius + ';overflow:hidden;cursor:pointer;">';
+  if (thumbUrl) {
+    html += '<img src="' + thumbUrl + '" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;" loading="lazy" onerror="this.style.display=\'none\'">';
+  }
   if (showLikes) {
-    html += '<div style="position:absolute;inset:0;background:rgba(0,0,0,0);display:flex;align-items:center;justify-content:center;opacity:0;transition:opacity 0.2s;" class="overlay" onmouseover="this.style.opacity=1;this.style.background=\'rgba(0,0,0,0.4)\'" onmouseout="this.style.opacity=0;this.style.background=\'rgba(0,0,0,0)\'">';
-    html += '<div style="text-align:center;color:#fff;">';
-    html += '<div style="font-size:12px;font-weight:700;">&#9829; ' + p.likes.toLocaleString() + '</div>';
+    html += '<div style="position:absolute;inset:0;background:rgba(0,0,0,0);display:flex;align-items:center;justify-content:center;transition:background 0.2s;" onmouseover="this.style.background=\'rgba(0,0,0,0.4)\'" onmouseout="this.style.background=\'rgba(0,0,0,0)\'">';
+    html += '<div style="text-align:center;color:#fff;opacity:0;transition:opacity 0.2s;" onmouseover="this.style.opacity=1" onmouseout="this.style.opacity=0">';
+    html += '<div style="font-size:12px;font-weight:700;">&#9829; ' + (p.likes || 0).toLocaleString() + '</div>';
     html += '</div></div>';
   }
   html += '</div>';
@@ -592,24 +610,40 @@ function tiktokRenderer(): string {
   return `
 var isDark = C.theme === 'dark';
 var bg = isDark ? '#0f172a' : '#f8faff';
-var cardBg = isDark ? '#1e293b' : '#1a1a2e';
-var text = isDark ? '#f1f5f9' : '#ffffff';
-var sub = isDark ? '#94a3b8' : '#94a3b8';
 var cols = C.columns || 3;
 var numVids = C.num_videos || 9;
 var gap = parseInt(C.gap || '8') || 8;
 var borderRadius = C.border_radius === 'round' ? '50%' : (C.border_radius || '8px');
 var showDuration = C.show_duration !== false;
 var showViews = C.show_view_count !== false;
-var videos = (M.videos || []).slice(0, numVids);
+// R = real API data (connected account); M = mock fallback
+var sourceVids = (R && R.videos && R.videos.length) ? R.videos : M.videos || [];
+var videos = sourceVids.slice(0, numVids);
+var hasReal = !!(R && R.videos && R.videos.length);
 document.body.style.background = bg;
 document.body.style.padding = '16px';
-var html = '<div style="display:grid;grid-template-columns:repeat(' + cols + ',1fr);gap:' + gap + 'px;">';
+var html = '';
+// Profile header (when connected account data available)
+if (hasReal && R.display_name) {
+  var avatarHtml = R.avatar
+    ? '<img src="' + R.avatar + '" width="40" height="40" style="border-radius:50%;object-fit:cover;flex-shrink:0;" loading="lazy">'
+    : '<div style="width:40px;height:40px;border-radius:50%;background:#2d2d2d;display:flex;align-items:center;justify-content:center;color:#fff;font-size:16px;font-weight:700;flex-shrink:0;">' + String(R.display_name).charAt(0).toUpperCase() + '</div>';
+  html += '<div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;padding:10px 12px;background:#1a1a2e;border-radius:12px;">';
+  html += avatarHtml;
+  html += '<div><div style="font-weight:700;font-size:13px;color:#f1f5f9;">@' + R.display_name + '</div>';
+  if (R.follower_count) html += '<div style="font-size:11px;color:#94a3b8;">' + R.follower_count + ' followers</div>';
+  html += '</div></div>';
+}
+html += '<div style="display:grid;grid-template-columns:repeat(' + cols + ',1fr);gap:' + gap + 'px;">';
 videos.forEach(function(v) {
-  html += '<div style="position:relative;padding-top:177%;background:' + v.color + ';border-radius:' + borderRadius + ';overflow:hidden;cursor:pointer;">';
-  html += '<div style="position:absolute;inset:0;background:linear-gradient(transparent 40%,rgba(0,0,0,0.6) 100%);">';
-  if (showDuration) html += '<div style="position:absolute;top:6px;right:6px;background:rgba(0,0,0,0.6);color:#fff;font-size:9px;padding:2px 5px;border-radius:4px;font-weight:600;">' + v.duration + '</div>';
-  if (showViews) html += '<div style="position:absolute;bottom:6px;left:6px;font-size:10px;font-weight:700;color:#fff;">' + v.views + '</div>';
+  var coverUrl = v.cover_image_url || '';
+  html += '<div style="position:relative;padding-top:177%;background:' + (v.color || '#1a1a2e') + ';border-radius:' + borderRadius + ';overflow:hidden;cursor:pointer;">';
+  if (coverUrl) {
+    html += '<img src="' + coverUrl + '" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;" loading="lazy" onerror="this.style.display=\'none\'">';
+  }
+  html += '<div style="position:absolute;inset:0;background:linear-gradient(transparent 40%,rgba(0,0,0,0.6) 100%);pointer-events:none;">';
+  if (showDuration && v.duration) html += '<div style="position:absolute;top:6px;right:6px;background:rgba(0,0,0,0.65);color:#fff;font-size:9px;padding:2px 5px;border-radius:4px;font-weight:600;">' + v.duration + '</div>';
+  if (showViews && v.views) html += '<div style="position:absolute;bottom:6px;left:6px;font-size:10px;font-weight:700;color:#fff;">&#128065; ' + v.views + '</div>';
   html += '<div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;"><div style="width:28px;height:28px;background:rgba(255,255,255,0.2);border-radius:50%;display:flex;align-items:center;justify-content:center;"><div style="width:0;height:0;border-top:6px solid transparent;border-bottom:6px solid transparent;border-left:10px solid #fff;margin-left:3px;"></div></div></div>';
   html += '</div></div>';
 });

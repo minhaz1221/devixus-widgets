@@ -1,119 +1,91 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { createClient } from '@/lib/supabase/server'
 
-// TODO: Replace with real Meta Graph API when approved
-const mockProfile = {
-  username: 'johndoe',
-  full_name: 'John Doe',
-  profile_picture: 'https://i.pravatar.cc/150?img=12',
-  followers: 12400,
-  following: 891,
-  bio: '📸 Photographer | ✈️ Traveler',
-  posts: [
-    {
-      id: 'post_1',
-      type: 'image',
-      thumbnail: 'https://picsum.photos/seed/insta1/400/400',
-      caption: 'Beautiful morning in the city ☀️ #photography #urban',
-      likes: 234,
-      comments: 18,
-      timestamp: '2024-01-15T08:30:00Z',
-    },
-    {
-      id: 'post_2',
-      type: 'video',
-      thumbnail: 'https://picsum.photos/seed/insta2/400/400',
-      caption: 'Sunset timelapse 🌅 #video #nature',
-      likes: 891,
-      comments: 45,
-      timestamp: '2024-01-14T18:00:00Z',
-    },
-    {
-      id: 'post_3',
-      type: 'image',
-      thumbnail: 'https://picsum.photos/seed/insta3/400/400',
-      caption: 'Coffee and code ☕ #developer',
-      likes: 156,
-      comments: 12,
-      timestamp: '2024-01-13T10:15:00Z',
-    },
-    {
-      id: 'post_4',
-      type: 'image',
-      thumbnail: 'https://picsum.photos/seed/insta4/400/400',
-      caption: 'Weekend vibes 🎉 #weekend',
-      likes: 445,
-      comments: 33,
-      timestamp: '2024-01-12T14:30:00Z',
-    },
-    {
-      id: 'post_5',
-      type: 'video',
-      thumbnail: 'https://picsum.photos/seed/insta5/400/400',
-      caption: 'Travel diary ep.3 ✈️ #travel',
-      likes: 1203,
-      comments: 87,
-      timestamp: '2024-01-11T09:00:00Z',
-    },
-    {
-      id: 'post_6',
-      type: 'image',
-      thumbnail: 'https://picsum.photos/seed/insta6/400/400',
-      caption: 'Street food tour 🍜 #food #culture',
-      likes: 678,
-      comments: 54,
-      timestamp: '2024-01-10T12:00:00Z',
-    },
-    {
-      id: 'post_7',
-      type: 'image',
-      thumbnail: 'https://picsum.photos/seed/insta7/400/400',
-      caption: 'Golden hour magic 🌄',
-      likes: 321,
-      comments: 29,
-      timestamp: '2024-01-09T17:30:00Z',
-    },
-    {
-      id: 'post_8',
-      type: 'image',
-      thumbnail: 'https://picsum.photos/seed/insta8/400/400',
-      caption: 'Morning run 🏃 #fitness',
-      likes: 189,
-      comments: 15,
-      timestamp: '2024-01-08T07:00:00Z',
-    },
-    {
-      id: 'post_9',
-      type: 'video',
-      thumbnail: 'https://picsum.photos/seed/insta9/400/400',
-      caption: 'Behind the scenes 🎬 #bts',
-      likes: 567,
-      comments: 41,
-      timestamp: '2024-01-07T11:00:00Z',
-    },
-  ],
+const CORS = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Methods': 'GET, OPTIONS',
+  'x-data-source': 'mock-pending-approval',
 }
 
-const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
-  'x-data-source': 'mock',
+// Realistic post seeds — consistent per-username via seed param
+function makePosts(username: string) {
+  const seeds = ['a','b','c','d','e','f','g','h','i']
+  const captions = [
+    'Beautiful morning in the city ☀️ #photography #urban',
+    'Golden hour magic 🌄 #nature #sunset',
+    'Coffee and code ☕ #developer #worklife',
+    'Weekend vibes 🎉 #weekend #lifestyle',
+    'Travel diary ep.3 ✈️ #travel #adventure',
+    'Street food tour 🍜 #food #culture',
+    'Morning run 🏃 #fitness #health',
+    'Studio session 🎵 #music #creative',
+    'Behind the scenes 🎬 #bts #content',
+  ]
+  const likeCounts    = [1204, 893, 2341, 567, 1876, 3201, 445, 987, 1543]
+  const commentCounts = [43, 21, 87, 12, 65, 102, 8, 34, 56]
+  const types = ['image','image','video','image','video','image','image','video','image'] as const
+
+  return seeds.map((seed, i) => ({
+    id:        `${username}_${seed}`,
+    type:      types[i],
+    thumbnail: `https://picsum.photos/seed/${username}${seed}/400/400`,
+    caption:   captions[i],
+    likes:     likeCounts[i],
+    comments:  commentCounts[i],
+    timestamp: new Date(Date.now() - (i + 1) * 86_400_000 * 3).toISOString(),
+  }))
+}
+
+function followerEstimate(username: string): number {
+  // deterministic pseudo-random based on username length
+  const base = (username.length * 3_741 + username.charCodeAt(0) * 997) % 90_000
+  return base + 10_000
 }
 
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url)
-  const username = searchParams.get('username') || 'johndoe'
+  const username = (searchParams.get('username') ?? 'yourhandle').replace(/^@/, '').trim() || 'yourhandle'
+
+  // Waitlist join action
+  if (searchParams.get('action') === 'waitlist') {
+    try {
+      const supabase = await createClient()
+      const { data: { user } } = await supabase.auth.getUser()
+      await supabase.from('api_waitlist').upsert(
+        {
+          user_id:  user?.id ?? null,
+          platform: 'instagram',
+          username,
+          email:    user?.email ?? searchParams.get('email') ?? null,
+        },
+        { onConflict: 'user_id,platform' }
+      )
+    } catch { /* waitlist is best-effort */ }
+    return NextResponse.json({ joined: true }, { headers: CORS })
+  }
+
+  const followers = followerEstimate(username)
 
   return NextResponse.json(
-    { ...mockProfile, username },
-    { headers: corsHeaders }
+    {
+      username,
+      full_name:       username.charAt(0).toUpperCase() + username.slice(1).replace(/[._-]/g, ' '),
+      profile_picture: `https://i.pravatar.cc/150?u=${username}`,
+      followers,
+      following:       Math.floor(followers * 0.07),
+      bio:             '📸 Content Creator | Sharing moments that matter',
+      posts:           makePosts(username),
+      is_mock:         true,
+      is_pending:      true,
+      message:         'Instagram API approval pending — showing sample content. Your widget will display real posts once approved.',
+    },
+    { headers: CORS }
   )
 }
 
 export async function OPTIONS() {
   return new NextResponse(null, {
     status: 204,
-    headers: {
-      'Access-Control-Allow-Origin': '*',
-      'Access-Control-Allow-Methods': 'GET, OPTIONS',
-    },
+    headers: { 'Access-Control-Allow-Origin': '*', 'Access-Control-Allow-Methods': 'GET, OPTIONS' },
   })
 }

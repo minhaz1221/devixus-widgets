@@ -78,133 +78,222 @@ function StarPicker({ value, onChange }: { value: number; onChange: (n: number) 
   )
 }
 
-// ── TikTok Source Panel (Elfsight-style add-source UX) ────────────────────
-function TikTokSourcePanel({ config, onChange }: { config: Record<string, unknown>; onChange: (c: Record<string, unknown>) => void }) {
+// ── TikTok Source Panel ────────────────────────────────────────────────────
+type TikTokMode = 'connected' | 'public'
+interface TikTokConnection { display_name: string; avatar: string; follower_count: number }
+
+function TikTokSourcePanel({
+  config, onChange, onPreviewData,
+}: {
+  config: Record<string, unknown>
+  onChange: (c: Record<string, unknown>) => void
+  onPreviewData?: (d: Record<string, unknown> | null) => void
+}) {
+  const [mode, setMode]           = useState<TikTokMode>((config.connection_mode as TikTokMode) ?? 'connected')
+  const [connected, setConnected] = useState<TikTokConnection | null>(null)
+  const [checkingConn, setCheckingConn] = useState(true)
+  // public profile state
   const [showModal, setShowModal] = useState(false)
   const [inputVal, setInputVal]   = useState('')
-  const [loading, setLoading]     = useState(false)
-  const [profile, setProfile]     = useState<{ display_name: string; avatar: string } | null>(null)
+  const [loadingProfile, setLoadingProfile] = useState(false)
+  const [publicProfile, setPublicProfile]   = useState<{ display_name: string; avatar: string } | null>(null)
 
   const username = (config.username as string) ?? ''
 
+  // Check if user has a connected TikTok account on mount
   useEffect(() => {
-    if (!username) { setProfile(null); return }
-    setLoading(true)
+    setCheckingConn(true)
+    fetch('/api/widgets/tiktok?mode=check')
+      .then(r => r.json())
+      .then((d: { connected?: boolean; display_name?: string; avatar?: string; follower_count?: number }) => {
+        if (d.connected) {
+          setConnected({ display_name: d.display_name ?? '', avatar: d.avatar ?? '', follower_count: d.follower_count ?? 0 })
+        } else {
+          setConnected(null)
+        }
+      })
+      .catch(() => setConnected(null))
+      .finally(() => setCheckingConn(false))
+  }, [])
+
+  // Load real preview data when connected mode is selected and we have a connection
+  useEffect(() => {
+    if (mode !== 'connected' || !connected) return
+    fetch('/api/widgets/tiktok?mode=connected')
+      .then(r => r.json())
+      .then((d: Record<string, unknown>) => {
+        if (d.videos) onPreviewData?.(d)
+      })
+      .catch(() => {})
+  }, [mode, connected, onPreviewData])
+
+  // Load oEmbed profile info for public mode
+  useEffect(() => {
+    if (!username || mode !== 'public') { setPublicProfile(null); return }
+    setLoadingProfile(true)
     fetch(`/api/widgets/tiktok?username=${encodeURIComponent(username)}`)
       .then(r => r.json())
-      .then(d => setProfile({ display_name: d.display_name || username, avatar: d.avatar || '' }))
-      .catch(() => setProfile({ display_name: username, avatar: '' }))
-      .finally(() => setLoading(false))
-  }, [username])
+      .then((d: { display_name?: string; avatar?: string }) => setPublicProfile({ display_name: d.display_name ?? username, avatar: d.avatar ?? '' }))
+      .catch(() => setPublicProfile({ display_name: username, avatar: '' }))
+      .finally(() => setLoadingProfile(false))
+  }, [username, mode])
 
-  function handleAdd() {
+  function switchMode(m: TikTokMode) {
+    setMode(m)
+    onChange({ ...config, connection_mode: m })
+    if (m === 'connected') onPreviewData?.(null)
+    if (m === 'public')    onPreviewData?.(null)
+  }
+
+  async function handleDisconnect() {
+    await fetch('/api/widgets/tiktok?mode=disconnect')
+    setConnected(null)
+    onPreviewData?.(null)
+  }
+
+  function handleAddPublic() {
     const clean = inputVal.replace(/^@/, '').replace(/.*tiktok\.com\/@?/, '').split('?')[0].trim()
     if (!clean) return
-    onChange({ ...config, username: clean })
+    onChange({ ...config, username: clean, connection_mode: 'public' })
     setInputVal('')
     setShowModal(false)
   }
 
-  function handleRemove() {
-    onChange({ ...config, username: '' })
-    setProfile(null)
-  }
-
   return (
     <div className="space-y-3">
-      <div className="flex items-center justify-between">
-        <h4 className="text-xs font-bold text-gray-500 uppercase tracking-wider">Sources</h4>
-      </div>
+      <h4 className="text-xs font-bold text-gray-500 uppercase tracking-wider">Source</h4>
 
-      {username ? (
-        <div className="bg-gray-50 rounded-xl border border-gray-200 p-3 flex items-center gap-3">
-          {loading ? (
-            <div className="w-9 h-9 rounded-full bg-gray-200 animate-pulse shrink-0" />
-          ) : profile?.avatar ? (
-            <img src={profile.avatar} alt="" className="w-9 h-9 rounded-full object-cover shrink-0" />
-          ) : (
-            <div className="w-9 h-9 rounded-full bg-black flex items-center justify-center shrink-0">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="white"><path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-2.88 2.5 2.89 2.89 0 0 1-2.89-2.89 2.89 2.89 0 0 1 2.89-2.89c.28 0 .54.04.79.1V9.01a6.33 6.33 0 0 0-.79-.05 6.34 6.34 0 0 0-6.34 6.34 6.34 6.34 0 0 0 6.34 6.34 6.34 6.34 0 0 0 6.33-6.34V8.94a8.16 8.16 0 0 0 4.77 1.52V7.03a4.85 4.85 0 0 1-1-.34z"/></svg>
-            </div>
-          )}
-          <div className="flex-1 min-w-0">
-            <p className="text-sm font-semibold text-gray-900 truncate">
-              {loading ? 'Loading…' : (profile?.display_name || `@${username}`)}
-            </p>
-            <p className="text-[11px] text-gray-400">@{username}</p>
-          </div>
-          <div className="flex items-center gap-1 shrink-0">
-            <button
-              type="button"
-              onClick={() => { setInputVal(username); setShowModal(true) }}
-              className="w-7 h-7 flex items-center justify-center text-gray-400 hover:text-gray-700 hover:bg-gray-200 rounded-lg transition-colors text-xs"
-              title="Edit"
-            >
-              ✏
-            </button>
-            <button
-              type="button"
-              onClick={handleRemove}
-              className="w-7 h-7 flex items-center justify-center text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors"
-              title="Remove"
-            >
-              <X size={13} />
-            </button>
-          </div>
-        </div>
-      ) : (
+      {/* Mode tabs */}
+      <div className="flex gap-1 bg-gray-100 rounded-xl p-1">
         <button
           type="button"
-          onClick={() => setShowModal(true)}
-          className="w-full flex items-center justify-center gap-2 py-3 rounded-xl border-2 border-dashed border-gray-200 text-gray-500 hover:border-indigo-300 hover:text-indigo-600 hover:bg-indigo-50 transition-all text-sm font-medium"
+          onClick={() => switchMode('connected')}
+          className={`flex-1 py-1.5 text-xs font-semibold rounded-lg transition-colors ${mode === 'connected' ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}
         >
-          <Plus size={16} /> Add TikTok Profile
+          My Account
         </button>
+        <button
+          type="button"
+          onClick={() => switchMode('public')}
+          className={`flex-1 py-1.5 text-xs font-semibold rounded-lg transition-colors ${mode === 'public' ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}
+        >
+          Any Profile
+        </button>
+      </div>
+
+      {/* Connected mode */}
+      {mode === 'connected' && (
+        <div>
+          {checkingConn ? (
+            <div className="h-16 rounded-xl bg-gray-100 animate-pulse" />
+          ) : connected ? (
+            <div className="bg-emerald-50 border border-emerald-200 rounded-xl p-3">
+              <div className="flex items-center gap-3">
+                {connected.avatar ? (
+                  <img src={connected.avatar} alt="" className="w-10 h-10 rounded-full object-cover shrink-0" />
+                ) : (
+                  <div className="w-10 h-10 rounded-full bg-black flex items-center justify-center shrink-0 text-white font-bold text-sm">
+                    {connected.display_name.charAt(0).toUpperCase()}
+                  </div>
+                )}
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-1.5">
+                    <Check size={12} className="text-emerald-600 shrink-0" />
+                    <p className="text-sm font-semibold text-gray-900 truncate">{connected.display_name}</p>
+                  </div>
+                  {connected.follower_count > 0 && (
+                    <p className="text-[11px] text-gray-500">{connected.follower_count.toLocaleString()} followers</p>
+                  )}
+                </div>
+                <button
+                  type="button"
+                  onClick={handleDisconnect}
+                  className="text-[11px] text-gray-400 hover:text-red-500 transition-colors shrink-0"
+                >
+                  Disconnect
+                </button>
+              </div>
+              <p className="text-[11px] text-emerald-700 mt-2 font-medium">Showing your real TikTok videos in the preview</p>
+            </div>
+          ) : (
+            <div className="space-y-3">
+              <div className="bg-gray-50 border border-gray-200 rounded-xl p-4 text-center space-y-2">
+                <div className="w-10 h-10 rounded-full bg-black flex items-center justify-center mx-auto">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="white"><path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-2.88 2.5 2.89 2.89 0 0 1-2.89-2.89 2.89 2.89 0 0 1 2.89-2.89c.28 0 .54.04.79.1V9.01a6.33 6.33 0 0 0-.79-.05 6.34 6.34 0 0 0-6.34 6.34 6.34 6.34 0 0 0 6.34 6.34 6.34 6.34 0 0 0 6.33-6.34V8.94a8.16 8.16 0 0 0 4.77 1.52V7.03a4.85 4.85 0 0 1-1-.34z"/></svg>
+                </div>
+                <p className="text-sm font-semibold text-gray-800">Connect your TikTok account</p>
+                <p className="text-xs text-gray-500">Show your own real videos with authentic view counts and cover images</p>
+              </div>
+              <a
+                href="/api/auth/tiktok"
+                className="flex items-center justify-center gap-2 w-full py-2.5 bg-black text-white text-sm font-semibold rounded-xl hover:bg-gray-900 transition-colors"
+              >
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="white"><path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-2.88 2.5 2.89 2.89 0 0 1-2.89-2.89 2.89 2.89 0 0 1 2.89-2.89c.28 0 .54.04.79.1V9.01a6.33 6.33 0 0 0-.79-.05 6.34 6.34 0 0 0-6.34 6.34 6.34 6.34 0 0 0 6.34 6.34 6.34 6.34 0 0 0 6.33-6.34V8.94a8.16 8.16 0 0 0 4.77 1.52V7.03a4.85 4.85 0 0 1-1-.34z"/></svg>
+                Connect TikTok Account
+              </a>
+            </div>
+          )}
+        </div>
       )}
 
-      {/* Add/Edit modal */}
+      {/* Public profile mode */}
+      {mode === 'public' && (
+        <div className="space-y-2">
+          {username ? (
+            <div className="bg-gray-50 rounded-xl border border-gray-200 p-3 flex items-center gap-3">
+              {loadingProfile ? (
+                <div className="w-9 h-9 rounded-full bg-gray-200 animate-pulse shrink-0" />
+              ) : publicProfile?.avatar ? (
+                <img src={publicProfile.avatar} alt="" className="w-9 h-9 rounded-full object-cover shrink-0" />
+              ) : (
+                <div className="w-9 h-9 rounded-full bg-black flex items-center justify-center shrink-0">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="white"><path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-2.88 2.5 2.89 2.89 0 0 1-2.89-2.89 2.89 2.89 0 0 1 2.89-2.89c.28 0 .54.04.79.1V9.01a6.33 6.33 0 0 0-.79-.05 6.34 6.34 0 0 0-6.34 6.34 6.34 6.34 0 0 0 6.34 6.34 6.34 6.34 0 0 0 6.33-6.34V8.94a8.16 8.16 0 0 0 4.77 1.52V7.03a4.85 4.85 0 0 1-1-.34z"/></svg>
+                </div>
+              )}
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-semibold text-gray-900 truncate">{loadingProfile ? 'Loading…' : (publicProfile?.display_name || `@${username}`)}</p>
+                <p className="text-[11px] text-gray-400">@{username}</p>
+              </div>
+              <div className="flex items-center gap-1 shrink-0">
+                <button type="button" onClick={() => { setInputVal(username); setShowModal(true) }} className="w-7 h-7 flex items-center justify-center text-gray-400 hover:text-gray-700 hover:bg-gray-200 rounded-lg transition-colors text-xs" title="Edit">✏</button>
+                <button type="button" onClick={() => { onChange({ ...config, username: '' }); setPublicProfile(null) }} className="w-7 h-7 flex items-center justify-center text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors" title="Remove"><X size={13} /></button>
+              </div>
+            </div>
+          ) : (
+            <button
+              type="button"
+              onClick={() => setShowModal(true)}
+              className="w-full flex items-center justify-center gap-2 py-3 rounded-xl border-2 border-dashed border-gray-200 text-gray-500 hover:border-indigo-300 hover:text-indigo-600 hover:bg-indigo-50 transition-all text-sm font-medium"
+            >
+              <Plus size={16} /> Add Any TikTok Profile
+            </button>
+          )}
+          <div className="flex items-start gap-1.5 px-1">
+            <AlertTriangle size={11} className="text-amber-500 shrink-0 mt-0.5" />
+            <p className="text-[11px] text-amber-700 leading-relaxed">Public profiles show sample videos. Connect your account above for real videos.</p>
+          </div>
+        </div>
+      )}
+
+      {/* Add/Edit modal for public mode */}
       {showModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40" onClick={e => { if (e.target === e.currentTarget) setShowModal(false) }}>
           <div className="bg-white rounded-2xl shadow-2xl w-full max-w-sm p-6 space-y-4">
             <div className="flex items-center justify-between">
-              <h3 className="font-bold text-gray-900">TikTok Profile</h3>
-              <button type="button" onClick={() => setShowModal(false)} className="w-7 h-7 flex items-center justify-center text-gray-400 hover:text-gray-700 rounded-lg hover:bg-gray-100">
-                <X size={15} />
-              </button>
+              <h3 className="font-bold text-gray-900">Any TikTok Profile</h3>
+              <button type="button" onClick={() => setShowModal(false)} className="w-7 h-7 flex items-center justify-center text-gray-400 hover:text-gray-700 rounded-lg hover:bg-gray-100"><X size={15} /></button>
             </div>
-
             <div>
-              <label className="block text-xs font-medium text-gray-600 mb-1">Enter TikTok Username</label>
+              <label className="block text-xs font-medium text-gray-600 mb-1">TikTok Username</label>
               <div className="flex items-center border border-gray-200 rounded-lg overflow-hidden focus-within:ring-2 focus-within:ring-indigo-500">
                 <span className="px-3 py-2 bg-gray-50 text-gray-500 text-sm font-medium border-r border-gray-200">@</span>
-                <input
-                  type="text"
-                  value={inputVal}
-                  onChange={e => setInputVal(e.target.value.replace(/^@/, ''))}
-                  onKeyDown={e => e.key === 'Enter' && handleAdd()}
-                  placeholder="charlidamelio"
-                  className="flex-1 px-3 py-2 text-sm outline-none bg-white"
-                  autoFocus
-                />
+                <input type="text" value={inputVal} onChange={e => setInputVal(e.target.value.replace(/^@/, ''))} onKeyDown={e => e.key === 'Enter' && handleAddPublic()} placeholder="charlidamelio" className="flex-1 px-3 py-2 text-sm outline-none bg-white" autoFocus />
               </div>
-              <p className="text-[11px] text-gray-400 mt-1.5 leading-relaxed">
-                For example, @charlidamelio, or paste a link like{' '}
-                <span className="font-mono">tiktok.com/@charlidamelio</span>
-              </p>
+              <p className="text-[11px] text-amber-600 mt-1.5 leading-relaxed">Sample videos are shown for public profiles due to TikTok API restrictions.</p>
             </div>
-
             <div className="flex justify-end gap-2 pt-1">
-              <button type="button" onClick={() => setShowModal(false)} className="px-4 py-2 text-sm font-medium text-gray-600 hover:bg-gray-100 rounded-lg transition-colors">
-                Cancel
-              </button>
-              <button
-                type="button"
-                onClick={handleAdd}
-                disabled={!inputVal.trim()}
-                className="px-4 py-2 text-sm font-semibold bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
-              >
-                Add
-              </button>
+              <button type="button" onClick={() => setShowModal(false)} className="px-4 py-2 text-sm font-medium text-gray-600 hover:bg-gray-100 rounded-lg transition-colors">Cancel</button>
+              <button type="button" onClick={handleAddPublic} disabled={!inputVal.trim()} className="px-4 py-2 text-sm font-semibold bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 disabled:opacity-40 disabled:cursor-not-allowed transition-colors">Add</button>
             </div>
           </div>
         </div>
@@ -522,6 +611,73 @@ function NumberCounterContent({ config, onChange }: { config: Record<string, unk
   )
 }
 
+// ── Instagram Content (pending API approval) ───────────────────────────────
+function InstagramContent({ config, onChange }: { config: Record<string, unknown>; onChange: (c: Record<string, unknown>) => void }) {
+  const c = config as Partial<InstagramFeedConfig>
+  const set = (k: string, v: unknown) => onChange({ ...config, [k]: v })
+  const [waitlistSent, setWaitlistSent] = useState(false)
+  const [waitlistLoading, setWaitlistLoading] = useState(false)
+
+  async function joinWaitlist() {
+    if (waitlistSent || waitlistLoading) return
+    setWaitlistLoading(true)
+    try {
+      await fetch(`/api/widgets/instagram?action=waitlist&username=${encodeURIComponent((c.username ?? '').replace(/^@/, ''))}`)
+      setWaitlistSent(true)
+    } catch { /* best-effort */ }
+    finally { setWaitlistLoading(false) }
+  }
+
+  return (
+    <div className="space-y-3">
+      <ConfigSection title="Instagram Account">
+        <label className="block text-xs font-medium text-gray-600 mb-1">Username</label>
+        <div className="flex items-center border border-gray-200 rounded-lg overflow-hidden focus-within:ring-2 focus-within:ring-indigo-500">
+          <span className="px-3 py-2 bg-gray-50 text-gray-500 text-sm font-medium border-r border-gray-200">@</span>
+          <input
+            type="text"
+            value={(c.username ?? '').replace(/^@/, '')}
+            onChange={e => set('username', e.target.value.replace(/^@/, ''))}
+            placeholder="yourusername"
+            className="flex-1 px-3 py-2 text-sm outline-none bg-white"
+          />
+        </div>
+      </ConfigSection>
+
+      {/* API pending approval notice */}
+      <div className="rounded-xl border border-amber-200 bg-amber-50 p-4 space-y-3">
+        <div className="flex items-start gap-2.5">
+          <span className="text-lg leading-none mt-0.5">⏳</span>
+          <div>
+            <p className="text-sm font-bold text-amber-900">Instagram API Approval Pending</p>
+            <p className="text-xs text-amber-800 mt-0.5 leading-relaxed">
+              We&apos;ve applied for Meta Graph API access. Expected approval in 2–4 weeks.
+            </p>
+          </div>
+        </div>
+        <div className="bg-white/70 rounded-lg px-3 py-2.5 border border-amber-200">
+          <p className="text-xs text-amber-800 font-medium">Preview Mode — Sample content shown</p>
+          <p className="text-[11px] text-amber-700 mt-0.5 leading-relaxed">
+            Your widget will automatically switch to real posts once approved. No changes needed.
+          </p>
+        </div>
+        <button
+          type="button"
+          onClick={joinWaitlist}
+          disabled={waitlistSent || waitlistLoading}
+          className={`w-full flex items-center justify-center gap-1.5 py-2 text-xs font-semibold rounded-lg transition-colors ${
+            waitlistSent
+              ? 'bg-green-600 text-white'
+              : 'bg-amber-600 text-white hover:bg-amber-700 disabled:opacity-60'
+          }`}
+        >
+          {waitlistSent ? <><Check size={12} /> Notified when ready</> : waitlistLoading ? 'Saving…' : '🔔 Get notified when ready'}
+        </button>
+      </div>
+    </div>
+  )
+}
+
 // ── Panel: Content (dispatcher) ────────────────────────────────────────────
 function ContentPanel({ type, config, onChange, onPreviewData }: { type: string; config: Record<string, unknown>; onChange: (c: Record<string, unknown>) => void; onPreviewData?: (d: Record<string, unknown> | null) => void }) {
   const set = (k: string, v: unknown) => onChange({ ...config, [k]: v })
@@ -607,18 +763,9 @@ function ContentPanel({ type, config, onChange, onPreviewData }: { type: string;
     )
   }
 
-  if (type === 'instagram_feed') {
-    const c = config as Partial<InstagramFeedConfig>
-    return (
-      <ConfigSection title="Instagram Account">
-        <label className="block text-xs font-medium text-gray-600 mb-1">Username</label>
-        <input type="text" value={c.username ?? ''} onChange={e => set('username', e.target.value)} placeholder="@yourusername" className={INPUT} />
-        <p className="text-[11px] text-gray-400 mt-1">Enter your Instagram handle to connect your feed.</p>
-      </ConfigSection>
-    )
-  }
+  if (type === 'instagram_feed') return <InstagramContent config={config} onChange={onChange} />
 
-  if (type === 'tiktok_feed') return <TikTokSourcePanel config={config} onChange={onChange} />
+  if (type === 'tiktok_feed') return <TikTokSourcePanel config={config} onChange={onChange} onPreviewData={onPreviewData} />
 
 
   if (type === 'faq_accordion') return <FAQContent config={config} onChange={onChange} />
