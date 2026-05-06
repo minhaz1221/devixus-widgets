@@ -5,6 +5,7 @@ import { getUserPlan } from '@/lib/plan-limits'
 import { Sidebar } from './_components/Sidebar'
 import { PageTitle } from './_components/PageTitle'
 import { GettingStarted } from './_components/GettingStarted'
+import { WelcomeDeal } from './_components/WelcomeDeal'
 import { Bell, Plus } from 'lucide-react'
 
 export default async function DashboardLayout({ children }: { children: React.ReactNode }) {
@@ -153,6 +154,9 @@ export default async function DashboardLayout({ children }: { children: React.Re
           {children}
         </main>
       </div>
+
+      {/* Welcome deal popup — only shown to free plan users */}
+      {!isPro && <WelcomeDeal />}
     </div>
   )
 }

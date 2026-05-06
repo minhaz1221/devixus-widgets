@@ -78,6 +78,141 @@ function StarPicker({ value, onChange }: { value: number; onChange: (n: number) 
   )
 }
 
+// ── TikTok Source Panel (Elfsight-style add-source UX) ────────────────────
+function TikTokSourcePanel({ config, onChange }: { config: Record<string, unknown>; onChange: (c: Record<string, unknown>) => void }) {
+  const [showModal, setShowModal] = useState(false)
+  const [inputVal, setInputVal]   = useState('')
+  const [loading, setLoading]     = useState(false)
+  const [profile, setProfile]     = useState<{ display_name: string; avatar: string } | null>(null)
+
+  const username = (config.username as string) ?? ''
+
+  useEffect(() => {
+    if (!username) { setProfile(null); return }
+    setLoading(true)
+    fetch(`/api/widgets/tiktok?username=${encodeURIComponent(username)}`)
+      .then(r => r.json())
+      .then(d => setProfile({ display_name: d.display_name || username, avatar: d.avatar || '' }))
+      .catch(() => setProfile({ display_name: username, avatar: '' }))
+      .finally(() => setLoading(false))
+  }, [username])
+
+  function handleAdd() {
+    const clean = inputVal.replace(/^@/, '').replace(/.*tiktok\.com\/@?/, '').split('?')[0].trim()
+    if (!clean) return
+    onChange({ ...config, username: clean })
+    setInputVal('')
+    setShowModal(false)
+  }
+
+  function handleRemove() {
+    onChange({ ...config, username: '' })
+    setProfile(null)
+  }
+
+  return (
+    <div className="space-y-3">
+      <div className="flex items-center justify-between">
+        <h4 className="text-xs font-bold text-gray-500 uppercase tracking-wider">Sources</h4>
+      </div>
+
+      {username ? (
+        <div className="bg-gray-50 rounded-xl border border-gray-200 p-3 flex items-center gap-3">
+          {loading ? (
+            <div className="w-9 h-9 rounded-full bg-gray-200 animate-pulse shrink-0" />
+          ) : profile?.avatar ? (
+            <img src={profile.avatar} alt="" className="w-9 h-9 rounded-full object-cover shrink-0" />
+          ) : (
+            <div className="w-9 h-9 rounded-full bg-black flex items-center justify-center shrink-0">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="white"><path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-2.88 2.5 2.89 2.89 0 0 1-2.89-2.89 2.89 2.89 0 0 1 2.89-2.89c.28 0 .54.04.79.1V9.01a6.33 6.33 0 0 0-.79-.05 6.34 6.34 0 0 0-6.34 6.34 6.34 6.34 0 0 0 6.34 6.34 6.34 6.34 0 0 0 6.33-6.34V8.94a8.16 8.16 0 0 0 4.77 1.52V7.03a4.85 4.85 0 0 1-1-.34z"/></svg>
+            </div>
+          )}
+          <div className="flex-1 min-w-0">
+            <p className="text-sm font-semibold text-gray-900 truncate">
+              {loading ? 'Loading…' : (profile?.display_name || `@${username}`)}
+            </p>
+            <p className="text-[11px] text-gray-400">@{username}</p>
+          </div>
+          <div className="flex items-center gap-1 shrink-0">
+            <button
+              type="button"
+              onClick={() => { setInputVal(username); setShowModal(true) }}
+              className="w-7 h-7 flex items-center justify-center text-gray-400 hover:text-gray-700 hover:bg-gray-200 rounded-lg transition-colors text-xs"
+              title="Edit"
+            >
+              ✏
+            </button>
+            <button
+              type="button"
+              onClick={handleRemove}
+              className="w-7 h-7 flex items-center justify-center text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors"
+              title="Remove"
+            >
+              <X size={13} />
+            </button>
+          </div>
+        </div>
+      ) : (
+        <button
+          type="button"
+          onClick={() => setShowModal(true)}
+          className="w-full flex items-center justify-center gap-2 py-3 rounded-xl border-2 border-dashed border-gray-200 text-gray-500 hover:border-indigo-300 hover:text-indigo-600 hover:bg-indigo-50 transition-all text-sm font-medium"
+        >
+          <Plus size={16} /> Add TikTok Profile
+        </button>
+      )}
+
+      {/* Add/Edit modal */}
+      {showModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40" onClick={e => { if (e.target === e.currentTarget) setShowModal(false) }}>
+          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-sm p-6 space-y-4">
+            <div className="flex items-center justify-between">
+              <h3 className="font-bold text-gray-900">TikTok Profile</h3>
+              <button type="button" onClick={() => setShowModal(false)} className="w-7 h-7 flex items-center justify-center text-gray-400 hover:text-gray-700 rounded-lg hover:bg-gray-100">
+                <X size={15} />
+              </button>
+            </div>
+
+            <div>
+              <label className="block text-xs font-medium text-gray-600 mb-1">Enter TikTok Username</label>
+              <div className="flex items-center border border-gray-200 rounded-lg overflow-hidden focus-within:ring-2 focus-within:ring-indigo-500">
+                <span className="px-3 py-2 bg-gray-50 text-gray-500 text-sm font-medium border-r border-gray-200">@</span>
+                <input
+                  type="text"
+                  value={inputVal}
+                  onChange={e => setInputVal(e.target.value.replace(/^@/, ''))}
+                  onKeyDown={e => e.key === 'Enter' && handleAdd()}
+                  placeholder="charlidamelio"
+                  className="flex-1 px-3 py-2 text-sm outline-none bg-white"
+                  autoFocus
+                />
+              </div>
+              <p className="text-[11px] text-gray-400 mt-1.5 leading-relaxed">
+                For example, @charlidamelio, or paste a link like{' '}
+                <span className="font-mono">tiktok.com/@charlidamelio</span>
+              </p>
+            </div>
+
+            <div className="flex justify-end gap-2 pt-1">
+              <button type="button" onClick={() => setShowModal(false)} className="px-4 py-2 text-sm font-medium text-gray-600 hover:bg-gray-100 rounded-lg transition-colors">
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={handleAdd}
+                disabled={!inputVal.trim()}
+                className="px-4 py-2 text-sm font-semibold bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+              >
+                Add
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  )
+}
+
 // ── Content panel sub-components (each uses hooks safely) ─────────────────
 function WhatsAppContent({ config, onChange }: { config: Record<string, unknown>; onChange: (c: Record<string, unknown>) => void }) {
   const c = config as Partial<WhatsAppConfig>
@@ -483,16 +618,8 @@ function ContentPanel({ type, config, onChange, onPreviewData }: { type: string;
     )
   }
 
-  if (type === 'tiktok_feed') {
-    const c = config as Partial<TikTokFeedConfig>
-    return (
-      <ConfigSection title="TikTok Account">
-        <label className="block text-xs font-medium text-gray-600 mb-1">Username</label>
-        <input type="text" value={c.username ?? ''} onChange={e => set('username', e.target.value)} placeholder="@yourusername" className={INPUT} />
-        <p className="text-[11px] text-gray-400 mt-1">Enter your TikTok handle to connect your feed.</p>
-      </ConfigSection>
-    )
-  }
+  if (type === 'tiktok_feed') return <TikTokSourcePanel config={config} onChange={onChange} />
+
 
   if (type === 'faq_accordion') return <FAQContent config={config} onChange={onChange} />
   if (type === 'number_counter') return <NumberCounterContent config={config} onChange={onChange} />

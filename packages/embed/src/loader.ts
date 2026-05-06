@@ -2317,6 +2317,51 @@
     }
   }
 
+  // Owner floating bar — only shown when the widget creator visits the embedded widget
+  function renderOwnerBar(widgetId: string) {
+    const bar = document.createElement('div')
+    bar.style.cssText = [
+      'position:relative;z-index:9999;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;',
+      'background:#0f172a;color:#f1f5f9;display:flex;align-items:center;gap:12px;',
+      'padding:8px 14px;font-size:12px;border-radius:8px 8px 0 0;',
+    ].join('')
+
+    const editUrl = `${API_BASE}/dashboard/widgets/${widgetId}`
+
+    bar.innerHTML = `
+      <span style="color:#64748b;font-size:11px;white-space:nowrap;">Panel only seen by widget owner</span>
+      <a href="${editUrl}" target="_blank" rel="noopener noreferrer"
+         style="display:inline-flex;align-items:center;gap:5px;background:#3b82f6;color:white;text-decoration:none;
+                padding:4px 10px;border-radius:6px;font-size:11px;font-weight:600;white-space:nowrap;
+                transition:background 0.15s;">
+        ✏ Edit widget
+      </a>
+    `
+
+    bar.querySelector('a')?.addEventListener('mouseenter', (e) => {
+      (e.currentTarget as HTMLElement).style.background = '#2563eb'
+    })
+    bar.querySelector('a')?.addEventListener('mouseleave', (e) => {
+      (e.currentTarget as HTMLElement).style.background = '#3b82f6'
+    })
+
+    return bar
+  }
+
+  async function checkOwnership(widgetId: string): Promise<boolean> {
+    try {
+      const res = await fetch(`${API_BASE}/api/widgets/${widgetId}/owner-check`, {
+        credentials: 'include',
+        signal: AbortSignal.timeout(3000),
+      })
+      if (!res.ok) return false
+      const data = await res.json()
+      return data.isOwner === true
+    } catch {
+      return false
+    }
+  }
+
   // Bootstrap — entry point
   async function init() {
     if (!_scriptEl) return
@@ -2341,7 +2386,21 @@
         return
       }
 
+      // Check ownership in background — never blocks widget render
+      const [isOwner] = await Promise.all([
+        checkOwnership(widgetId),
+        Promise.resolve(), // placeholder to keep this a Promise.all
+      ])
+
       const shadow = createContainer(targetEl)
+
+      // Inject owner bar above widget when creator is viewing
+      if (isOwner) {
+        const ownerBar = renderOwnerBar(widgetId)
+        const host = shadow.host as HTMLElement
+        host.before(ownerBar)
+      }
+
       renderWidget(shadow, widget, widgetId)
 
       // Inject custom CSS (Pro/Agency plan feature)

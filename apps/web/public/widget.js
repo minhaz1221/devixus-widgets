@@ -1,4 +1,4 @@
-"use strict";(()=>{(function(){"use strict";let I=document.currentScript||(()=>{let e=document.getElementsByTagName("script");return e[e.length-1]||null})(),C=(()=>{try{let e=I==null?void 0:I.src;if(e)return new URL(e).origin}catch(e){}return"https://devixus-widgets-web.vercel.app"})(),F="https://devixus-widgets-marketing.vercel.app",U={bg:"#0f172a",card:"#1e293b",text:"#f1f5f9",border:"#334155",muted:"#94a3b8"},q={bg:"#ffffff",card:"#f9fafb",text:"#1a1a1a",border:"#e5e7eb",muted:"#6b7280"};function D(e){var t;return e==="auto"?(t=window.matchMedia)!=null&&t.call(window,"(prefers-color-scheme: dark)").matches?"dark":"light":e==="dark"?"dark":"light"}function E(e){return D(e)==="dark"?U:q}async function A(e){let t=await fetch(`${C}/api/widget/${e}`,{method:"GET",headers:{"Content-Type":"application/json"}});if(!t.ok)throw new Error(`Widget not found: ${e}`);return t.json()}function B(e){let t=document.createElement("div");return t.setAttribute("data-devixus-widget","true"),t.style.cssText="all: initial; display: block;",e.appendChild(t),t.attachShadow({mode:"open"})}function P(e,t,h){let s=t.phone_number||"",x=encodeURIComponent(t.welcome_message||"Hello!"),i=t.button_color||"#25D366",r=t.position||"bottom-right",a={small:44,medium:56,large:68}[t.button_size||"medium"]||56,y=Math.round(a*.54),f=!!t.pulse_animation,$=t.open_in==="same_tab"?"_self":"_blank",u=t.tooltip_text||"",td=(t.tooltip_delay!==undefined?t.tooltip_delay:2)*1e3,v=r==="bottom-right"?"bottom: 24px; right: 24px;":"bottom: 24px; left: 24px;",w=r==="bottom-right"?"flex-end":"flex-start";e.innerHTML=`
+"use strict";(()=>{(function(){"use strict";let I=document.currentScript||(()=>{let t=document.getElementsByTagName("script");return t[t.length-1]||null})(),T=(()=>{try{let t=I==null?void 0:I.src;if(t)return new URL(t).origin}catch(t){}return"https://devixus-widgets-web.vercel.app"})(),R="https://devixus-widgets-marketing.vercel.app",U={bg:"#0f172a",card:"#1e293b",text:"#f1f5f9",border:"#334155",muted:"#94a3b8"},q={bg:"#ffffff",card:"#f9fafb",text:"#1a1a1a",border:"#e5e7eb",muted:"#6b7280"};function D(t){var e;return t==="auto"?(e=window.matchMedia)!=null&&e.call(window,"(prefers-color-scheme: dark)").matches?"dark":"light":t==="dark"?"dark":"light"}function E(t){return D(t)==="dark"?U:q}async function A(t){let e=await fetch(`${T}/api/widget/${t}`,{method:"GET",headers:{"Content-Type":"application/json"}});if(!e.ok)throw new Error(`Widget not found: ${t}`);return e.json()}function B(t){let e=document.createElement("div");return e.setAttribute("data-devixus-widget","true"),e.style.cssText="all: initial; display: block;",t.appendChild(e),e.attachShadow({mode:"open"})}function P(t,e,b){let r=e.phone_number||"",p=encodeURIComponent(e.welcome_message||"Hello!"),i=e.button_color||"#25D366",l=e.position||"bottom-right",a={small:44,medium:56,large:68}[e.button_size||"medium"]||56,y=Math.round(a*.54),m=!!e.pulse_animation,$=e.open_in==="same_tab"?"_self":"_blank",f=e.tooltip_text||"",v=l==="bottom-right"?"bottom: 24px; right: 24px;":"bottom: 24px; left: 24px;",w=l==="bottom-right"?"flex-end":"flex-start";t.innerHTML=`
       <style>
         * { box-sizing: border-box; margin: 0; padding: 0; }
         .wa-btn {
@@ -35,7 +35,7 @@
           height: ${y}px;
           fill: white;
         }
-        ${f?`
+        ${m?`
         @keyframes wa-pulse {
           0% { transform: scale(.85); opacity: 0; }
           50% { opacity: .4; }
@@ -50,11 +50,11 @@
           animation: wa-pulse 2s ease infinite;
           z-index: -1;
         }`:""}
-        ${u?`
+        ${f?`
         .wa-tooltip {
           position: absolute;
           bottom: calc(100% + 8px);
-          ${r==="bottom-right"?"right: 0;":"left: 0;"}
+          ${l==="bottom-right"?"right: 0;":"left: 0;"}
           background: white;
           color: #1a1a1a;
           font-size: 13px;
@@ -79,9 +79,9 @@
       </style>
       <div class="wa-btn">
         <div class="wa-bubble-wrap">
-          ${u?`<div class="wa-tooltip">${u}</div>`:""}
+          ${f?`<div class="wa-tooltip">${f}</div>`:""}
           <a class="wa-bubble"
-             href="https://wa.me/${s}?text=${x}"
+             href="https://wa.me/${r}?text=${p}"
              target="${$}"
              rel="noopener noreferrer"
              aria-label="Chat on WhatsApp">
@@ -90,22 +90,22 @@
             </svg>
           </a>
         </div>
-        ${h?`<a class="wa-branding" href="${F}" target="_blank" rel="noopener noreferrer">Powered by Devixus</a>`:""}
+        ${b?`<a class="wa-branding" href="${R}" target="_blank" rel="noopener noreferrer">Powered by Devixus</a>`:""}
       </div>
-    `};if(u){var _t=e.querySelector(".wa-tooltip");if(_t){if(td>0){_t.style.opacity="0";setTimeout(function(){_t.style.opacity="1";_t.style.transition="opacity .3s ease";},td);}else{_t.style.opacity="1";}}}function W(e,t,h){var _,T;let s=t.testimonials||[],x=t.theme||"light",i=t.show_rating!==!1,r=t.layout||"slider",l=t.columns||2,a=t.show_arrows!==!1,y=!!t.show_dots,f=!!t.show_quote_icon,$=t.avatar_shape||"circle",u=t.card_shadow||"none",v=E(x),w=v.bg,p=v.text,d=v.muted,z=v.card,g={none:"none",small:"0 1px 4px rgba(0,0,0,.08)",medium:"0 4px 16px rgba(0,0,0,.1)",large:"0 8px 32px rgba(0,0,0,.14)"}[u]||"none",o=$==="circle"?"50%":$==="square"?"4px":"8px",n=s.map(b=>{let c=b.rating||5,S=i?`<div class="stars">${"\u2605".repeat(c)}${"\u2606".repeat(5-c)}</div>`:"",L=b.avatar_url?`<img src="${b.avatar_url}" class="avatar" alt="${b.author}" />`:`<div class="avatar-placeholder">${b.author.charAt(0).toUpperCase()}</div>`;return`
+    `}function W(t,e,b){var _,L;let r=e.testimonials||[],p=e.theme||"light",i=e.show_rating!==!1,l=e.layout||"slider",s=e.columns||2,a=e.show_arrows!==!1,y=!!e.show_dots,m=!!e.show_quote_icon,$=e.avatar_shape||"circle",f=e.card_shadow||"none",v=E(p),w=v.bg,g=v.text,d=v.muted,z=v.card,u={none:"none",small:"0 1px 4px rgba(0,0,0,.08)",medium:"0 4px 16px rgba(0,0,0,.1)",large:"0 8px 32px rgba(0,0,0,.14)"}[f]||"none",o=$==="circle"?"50%":$==="square"?"4px":"8px",n=r.map(x=>{let c=x.rating||5,S=i?`<div class="stars">${"\u2605".repeat(c)}${"\u2606".repeat(5-c)}</div>`:"",j=x.avatar_url?`<img src="${x.avatar_url}" class="avatar" alt="${x.author}" />`:`<div class="avatar-placeholder">${x.author.charAt(0).toUpperCase()}</div>`;return`
         <div class="card">
-          ${f?'<div class="quote-icon">"</div>':""}
+          ${m?'<div class="quote-icon">"</div>':""}
           ${S}
-          <p class="content">${b.content}</p>
+          <p class="content">${x.content}</p>
           <div class="author-row">
-            ${L}
+            ${j}
             <div>
-              <div class="author">${b.author}</div>
-              <div class="role">${b.role||""}</div>
+              <div class="author">${x.author}</div>
+              <div class="role">${x.role||""}</div>
             </div>
           </div>
         </div>
-      `}).join(""),m=r==="grid",k=m?`display: grid; grid-template-columns: repeat(${l}, 1fr); gap: 16px;`:"display: flex; gap: 16px; overflow-x: auto; scroll-snap-type: x mandatory; scrollbar-width: none; -ms-overflow-style: none; padding-bottom: 8px;";if(e.innerHTML=`
+      `}).join(""),h=l==="grid",k=h?`display: grid; grid-template-columns: repeat(${s}, 1fr); gap: 16px;`:"display: flex; gap: 16px; overflow-x: auto; scroll-snap-type: x mandatory; scrollbar-width: none; -ms-overflow-style: none; padding-bottom: 8px;";if(t.innerHTML=`
       <style>
         * { box-sizing: border-box; margin: 0; padding: 0; }
         .wrap {
@@ -118,14 +118,14 @@
         .track { ${k} }
         .track::-webkit-scrollbar { display: none; }
         .card {
-          ${m?"":"flex: 0 0 280px; scroll-snap-align: start;"}
+          ${h?"":"flex: 0 0 280px; scroll-snap-align: start;"}
           background: ${z};
           border-radius: 12px;
           padding: 20px;
           display: flex;
           flex-direction: column;
           gap: 12px;
-          box-shadow: ${g};
+          box-shadow: ${u};
         }
         .quote-icon {
           font-size: 48px;
@@ -135,7 +135,7 @@
           margin-bottom: -8px;
         }
         .stars { color: #f59e0b; font-size: 16px; letter-spacing: 2px; }
-        .content { color: ${p}; font-size: 14px; line-height: 1.6; flex: 1; }
+        .content { color: ${g}; font-size: 14px; line-height: 1.6; flex: 1; }
         .author-row { display: flex; align-items: center; gap: 10px; }
         .avatar {
           width: 36px; height: 36px;
@@ -154,9 +154,9 @@
           font-weight: 600;
           flex-shrink: 0;
         }
-        .author { color: ${p}; font-size: 13px; font-weight: 600; }
+        .author { color: ${g}; font-size: 13px; font-weight: 600; }
         .role { color: ${d}; font-size: 12px; }
-        ${!m&&a?`
+        ${!h&&a?`
         .arrows {
           display: flex;
           gap: 8px;
@@ -173,7 +173,7 @@
           align-items: center;
           justify-content: center;
           font-size: 14px;
-          color: ${p};
+          color: ${g};
           transition: background .2s;
         }
         .arrow-btn:hover { background: ${z}; }`:""}
@@ -198,25 +198,25 @@
       </style>
       <div class="wrap">
         <div class="track" id="t-track">${n}</div>
-        ${!m&&a?`
+        ${!h&&a?`
         <div class="arrows">
           <button class="arrow-btn" id="t-prev">\u2190</button>
           <button class="arrow-btn" id="t-next">\u2192</button>
         </div>`:""}
-        ${y&&s.length>0?`
+        ${y&&r.length>0?`
         <div class="dots" id="t-dots">
-          ${s.map((b,c)=>`<div class="dot${c===0?" active":""}" data-i="${c}"></div>`).join("")}
+          ${r.map((x,c)=>`<div class="dot${c===0?" active":""}" data-i="${c}"></div>`).join("")}
         </div>`:""}
-        ${h?`<div class="branding"><a href="${F}" target="_blank" rel="noopener noreferrer">Powered by Devixus Widgets</a></div>`:""}
+        ${b?`<div class="branding"><a href="${R}" target="_blank" rel="noopener noreferrer">Powered by Devixus Widgets</a></div>`:""}
       </div>
-    `,!m){let L=function(j){if(!b)return;let R=b.children;R[j]&&(S=j,R[j].scrollIntoView({behavior:"smooth",inline:"start",block:"nearest"}),c&&c.querySelectorAll(".dot").forEach((et,ot)=>{et.classList.toggle("active",ot===S)}))},b=e.getElementById("t-track"),c=y?e.getElementById("t-dots"):null,S=0;a&&((_=e.getElementById("t-prev"))==null||_.addEventListener("click",()=>{L(Math.max(0,S-1))}),(T=e.getElementById("t-next"))==null||T.addEventListener("click",()=>{L(Math.min(s.length-1,S+1))})),c&&c.querySelectorAll(".dot").forEach(j=>{j.addEventListener("click",()=>{var R;L(parseInt((R=j.dataset.i)!=null?R:"0"))})});if(t.autoplay!==false&&s.length>1){  var _spd=t.autoplay_speed||4000,_iv=setInterval(function(){L((S+1)%s.length);},_spd);  b&&b.addEventListener("mouseenter",function(){clearInterval(_iv);});  b&&b.addEventListener("mouseleave",function(){_iv=setInterval(function(){L((S+1)%s.length);},_spd);});}}}function N(e,t,h,s){let x=t.theme||"light",i=E(x),r=i.bg,l=i.text,a=i.muted,y=i.card,f=t.accent_color||"#ff0000",$=t.columns||3,u=t.layout||"grid",v=t.subscribe_button_color||f,w=t.header_style||"full",p=t.show_subscriber_count!==!1;e.innerHTML=`
+    `,!h){let j=function(C){if(!x)return;let F=x.children;F[C]&&(S=C,F[C].scrollIntoView({behavior:"smooth",inline:"start",block:"nearest"}),c&&c.querySelectorAll(".dot").forEach((ne,ae)=>{ne.classList.toggle("active",ae===S)}))},x=t.getElementById("t-track"),c=y?t.getElementById("t-dots"):null,S=0;a&&((_=t.getElementById("t-prev"))==null||_.addEventListener("click",()=>{j(Math.max(0,S-1))}),(L=t.getElementById("t-next"))==null||L.addEventListener("click",()=>{j(Math.min(r.length-1,S+1))})),c&&c.querySelectorAll(".dot").forEach(C=>{C.addEventListener("click",()=>{var F;j(parseInt((F=C.dataset.i)!=null?F:"0"))})})}}function N(t,e,b,r){let p=e.theme||"light",i=E(p),l=i.bg,s=i.text,a=i.muted,y=i.card,m=e.accent_color||"#ff0000",$=e.columns||3,f=e.layout||"grid",v=e.subscribe_button_color||m,w=e.header_style||"full",g=e.show_subscriber_count!==!1;t.innerHTML=`
       <style>
         * { box-sizing: border-box; margin: 0; padding: 0; }
         .yt-wrap {
           font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-          background: ${r};
+          background: ${l};
           padding: 20px;
-          color: ${l};
+          color: ${s};
         }
         .yt-loading {
           text-align: center;
@@ -228,22 +228,11 @@
       <div class="yt-wrap">
         <div class="yt-loading">Loading videos...</div>
       </div>
-    `;let d=t.channel_id,z=t.max_results||6,M=`${s}/api/youtube?channel_id=${d}&max_results=${z}`;fetch(M).then(g=>g.json()).then(g=>{if(!g.videos||g.videos.length===0){e.innerHTML=`
+    `;let d=e.channel_id,z=e.max_results||6,M=`${r}/api/youtube?channel_id=${d}&max_results=${z}`;fetch(M).then(u=>u.json()).then(u=>{if(!u.videos||u.videos.length===0){t.innerHTML=`
             <div style="padding:20px;text-align:center;
               color:${a};font-family:sans-serif;">
               No videos found
-            </div>`;return}let o=g.channel,pop=t.play_behavior==='popup',G=t.gap||'16px',m=g.videos.map(_=>pop?`
-          <div class="yt-card" data-vid="${_.id}" style="cursor:pointer">
-            <div class="yt-thumb">
-              <img src="${_.thumbnail}"
-                   alt="${_.title}"
-                   loading="lazy" />
-              <div class="yt-play">\u25B6</div>
-            </div>
-            ${t.show_title!==!1?`<div class="yt-title">${_.title}</div>`:""}
-            ${t.show_date!==!1?`<div class="yt-meta">${new Date(_.published_at).toLocaleDateString()}</div>`:""}
-          </div>
-        `:`
+            </div>`;return}let o=u.channel,h=u.videos.map(_=>`
           <a class="yt-card"
              href="${_.url}"
              target="_blank"
@@ -254,17 +243,17 @@
                    loading="lazy" />
               <div class="yt-play">\u25B6</div>
             </div>
-            ${t.show_title!==!1?`<div class="yt-title">${_.title}</div>`:""}
-            ${t.show_date!==!1?`<div class="yt-meta">${new Date(_.published_at).toLocaleDateString()}</div>`:""}
+            ${e.show_title!==!1?`<div class="yt-title">${_.title}</div>`:""}
+            ${e.show_date!==!1?`<div class="yt-meta">${new Date(_.published_at).toLocaleDateString()}</div>`:""}
           </a>
-        `).join(""),k=u==="grid"?`grid-template-columns: repeat(${$}, 1fr);`:u==="list"?"grid-template-columns: 1fr;":"grid-auto-flow: column; grid-auto-columns: 280px;";e.innerHTML=`
+        `).join(""),k=f==="grid"?`grid-template-columns: repeat(${$}, 1fr);`:f==="list"?"grid-template-columns: 1fr;":"grid-auto-flow: column; grid-auto-columns: 280px;";t.innerHTML=`
           <style>
             * { box-sizing: border-box; margin: 0; padding: 0; }
             .yt-wrap {
               font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-              background: ${r};
+              background: ${l};
               padding: 20px;
-              color: ${l};
+              color: ${s};
             }
             .yt-header {
               display: flex;
@@ -272,7 +261,7 @@
               gap: 12px;
               margin-bottom: 20px;
               padding-bottom: 16px;
-              border-bottom: 1px solid ${x==="dark"?"#333":"#eee"};
+              border-bottom: 1px solid ${p==="dark"?"#333":"#eee"};
             }
             .yt-avatar {
               width: 48px;
@@ -283,7 +272,7 @@
             .yt-channel-name {
               font-size: 16px;
               font-weight: 600;
-              color: ${l};
+              color: ${s};
             }
             .yt-subs {
               font-size: 12px;
@@ -306,13 +295,13 @@
             .yt-grid {
               display: grid;
               ${k}
-              gap: ${G};
-              ${u==="carousel"?"overflow-x: auto; scrollbar-width: none;":""}
+              gap: 16px;
+              ${f==="carousel"?"overflow-x: auto; scrollbar-width: none;":""}
             }
             .yt-grid::-webkit-scrollbar { display: none; }
             .yt-card {
               text-decoration: none;
-              color: ${l};
+              color: ${s};
               display: block;
               border-radius: 8px;
               overflow: hidden;
@@ -382,7 +371,7 @@
                          alt="${o.name}" />`:""}
               <div>
                 <div class="yt-channel-name">${o.name}</div>
-                ${p&&o.subscriber_count?`<div class="yt-subs">${o.subscriber_count} subscribers</div>`:""}
+                ${g&&o.subscriber_count?`<div class="yt-subs">${o.subscriber_count} subscribers</div>`:""}
               </div>
               <a href="https://youtube.com/channel/${d}"
                  class="yt-subscribe"
@@ -391,24 +380,24 @@
                 Subscribe
               </a>
             </div>`:""}
-            <div class="yt-grid">${m}</div>
-            ${h?`
+            <div class="yt-grid">${h}</div>
+            ${b?`
               <div class="yt-branding">
-                <a href="${s}"
+                <a href="${r}"
                    target="_blank"
                    rel="noopener noreferrer">
                   Powered by Devixus Widgets
                 </a>
               </div>`:""}
           </div>
-        `;if(pop){let moId='dvx-yt-'+Math.random().toString(36).slice(2);let moHtml='<div id="'+moId+'" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.88);z-index:2147483647;align-items:center;justify-content:center;cursor:pointer"><div style="position:relative;width:90%;max-width:960px;aspect-ratio:16/9"><button style="position:absolute;top:-40px;right:0;background:none;border:none;color:#fff;font-size:30px;line-height:1;cursor:pointer;padding:4px 8px;">&#x2715;</button><iframe style="width:100%;height:100%;border:none;border-radius:10px;" src="" frameborder="0" allowfullscreen allow="autoplay;encrypted-media"></iframe></div></div>';document.body.insertAdjacentHTML('beforeend',moHtml);let mo=document.getElementById(moId);e.querySelectorAll('.yt-card').forEach(function(c){c.addEventListener('click',function(){mo.querySelector('iframe').src='https://www.youtube.com/embed/'+c.getAttribute('data-vid')+'?autoplay=1';mo.style.display='flex';});});mo.addEventListener('click',function(ev){if(ev.target===mo||ev.target.tagName==='BUTTON'){mo.style.display='none';mo.querySelector('iframe').src='';}});}}).catch(()=>{let g=e.querySelector(".yt-loading");g&&(g.textContent="Failed to load videos")})}function Y(e,t,h,s){let x=t.theme||"light",i=E(x),r=i.bg,l=i.text,a=i.muted,y=i.card,f=t.accent_color||"#4285f4",$=t.layout||"grid";if(e.innerHTML=`
+        `}).catch(()=>{let u=t.querySelector(".yt-loading");u&&(u.textContent="Failed to load videos")})}function O(t,e,b,r){let p=e.theme||"light",i=E(p),l=i.bg,s=i.text,a=i.muted,y=i.card,m=e.accent_color||"#4285f4",$=e.layout||"grid";if(t.innerHTML=`
       <style>
         * { box-sizing: border-box; margin: 0; padding: 0; }
         .gr-wrap {
           font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-          background: ${r};
+          background: ${l};
           padding: 20px;
-          color: ${l};
+          color: ${s};
         }
         .gr-loading {
           text-align: center;
@@ -420,30 +409,30 @@
       <div class="gr-wrap">
         <div class="gr-loading">Loading reviews...</div>
       </div>
-    `,!t.place_id){let p=e.querySelector(".gr-wrap");p&&(p.innerHTML=`<div class="gr-loading" style="color:${a}">No business configured</div>`);return}let u=t.max_reviews||6,v=t.min_rating||1,w=`${s}/api/google-reviews?place_id=${encodeURIComponent(t.place_id)}&max_reviews=${u}&min_rating=${v}`;fetch(w).then(p=>p.json()).then(p=>{if(!p.reviews||p.reviews.length===0){e.innerHTML=`
+    `,!e.place_id){let g=t.querySelector(".gr-wrap");g&&(g.innerHTML=`<div class="gr-loading" style="color:${a}">No business configured</div>`);return}let f=e.max_reviews||6,v=e.min_rating||1,w=`${r}/api/google-reviews?place_id=${encodeURIComponent(e.place_id)}&max_reviews=${f}&min_rating=${v}`;fetch(w).then(g=>g.json()).then(g=>{if(!g.reviews||g.reviews.length===0){t.innerHTML=`
             <div style="padding:20px;text-align:center;
-              color:${a};font-family:sans-serif;background:${r};">
+              color:${a};font-family:sans-serif;background:${l};">
               No reviews found
-            </div>`;return}let d=p.place,z=p.reviews;function M(n){return Array.from({length:5},(m,k)=>`<span style="color:${k<n?"#fbbc04":"#dadce0"}">\u2605</span>`).join("")}let g=z.map(n=>`
+            </div>`;return}let d=g.place,z=g.reviews;function M(n){return Array.from({length:5},(h,k)=>`<span style="color:${k<n?"#fbbc04":"#dadce0"}">\u2605</span>`).join("")}let u=z.map(n=>`
           <div class="gr-card">
             <div class="gr-card-header">
-              ${t.show_reviewer_photo!==!1&&n.author_photo?`<img src="${n.author_photo}" class="gr-avatar" alt="${n.author_name}" />`:`<div class="gr-avatar-placeholder">${n.author_name.charAt(0).toUpperCase()}</div>`}
+              ${e.show_reviewer_photo!==!1&&n.author_photo?`<img src="${n.author_photo}" class="gr-avatar" alt="${n.author_name}" />`:`<div class="gr-avatar-placeholder">${n.author_name.charAt(0).toUpperCase()}</div>`}
               <div class="gr-author-info">
                 <div class="gr-author">${n.author_name}</div>
-                ${t.show_review_date!==!1?`<div class="gr-date">${n.relative_time}</div>`:""}
+                ${e.show_review_date!==!1?`<div class="gr-date">${n.relative_time}</div>`:""}
               </div>
             </div>
             <div class="gr-stars">${M(n.rating)}</div>
             ${n.text?`<p class="gr-text">${n.text}</p>`:""}
           </div>
-        `).join(""),o=$==="grid"?"grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));":$==="carousel"?"grid-auto-flow: column; grid-auto-columns: 300px; overflow-x: auto;":"grid-template-columns: 1fr;";e.innerHTML=`
+        `).join(""),o=$==="grid"?"grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));":$==="carousel"?"grid-auto-flow: column; grid-auto-columns: 300px; overflow-x: auto;":"grid-template-columns: 1fr;";t.innerHTML=`
           <style>
             * { box-sizing: border-box; margin: 0; padding: 0; }
             .gr-wrap {
               font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-              background: ${r};
+              background: ${l};
               padding: 20px;
-              color: ${l};
+              color: ${s};
             }
             .gr-header {
               display: flex;
@@ -451,14 +440,14 @@
               justify-content: space-between;
               margin-bottom: 20px;
               padding-bottom: 16px;
-              border-bottom: 1px solid ${x==="dark"?"#333":"#eee"};
+              border-bottom: 1px solid ${p==="dark"?"#333":"#eee"};
               flex-wrap: wrap;
               gap: 12px;
             }
             .gr-place-name {
               font-size: 18px;
               font-weight: 600;
-              color: ${l};
+              color: ${s};
               margin-bottom: 4px;
             }
             .gr-place-address { font-size: 12px; color: ${a}; }
@@ -471,7 +460,7 @@
             .gr-overall-score {
               font-size: 36px;
               font-weight: 700;
-              color: ${l};
+              color: ${s};
               line-height: 1;
             }
             .gr-overall-stars { font-size: 18px; }
@@ -480,7 +469,7 @@
               display: inline-block;
               margin-top: 8px;
               font-size: 12px;
-              color: ${f};
+              color: ${m};
               text-decoration: none;
             }
             .gr-google-badge {
@@ -489,7 +478,7 @@
               gap: 6px;
               margin-top: 4px;
             }
-            .gr-google-logo { font-size: 12px; font-weight: 700; color: ${f}; }
+            .gr-google-logo { font-size: 12px; font-weight: 700; color: ${m}; }
             .gr-grid {
               display: grid;
               ${o}
@@ -515,7 +504,7 @@
             .gr-avatar-placeholder {
               width: 40px; height: 40px;
               border-radius: 50%;
-              background: ${f};
+              background: ${m};
               color: white;
               display: flex;
               align-items: center;
@@ -524,7 +513,7 @@
               font-weight: 600;
               flex-shrink: 0;
             }
-            .gr-author { font-size: 14px; font-weight: 500; color: ${l}; }
+            .gr-author { font-size: 14px; font-weight: 500; color: ${s}; }
             .gr-date { font-size: 11px; color: ${a}; margin-top: 1px; }
             .gr-stars { font-size: 15px; letter-spacing: 1px; }
             .gr-text {
@@ -540,18 +529,18 @@
             .gr-branding a { color: ${a}; text-decoration: none; opacity: 0.6; }
           </style>
           <div class="gr-wrap">
-            ${t.show_header!==!1&&d?`
+            ${e.show_header!==!1&&d?`
             <div class="gr-header">
               <div>
                 <div class="gr-place-name">${d.name}</div>
                 <div class="gr-place-address">${d.address||""}</div>
-                ${t.write_review_link&&d.google_url?`
+                ${e.write_review_link&&d.google_url?`
                   <a href="${d.google_url}"
                      class="gr-write-link"
                      target="_blank"
                      rel="noopener noreferrer">Write a review \u2197</a>`:""}
               </div>
-              ${t.show_overall_rating!==!1?`
+              ${e.show_overall_rating!==!1?`
               <div class="gr-overall">
                 <div class="gr-overall-score">${d.overall_rating}</div>
                 <div class="gr-overall-stars">${M(Math.round(d.overall_rating))}</div>
@@ -562,22 +551,22 @@
                 </div>
               </div>`:""}
             </div>`:""}
-            <div class="gr-grid">${g}</div>
-            ${h?`
+            <div class="gr-grid">${u}</div>
+            ${b?`
               <div class="gr-branding">
-                <a href="${s}" target="_blank" rel="noopener noreferrer">
+                <a href="${r}" target="_blank" rel="noopener noreferrer">
                   Powered by Devixus Widgets
                 </a>
               </div>`:""}
           </div>
-        `}).catch(()=>{let p=e.querySelector(".gr-loading");p&&(p.textContent="Failed to load reviews")})}function G(e,t,h,s){var g;let x=t.theme||"light",i=E(x),r=t.bg_color||i.bg,l=t.text_color||i.text,a=t.accent_color||"#ff6914",y=t.title||"Offer ends in",f=t.style||"blocks",$=t.font_family==="mono"?"'Courier New', monospace":t.font_family==="serif"?"Georgia, 'Times New Roman', serif":"-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",v=(g={colon:":",slash:"/",dot:"\xB7",none:""}[t.separator_style||"colon"])!=null?g:":",w=t.expire_action||"message";function p(){let o=new Date(t.target_date+"T"+(t.target_time||"00:00")).getTime(),n=Date.now(),m=o-n;return m<=0?null:{days:Math.floor(m/(1e3*60*60*24)),hours:Math.floor(m%(1e3*60*60*24)/(1e3*60*60)),minutes:Math.floor(m%(1e3*60*60)/(1e3*60)),seconds:Math.floor(m%(1e3*60)/1e3)}}function d(o){return String(o).padStart(2,"0")}function z(){let o=p();if(!o){if(w==="hide"){e.innerHTML="";return}let _=t.expired_message||"This offer has ended";if(w==="redirect"&&t.redirect_url&&(window.location.href=t.redirect_url),w==="nothing")return;e.innerHTML=`
+        `}).catch(()=>{let g=t.querySelector(".gr-loading");g&&(g.textContent="Failed to load reviews")})}function Y(t,e,b,r){var u;let p=e.theme||"light",i=E(p),l=e.bg_color||i.bg,s=e.text_color||i.text,a=e.accent_color||"#ff6914",y=e.title||"Offer ends in",m=e.style||"blocks",$=e.font_family==="mono"?"'Courier New', monospace":e.font_family==="serif"?"Georgia, 'Times New Roman', serif":"-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",v=(u={colon:":",slash:"/",dot:"\xB7",none:""}[e.separator_style||"colon"])!=null?u:":",w=e.expire_action||"message";function g(){let o=new Date(e.target_date+"T"+(e.target_time||"00:00")).getTime(),n=Date.now(),h=o-n;return h<=0?null:{days:Math.floor(h/(1e3*60*60*24)),hours:Math.floor(h%(1e3*60*60*24)/(1e3*60*60)),minutes:Math.floor(h%(1e3*60*60)/(1e3*60)),seconds:Math.floor(h%(1e3*60)/1e3)}}function d(o){return String(o).padStart(2,"0")}function z(){let o=g();if(!o){if(w==="hide"){t.innerHTML="";return}let _=e.expired_message||"This offer has ended";if(w==="redirect"&&e.redirect_url&&(window.location.href=e.redirect_url),w==="nothing")return;t.innerHTML=`
           <style>
             .ct-wrap {
               font-family: ${$};
-              background: ${r};
+              background: ${l};
               padding: 24px;
               text-align: center;
-              color: ${l};
+              color: ${s};
               border-radius: 8px;
             }
             .ct-expired { font-size: 18px; font-weight: 500; }
@@ -585,7 +574,7 @@
           <div class="ct-wrap">
             <div class="ct-expired">${_}</div>
           </div>
-        `;return}let n=[];t.show_days!==!1&&n.push({value:d(o.days),label:"Days"}),t.show_hours!==!1&&n.push({value:d(o.hours),label:"Hours"}),t.show_minutes!==!1&&n.push({value:d(o.minutes),label:"Minutes"}),t.show_seconds!==!1&&n.push({value:d(o.seconds),label:"Seconds"});let m=f==="blocks"?`
+        `;return}let n=[];e.show_days!==!1&&n.push({value:d(o.days),label:"Days"}),e.show_hours!==!1&&n.push({value:d(o.hours),label:"Hours"}),e.show_minutes!==!1&&n.push({value:d(o.minutes),label:"Minutes"}),e.show_seconds!==!1&&n.push({value:d(o.seconds),label:"Seconds"});let h=m==="blocks"?`
         .ct-unit {
           background: ${a};
           border-radius: 8px;
@@ -609,7 +598,7 @@
           text-transform: uppercase;
           letter-spacing: .05em;
         }
-      `:f==="flip"?`
+      `:m==="flip"?`
         .ct-unit {
           display: flex;
           flex-direction: column;
@@ -622,7 +611,7 @@
           color: ${a};
           line-height: 1;
           font-variant-numeric: tabular-nums;
-          background: ${r};
+          background: ${l};
           border: 2px solid ${a};
           border-radius: 8px;
           padding: 8px 16px;
@@ -631,7 +620,7 @@
         }
         .ct-label {
           font-size: 11px;
-          color: ${l};
+          color: ${s};
           opacity: 0.6;
           text-transform: uppercase;
           letter-spacing: .05em;
@@ -652,7 +641,7 @@
         }
         .ct-label {
           font-size: 11px;
-          color: ${l};
+          color: ${s};
           opacity: 0.6;
           text-transform: uppercase;
           letter-spacing: .05em;
@@ -660,24 +649,24 @@
       `,k=n.map(_=>`
         <div class="ct-unit">
           <div class="ct-value">${_.value}</div>
-          ${t.show_labels!==!1?`<div class="ct-label">${_.label}</div>`:""}
+          ${e.show_labels!==!1?`<div class="ct-label">${_.label}</div>`:""}
         </div>
-      `).join(f==="minimal"?`<div class="ct-sep">${v}</div>`:"");e.innerHTML=`
+      `).join(m==="minimal"?`<div class="ct-sep">${v}</div>`:"");t.innerHTML=`
         <style>
           * { box-sizing: border-box; margin: 0; padding: 0; }
           .ct-wrap {
             font-family: ${$};
-            background: ${r};
+            background: ${l};
             padding: 24px 20px;
             border-radius: 8px;
             text-align: center;
-            color: ${l};
+            color: ${s};
           }
           .ct-title {
             font-size: 16px;
             font-weight: 500;
             margin-bottom: 16px;
-            color: ${l};
+            color: ${s};
           }
           .ct-units {
             display: flex;
@@ -686,7 +675,7 @@
             gap: 12px;
             flex-wrap: wrap;
           }
-          ${m}
+          ${h}
           .ct-sep {
             font-size: 36px;
             font-weight: 700;
@@ -698,7 +687,7 @@
             font-size: 10px;
           }
           .ct-branding a {
-            color: ${l};
+            color: ${s};
             opacity: 0.4;
             text-decoration: none;
           }
@@ -706,26 +695,26 @@
         <div class="ct-wrap">
           ${y?`<div class="ct-title">${y}</div>`:""}
           <div class="ct-units">${k}</div>
-          ${h?`
+          ${b?`
             <div class="ct-branding">
-              <a href="${s}" target="_blank" rel="noopener noreferrer">
+              <a href="${r}" target="_blank" rel="noopener noreferrer">
                 Powered by Devixus Widgets
               </a>
             </div>`:""}
         </div>
-      `}z();let M=setInterval(()=>{let o=p();if(!o){clearInterval(M),z();return}let n=e.querySelectorAll(".ct-value"),m=[];t.show_days!==!1&&m.push(d(o.days)),t.show_hours!==!1&&m.push(d(o.hours)),t.show_minutes!==!1&&m.push(d(o.minutes)),t.show_seconds!==!1&&m.push(d(o.seconds)),n.forEach((k,_)=>{m[_]&&(k.textContent=m[_])})},1e3)}function O(e,t,h,s){let x=t.message||"\u{1F389} Welcome to our website!",i=t.bg_color||"#ff6914",r=t.text_color||"#ffffff",l=t.link_color||"#ffffff",a=t.position||"top",y=t.is_sticky!==!1,f=t.show_close_button!==!1,$=t.show_emoji?t.emoji||"\u{1F389}":"",u=t.style||"solid",v=i;u==="gradient"?v=`linear-gradient(135deg, ${i}, ${i}dd)`:u==="striped"&&(v=`repeating-linear-gradient(
+      `}z();let M=setInterval(()=>{let o=g();if(!o){clearInterval(M),z();return}let n=t.querySelectorAll(".ct-value"),h=[];e.show_days!==!1&&h.push(d(o.days)),e.show_hours!==!1&&h.push(d(o.hours)),e.show_minutes!==!1&&h.push(d(o.minutes)),e.show_seconds!==!1&&h.push(d(o.seconds)),n.forEach((k,_)=>{h[_]&&(k.textContent=h[_])})},1e3)}function G(t,e,b,r){let p=e.message||"\u{1F389} Welcome to our website!",i=e.bg_color||"#ff6914",l=e.text_color||"#ffffff",s=e.link_color||"#ffffff",a=e.position||"top",y=e.is_sticky!==!1,m=e.show_close_button!==!1,$=e.show_emoji?e.emoji||"\u{1F389}":"",f=e.style||"solid",v=i;f==="gradient"?v=`linear-gradient(135deg, ${i}, ${i}dd)`:f==="striped"&&(v=`repeating-linear-gradient(
         45deg,
         ${i},
         ${i} 10px,
         ${i}ee 10px,
         ${i}ee 20px
-      )`);let w=y?`position: fixed; ${a}: 0; left: 0; right: 0; z-index: 999999;`:"position: relative;";if(e.innerHTML=`
+      )`);let w=y?`position: fixed; ${a}: 0; left: 0; right: 0; z-index: 999999;`:"position: relative;";if(t.innerHTML=`
       <style>
         * { box-sizing: border-box; margin: 0; padding: 0; }
         .ab-bar {
           ${w}
           background: ${v};
-          color: ${r};
+          color: ${l};
           padding: 10px 16px;
           font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
           font-size: 14px;
@@ -743,9 +732,9 @@
           flex-wrap: wrap;
           justify-content: center;
         }
-        .ab-message { color: ${r}; font-weight: 500; }
+        .ab-message { color: ${l}; font-weight: 500; }
         .ab-link {
-          color: ${l};
+          color: ${s};
           text-decoration: underline;
           font-weight: 600;
           cursor: pointer;
@@ -759,7 +748,7 @@
           transform: translateY(-50%);
           background: none;
           border: none;
-          color: ${r};
+          color: ${l};
           cursor: pointer;
           font-size: 18px;
           opacity: 0.7;
@@ -775,35 +764,35 @@
         .ab-close:hover { opacity: 1; background: rgba(0,0,0,0.1); }
         .ab-branding {
           position: absolute;
-          right: ${f?"44px":"12px"};
+          right: ${m?"44px":"12px"};
           top: 50%;
           transform: translateY(-50%);
           font-size: 9px;
         }
-        .ab-branding a { color: ${r}; opacity: 0.4; text-decoration: none; }
+        .ab-branding a { color: ${l}; opacity: 0.4; text-decoration: none; }
       </style>
       <div class="ab-bar" id="ab-bar">
         <div class="ab-content">
           ${$?`<span>${$}</span>`:""}
-          <span class="ab-message">${x}</span>
-          ${t.link_text&&t.link_url?`
+          <span class="ab-message">${p}</span>
+          ${e.link_text&&e.link_url?`
             <a class="ab-link"
-               href="${t.link_url}"
+               href="${e.link_url}"
                target="_blank"
                rel="noopener noreferrer">
-              ${t.link_text} \u2192
+              ${e.link_text} \u2192
             </a>
           `:""}
         </div>
-        ${h?`
+        ${b?`
           <div class="ab-branding">
-            <a href="${s}" target="_blank" rel="noopener noreferrer">Devixus</a>
+            <a href="${r}" target="_blank" rel="noopener noreferrer">Devixus</a>
           </div>`:""}
-        ${f?`
+        ${m?`
           <button class="ab-close" id="ab-close" aria-label="Close">\u2715</button>
         `:""}
       </div>
-    `,f){let p=e.getElementById("ab-close"),d=e.getElementById("ab-bar");p&&d&&p.addEventListener("click",()=>{d.style.display="none"})}}function V(e,t,h){let s=`${h}/dashboard/billing`;e.innerHTML=`
+    `,m){let g=t.getElementById("ab-close"),d=t.getElementById("ab-bar");g&&d&&g.addEventListener("click",()=>{d.style.display="none"})}}function V(t,e,b){let r=`${b}/dashboard/billing`;t.innerHTML=`
       <style>
         * { box-sizing: border-box; margin: 0; padding: 0; }
         .dv-overlay {
@@ -897,26 +886,26 @@
             This widget has used all its free views
             for this month. Upgrade to keep it running.
           </div>
-          <a href="${s}"
+          <a href="${r}"
              target="_blank"
              class="dv-btn">
             Upgrade plan \u2192
           </a>
           <div class="dv-powered">
-            <a href="${h}" target="_blank">
+            <a href="${b}" target="_blank">
               Powered by Devixus Widgets
             </a>
           </div>
         </div>
       </div>
-    `}function K(e,t){try{let h=window.location.hostname,s=JSON.stringify({widget_id:e,domain:h,event_type:"load"});navigator.sendBeacon?navigator.sendBeacon(`${t}/api/track`,new Blob([s],{type:"application/json"})):fetch(`${t}/api/track`,{method:"POST",body:s,headers:{"Content-Type":"application/json"},keepalive:!0}).catch(()=>{})}catch(h){}}function J(e,t,h,s,x){let i=t.theme||"light",r=E(i),l=r.bg,a=r.text,y=r.muted,f=r.card,$=r.border,u=t.accent_color||"#6366f1",bc=t.button_color||u,v=t.border_radius||8,w=t.display_mode==="popup",p=t.title||"Contact Us",d=t.subtitle||"Send us a message and we'll get back to you.",z=t.button_text||"Send Message",M=t.success_message||"Thank you! We'll be in touch soon.",g=t.fields||{name:!0,email:!0,phone:!1,subject:!1,message:!0},o=t.required_fields||{name:!0,email:!0,message:!0};function n(b){return`
-        <div class="cf-form-wrap" id="${b}">
+    `}function K(t,e){try{let b=window.location.hostname,r=JSON.stringify({widget_id:t,domain:b,event_type:"load"});navigator.sendBeacon?navigator.sendBeacon(`${e}/api/track`,new Blob([r],{type:"application/json"})):fetch(`${e}/api/track`,{method:"POST",body:r,headers:{"Content-Type":"application/json"},keepalive:!0}).catch(()=>{})}catch(b){}}function J(t,e,b,r,p){let i=e.theme||"light",l=E(i),s=l.bg,a=l.text,y=l.muted,m=l.card,$=l.border,f=e.accent_color||"#6366f1",v=e.border_radius||8,w=e.display_mode==="popup",g=e.title||"Contact Us",d=e.subtitle||"Send us a message and we'll get back to you.",z=e.button_text||"Send Message",M=e.success_message||"Thank you! We'll be in touch soon.",u=e.fields||{name:!0,email:!0,phone:!1,subject:!1,message:!0},o=e.required_fields||{name:!0,email:!0,message:!0};function n(x){return`
+        <div class="cf-form-wrap" id="${x}">
           <div class="cf-header">
-            <h3 class="cf-title">${p}</h3>
+            <h3 class="cf-title">${g}</h3>
             ${d?`<p class="cf-subtitle">${d}</p>`:""}
           </div>
-          <form class="cf-form" id="cf-form-${x}">
-            ${g.name?`
+          <form class="cf-form" id="cf-form-${p}">
+            ${u.name?`
               <div class="cf-field">
                 <label class="cf-label">
                   Name${o.name?' <span class="cf-req">*</span>':""}
@@ -925,7 +914,7 @@
                        placeholder="Your name"
                        ${o.name?"required":""} />
               </div>`:""}
-            ${g.email?`
+            ${u.email?`
               <div class="cf-field">
                 <label class="cf-label">
                   Email${o.email?' <span class="cf-req">*</span>':""}
@@ -934,7 +923,7 @@
                        placeholder="your@email.com"
                        ${o.email?"required":""} />
               </div>`:""}
-            ${g.phone?`
+            ${u.phone?`
               <div class="cf-field">
                 <label class="cf-label">
                   Phone${o.phone?' <span class="cf-req">*</span>':""}
@@ -943,13 +932,13 @@
                        placeholder="+1 234 567 8900"
                        ${o.phone?"required":""} />
               </div>`:""}
-            ${g.subject?`
+            ${u.subject?`
               <div class="cf-field">
                 <label class="cf-label">Subject</label>
                 <input type="text" name="subject" class="cf-input"
                        placeholder="What is this about?" />
               </div>`:""}
-            ${g.message?`
+            ${u.message?`
               <div class="cf-field">
                 <label class="cf-label">
                   Message${o.message?' <span class="cf-req">*</span>':""}
@@ -958,26 +947,26 @@
                           placeholder="Your message..." rows="4"
                           ${o.message?"required":""}></textarea>
               </div>`:""}
-            <div class="cf-field" id="cf-error-${x}" style="display:none">
+            <div class="cf-field" id="cf-error-${p}" style="display:none">
               <p class="cf-error-msg"></p>
             </div>
             <button type="submit" class="cf-btn">${z}</button>
           </form>
-          <div class="cf-success" id="cf-success-${x}" style="display:none">
+          <div class="cf-success" id="cf-success-${p}" style="display:none">
             <div class="cf-success-icon">\u2713</div>
             <p class="cf-success-msg">${M}</p>
           </div>
-          ${h?`
+          ${b?`
             <div class="cf-branding">
-              <a href="${s}" target="_blank" rel="noopener noreferrer">
+              <a href="${r}" target="_blank" rel="noopener noreferrer">
                 Powered by Devixus Widgets
               </a>
             </div>`:""}
         </div>
-      `}let m=w?`
+      `}let h=w?`
       <div>
         <button class="cf-trigger" id="cf-trigger">
-          ${t.trigger_text||"\u2709 Contact Us"}
+          ${e.trigger_text||"\u2709 Contact Us"}
         </button>
         <div class="cf-popup-overlay" id="cf-popup" style="display:none">
           <div class="cf-popup-box">
@@ -986,11 +975,11 @@
           </div>
         </div>
       </div>
-    `:n("cf-inline-form");if(e.innerHTML=`
+    `:n("cf-inline-form");if(t.innerHTML=`
       <style>
         * { box-sizing: border-box; margin: 0; padding: 0; }
         .cf-trigger {
-          background: ${bc};
+          background: ${f};
           color: white;
           border: none;
           padding: 12px 20px;
@@ -1013,7 +1002,7 @@
           padding: 16px;
         }
         .cf-popup-box {
-          background: ${l};
+          background: ${s};
           border-radius: ${v+4}px;
           padding: 28px;
           width: 100%;
@@ -1038,10 +1027,10 @@
           justify-content: center;
           border-radius: 50%;
         }
-        .cf-popup-close:hover { background: ${f}; }
+        .cf-popup-close:hover { background: ${m}; }
         .cf-form-wrap {
           font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-          background: ${l};
+          background: ${s};
           padding: ${w?"0":"24px"};
           border-radius: ${v}px;
           color: ${a};
@@ -1063,7 +1052,7 @@
         .cf-label { font-size: 13px; font-weight: 500; color: ${a}; }
         .cf-req { color: #ef4444; }
         .cf-input, .cf-textarea {
-          background: ${f};
+          background: ${m};
           border: 1px solid ${$};
           border-radius: ${v-2}px;
           padding: 10px 12px;
@@ -1074,10 +1063,10 @@
           transition: border-color .2s;
           width: 100%;
         }
-        .cf-input:focus, .cf-textarea:focus { border-color: ${u}; }
+        .cf-input:focus, .cf-textarea:focus { border-color: ${f}; }
         .cf-textarea { resize: vertical; }
         .cf-btn {
-          background: ${bc};
+          background: ${f};
           color: white;
           border: none;
           padding: 12px 20px;
@@ -1120,22 +1109,22 @@
         .cf-branding { text-align: center; margin-top: 16px; font-size: 10px; }
         .cf-branding a { color: ${y}; text-decoration: none; opacity: 0.6; }
       </style>
-      ${m}
-    `,w){let b=e.getElementById("cf-trigger"),c=e.getElementById("cf-popup"),S=e.getElementById("cf-popup-close");b==null||b.addEventListener("click",()=>{c&&(c.style.display="flex")}),S==null||S.addEventListener("click",()=>{c&&(c.style.display="none")}),c==null||c.addEventListener("click",L=>{L.target===c&&(c.style.display="none")})}let k=e.getElementById(`cf-form-${x}`),_=e.getElementById(`cf-success-${x}`),T=e.getElementById(`cf-error-${x}`);k==null||k.addEventListener("submit",async b=>{b.preventDefault();let c=k.querySelector(".cf-btn");c&&(c.disabled=!0,c.textContent="Sending...");let S=new FormData(k);try{if((await fetch(`${s}/api/contact-submit`,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({widget_id:x,name:S.get("name"),email:S.get("email"),phone:S.get("phone"),subject:S.get("subject"),message:S.get("message")})})).ok)k.style.display="none",_&&(_.style.display="block");else throw new Error("Failed")}catch(L){c&&(c.disabled=!1,c.textContent=z);let j=T==null?void 0:T.querySelector(".cf-error-msg");j&&(j.textContent="Failed to send. Please try again."),T&&(T.style.display="block")}})}function X(e,t,h,s){var M;let x=t.theme||"light",i=t.style||"filled",r=t.size||"medium",l=t.layout||"horizontal",a=t.show_labels!==!1,y=t.animation||"hover_grow",f=(M=t.border_radius)!=null?M:50,$={small:{btn:"36px",icon:"18px",font:"12px"},medium:{btn:"44px",icon:"22px",font:"13px"},large:{btn:"56px",icon:"28px",font:"14px"}},u=$[r]||$.medium,v=t.networks||{},w={facebook:{label:"Facebook",color:"#1877F2",icon:"f"},instagram:{label:"Instagram",color:"#E4405F",icon:"\u{1F4F7}"},twitter:{label:"Twitter / X",color:"#000000",icon:"X"},tiktok:{label:"TikTok",color:"#000000",icon:"\u266A"},youtube:{label:"YouTube",color:"#FF0000",icon:"\u25B6"},linkedin:{label:"LinkedIn",color:"#0A66C2",icon:"in"},pinterest:{label:"Pinterest",color:"#E60023",icon:"P"},whatsapp:{label:"WhatsApp",color:"#25D366",icon:"\u{1F4AC}"}},p=Object.entries(v).filter(([,g])=>g).map(([g,o])=>{let n=w[g];if(!n)return"";let m=i==="filled"?`background: ${n.color}; color: white; border: none;`:i==="outline"?`background: transparent; color: ${n.color}; border: 2px solid ${n.color};`:`background: transparent; color: ${n.color}; border: none;`,k=t.label_type==="follow_us"?"Follow us":t.label_type==="custom"&&t.custom_label||n.label;return`
+      ${h}
+    `,w){let x=t.getElementById("cf-trigger"),c=t.getElementById("cf-popup"),S=t.getElementById("cf-popup-close");x==null||x.addEventListener("click",()=>{c&&(c.style.display="flex")}),S==null||S.addEventListener("click",()=>{c&&(c.style.display="none")}),c==null||c.addEventListener("click",j=>{j.target===c&&(c.style.display="none")})}let k=t.getElementById(`cf-form-${p}`),_=t.getElementById(`cf-success-${p}`),L=t.getElementById(`cf-error-${p}`);k==null||k.addEventListener("submit",async x=>{x.preventDefault();let c=k.querySelector(".cf-btn");c&&(c.disabled=!0,c.textContent="Sending...");let S=new FormData(k);try{if((await fetch(`${r}/api/contact-submit`,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({widget_id:p,name:S.get("name"),email:S.get("email"),phone:S.get("phone"),subject:S.get("subject"),message:S.get("message")})})).ok)k.style.display="none",_&&(_.style.display="block");else throw new Error("Failed")}catch(j){c&&(c.disabled=!1,c.textContent=z);let C=L==null?void 0:L.querySelector(".cf-error-msg");C&&(C.textContent="Failed to send. Please try again."),L&&(L.style.display="block")}})}function X(t,e,b,r){var M;let p=e.theme||"light",i=e.style||"filled",l=e.size||"medium",s=e.layout||"horizontal",a=e.show_labels!==!1,y=e.animation||"hover_grow",m=(M=e.border_radius)!=null?M:50,$={small:{btn:"36px",icon:"18px",font:"12px"},medium:{btn:"44px",icon:"22px",font:"13px"},large:{btn:"56px",icon:"28px",font:"14px"}},f=$[l]||$.medium,v=e.networks||{},w={facebook:{label:"Facebook",color:"#1877F2",icon:"f"},instagram:{label:"Instagram",color:"#E4405F",icon:"\u{1F4F7}"},twitter:{label:"Twitter / X",color:"#000000",icon:"X"},tiktok:{label:"TikTok",color:"#000000",icon:"\u266A"},youtube:{label:"YouTube",color:"#FF0000",icon:"\u25B6"},linkedin:{label:"LinkedIn",color:"#0A66C2",icon:"in"},pinterest:{label:"Pinterest",color:"#E60023",icon:"P"},whatsapp:{label:"WhatsApp",color:"#25D366",icon:"\u{1F4AC}"}},g=Object.entries(v).filter(([,u])=>u).map(([u,o])=>{let n=w[u];if(!n)return"";let h=i==="filled"?`background: ${n.color}; color: white; border: none;`:i==="outline"?`background: transparent; color: ${n.color}; border: 2px solid ${n.color};`:`background: transparent; color: ${n.color}; border: none;`,k=e.label_type==="follow_us"?"Follow us":e.label_type==="custom"&&e.custom_label||n.label;return`
           <a href="${o}"
              target="_blank"
              rel="noopener noreferrer"
-             class="sf-btn sf-${g}"
+             class="sf-btn sf-${u}"
              aria-label="${n.label}"
-             style="${m}">
+             style="${h}">
             <span class="sf-icon">${n.icon}</span>
             ${a?`<span class="sf-label">${k}</span>`:""}
           </a>
-        `}).join(""),d=l==="horizontal"?"flex-direction: row; flex-wrap: wrap;":l==="vertical"?"flex-direction: column;":"display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));",z=y==="hover_grow"?".sf-btn:hover { transform: scale(1.08); }":y==="hover_bounce"?`.sf-btn:hover { animation: sfbounce .3s ease; }
+        `}).join(""),d=s==="horizontal"?"flex-direction: row; flex-wrap: wrap;":s==="vertical"?"flex-direction: column;":"display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));",z=y==="hover_grow"?".sf-btn:hover { transform: scale(1.08); }":y==="hover_bounce"?`.sf-btn:hover { animation: sfbounce .3s ease; }
          @keyframes sfbounce {
            0%,100% { transform: translateY(0); }
            50% { transform: translateY(-4px); }
-         }`:"";e.innerHTML=`
+         }`:"";t.innerHTML=`
       <style>
         * { box-sizing: border-box; margin: 0; padding: 0; }
         .sf-wrap {
@@ -1151,65 +1140,65 @@
           display: inline-flex;
           align-items: center;
           gap: 8px;
-          height: ${u.btn};
+          height: ${f.btn};
           padding: 0 ${a?"14px":"0"};
-          ${a?"":`width: ${u.btn};`}
+          ${a?"":`width: ${f.btn};`}
           justify-content: center;
-          border-radius: ${f}px;
+          border-radius: ${m}px;
           text-decoration: none;
-          font-size: ${u.font};
+          font-size: ${f.font};
           font-weight: 600;
           cursor: pointer;
           transition: transform .2s, opacity .2s;
           white-space: nowrap;
         }
         .sf-btn:hover { opacity: .9; }
-        .sf-icon { font-size: ${u.icon}; line-height: 1; font-style: normal; }
-        .sf-label { font-size: ${u.font}; }
+        .sf-icon { font-size: ${f.icon}; line-height: 1; font-style: normal; }
+        .sf-label { font-size: ${f.font}; }
         ${z}
         .sf-branding { width: 100%; text-align: center; margin-top: 8px; font-size: 10px; }
         .sf-branding a { color: #999; text-decoration: none; opacity: 0.6; }
       </style>
       <div class="sf-wrap">
-        ${p}
-        ${h?`
+        ${g}
+        ${b?`
           <div class="sf-branding">
-            <a href="${s}" target="_blank" rel="noopener noreferrer">
+            <a href="${r}" target="_blank" rel="noopener noreferrer">
               Powered by Devixus Widgets
             </a>
           </div>`:""}
       </div>
-    `}function Q(e,t,h,s){let x=t.theme||"light",i=E(x),r=i.bg,l=i.text,a=i.muted,y=t.columns||3,f=t.layout||"grid",$=t.border_radius==="round"?"50%":t.border_radius||"8px",u=t.gap||"8px",v=t.num_posts||9,w=t.show_likes!==!1,p=!!t.show_caption,d=t.show_video_icon!==!1,z=t.link_behavior||"instagram",M=t.username||"";if(e.innerHTML=`
+    `}function Q(t,e,b,r){let p=e.theme||"light",i=E(p),l=i.bg,s=i.text,a=i.muted,y=e.columns||3,m=e.layout||"grid",$=e.border_radius==="round"?"50%":e.border_radius||"8px",f=e.gap||"8px",v=e.num_posts||9,w=e.show_likes!==!1,g=!!e.show_caption,d=e.show_video_icon!==!1,z=e.link_behavior||"instagram",M=e.username||"";if(t.innerHTML=`
       <style>
         * { box-sizing: border-box; margin: 0; padding: 0; }
         .ig-wrap {
           font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-          background: ${r};
+          background: ${l};
           padding: 20px;
-          color: ${l};
+          color: ${s};
         }
         .ig-loading { text-align: center; padding: 40px; color: ${a}; font-size: 14px; }
       </style>
       <div class="ig-wrap"><div class="ig-loading">Loading Instagram posts...</div></div>
-    `,!M){let o=e.querySelector(".ig-wrap");o&&(o.innerHTML=`<div class="ig-loading" style="color:${a}">No Instagram username configured</div>`);return}function g(o){return o>=1e6?`${(o/1e6).toFixed(1)}M`:o>=1e3?`${(o/1e3).toFixed(1)}K`:String(o)}fetch(`${s}/api/widgets/instagram?username=${encodeURIComponent(M)}`).then(o=>o.json()).then(o=>{if(!o||!o.posts)return;let m=o.posts.slice(0,v).map(c=>{let S=z==="instagram"?`https://www.instagram.com/${M}/`:"#";return`
+    `,!M){let o=t.querySelector(".ig-wrap");o&&(o.innerHTML=`<div class="ig-loading" style="color:${a}">No Instagram username configured</div>`);return}function u(o){return o>=1e6?`${(o/1e6).toFixed(1)}M`:o>=1e3?`${(o/1e3).toFixed(1)}K`:String(o)}fetch(`${r}/api/widgets/instagram?username=${encodeURIComponent(M)}`).then(o=>o.json()).then(o=>{if(!o||!o.posts)return;let h=o.posts.slice(0,v).map(c=>{let S=z==="instagram"?`https://www.instagram.com/${M}/`:"#";return`
             <div class="ig-post" style="cursor:${z==="none"?"default":"pointer"}" data-href="${S}" data-behavior="${z}">
               <div class="ig-thumb-wrap">
                 <img src="${c.thumbnail}" alt="" class="ig-thumb" loading="lazy" />
                 ${c.type==="video"&&d?'<div class="ig-video-icon">\u25B6</div>':""}
                 ${w?`
                   <div class="ig-overlay">
-                    <span class="ig-stat">\u2665 ${g(c.likes)}</span>
+                    <span class="ig-stat">\u2665 ${u(c.likes)}</span>
                     <span class="ig-stat">\u{1F4AC} ${c.comments}</span>
                   </div>`:""}
               </div>
-              ${p?`<p class="ig-caption">${c.caption}</p>`:""}
+              ${g?`<p class="ig-caption">${c.caption}</p>`:""}
             </div>
-          `}).join(""),k=f==="grid"?`display: grid; grid-template-columns: repeat(${y}, 1fr); gap: ${u};`:f==="carousel"?`display: flex; gap: ${u}; overflow-x: auto; scrollbar-width: none;`:`column-count: ${y}; column-gap: ${u};`,_=f==="masonry"?`break-inside: avoid; margin-bottom: ${u};`:f==="carousel"?`flex: 0 0 ${Math.floor(280/y)}px;`:"",T=f!=="masonry"?"padding-top: 100%;":"",b=f!=="masonry"?"position: absolute; top: 0; left: 0; width: 100%; height: 100%;":"width: 100%; display: block;";e.innerHTML=`
+          `}).join(""),k=m==="grid"?`display: grid; grid-template-columns: repeat(${y}, 1fr); gap: ${f};`:m==="carousel"?`display: flex; gap: ${f}; overflow-x: auto; scrollbar-width: none;`:`column-count: ${y}; column-gap: ${f};`,_=m==="masonry"?`break-inside: avoid; margin-bottom: ${f};`:m==="carousel"?`flex: 0 0 ${Math.floor(280/y)}px;`:"",L=m!=="masonry"?"padding-top: 100%;":"",x=m!=="masonry"?"position: absolute; top: 0; left: 0; width: 100%; height: 100%;":"width: 100%; display: block;";t.innerHTML=`
           <style>
             * { box-sizing: border-box; margin: 0; padding: 0; }
             .ig-wrap {
               font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-              background: ${r};
+              background: ${l};
               padding: 20px;
             }
             .ig-header {
@@ -1218,13 +1207,13 @@
               gap: 12px;
               padding-bottom: 16px;
               margin-bottom: 16px;
-              border-bottom: 1px solid ${x==="dark"?"#333":"#eee"};
+              border-bottom: 1px solid ${p==="dark"?"#333":"#eee"};
             }
             .ig-avatar { width: 48px; height: 48px; border-radius: 50%; object-fit: cover; }
-            .ig-name { font-size: 15px; font-weight: 600; color: ${l}; }
+            .ig-name { font-size: 15px; font-weight: 600; color: ${s}; }
             .ig-bio { font-size: 12px; color: ${a}; margin-top: 2px; }
             .ig-followers { margin-left: auto; text-align: right; }
-            .ig-followers-num { font-size: 14px; font-weight: 700; color: ${l}; }
+            .ig-followers-num { font-size: 14px; font-weight: 700; color: ${s}; }
             .ig-followers-label { font-size: 11px; color: ${a}; }
             .ig-grid { ${k} }
             .ig-grid::-webkit-scrollbar { display: none; }
@@ -1233,11 +1222,11 @@
               position: relative;
               overflow: hidden;
               border-radius: ${$};
-              ${T}
+              ${L}
               background: #eee;
             }
             .ig-thumb {
-              ${b}
+              ${x}
               object-fit: cover;
               transition: transform 0.3s ease;
             }
@@ -1287,58 +1276,58 @@
                 <div class="ig-bio">${o.bio||""}</div>
               </div>
               <div class="ig-followers">
-                <div class="ig-followers-num">${g(o.followers)}</div>
+                <div class="ig-followers-num">${u(o.followers)}</div>
                 <div class="ig-followers-label">followers</div>
               </div>
             </div>
-            <div class="ig-grid">${m}</div>
-            ${h?`
+            <div class="ig-grid">${h}</div>
+            ${b?`
               <div class="ig-footer">
-                <a href="${s}" target="_blank" rel="noopener noreferrer">\u{1F4F8} Powered by Devixus Widgets</a>
+                <a href="${r}" target="_blank" rel="noopener noreferrer">\u{1F4F8} Powered by Devixus Widgets</a>
               </div>`:""}
           </div>
-        `,z!=="none"&&e.querySelectorAll(".ig-post").forEach(c=>{let S=c.dataset.href;S&&S!=="#"&&c.addEventListener("click",()=>{window.open(S,"_blank","noopener noreferrer")})})}).catch(()=>{let o=e.querySelector(".ig-loading");o&&(o.textContent="Failed to load Instagram posts")})}function Z(e,t,h,s){let x=t.theme||"light",i=E(x),r=i.bg,l=i.text,a=i.muted,y=i.card,f=t.columns||3,$=t.layout||"grid",u=t.border_radius==="round"?"50%":t.border_radius||"8px",v=t.gap||"8px",w=t.num_videos||9,p=t.show_duration!==!1,d=t.show_view_count!==!1,z=!!t.show_caption,M=t.show_like_count!==!1,g=t.username||"";if(e.innerHTML=`
+        `,z!=="none"&&t.querySelectorAll(".ig-post").forEach(c=>{let S=c.dataset.href;S&&S!=="#"&&c.addEventListener("click",()=>{window.open(S,"_blank","noopener noreferrer")})})}).catch(()=>{let o=t.querySelector(".ig-loading");o&&(o.textContent="Failed to load Instagram posts")})}function Z(t,e,b,r){let p=e.theme||"light",i=E(p),l=i.bg,s=i.text,a=i.muted,y=i.card,m=e.columns||3,$=e.layout||"grid",f=e.border_radius==="round"?"50%":e.border_radius||"8px",v=e.gap||"8px",w=e.num_videos||9,g=e.show_duration!==!1,d=e.show_view_count!==!1,z=!!e.show_caption,M=e.show_like_count!==!1,u=e.username||"";if(t.innerHTML=`
       <style>
         * { box-sizing: border-box; margin: 0; padding: 0; }
         .tt-wrap {
           font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-          background: ${r};
+          background: ${l};
           padding: 20px;
         }
         .tt-loading { text-align: center; padding: 40px; color: ${a}; font-size: 14px; }
       </style>
       <div class="tt-wrap"><div class="tt-loading">Loading TikTok videos...</div></div>
-    `,!g){let n=e.querySelector(".tt-wrap");n&&(n.innerHTML='<div class="tt-loading">No TikTok username configured</div>');return}function o(n){return n>=1e6?`${(n/1e6).toFixed(1)}M`:n>=1e3?`${(n/1e3).toFixed(1)}K`:String(n)}fetch(`${s}/api/widgets/tiktok?username=${encodeURIComponent(g)}`).then(n=>n.json()).then(n=>{if(!n||!n.videos)return;let m=n.videos.slice(0,w),k=`https://www.tiktok.com/@${g}`,_=m.map(b=>{if($==="list")return`
+    `,!u){let n=t.querySelector(".tt-wrap");n&&(n.innerHTML='<div class="tt-loading">No TikTok username configured</div>');return}function o(n){return n>=1e6?`${(n/1e6).toFixed(1)}M`:n>=1e3?`${(n/1e3).toFixed(1)}K`:String(n)}fetch(`${r}/api/widgets/tiktok?username=${encodeURIComponent(u)}`).then(n=>n.json()).then(n=>{if(!n||!n.videos)return;let h=n.videos.slice(0,w),k=`https://www.tiktok.com/@${u}`,_=h.map(x=>{if($==="list")return`
               <a class="tt-list-item" href="${k}" target="_blank" rel="noopener noreferrer">
                 <div class="tt-list-thumb">
-                  <img src="${b.thumbnail}" alt="" class="tt-list-img" loading="lazy" />
-                  ${p?`<div class="tt-duration">${b.duration}</div>`:""}
+                  <img src="${x.thumbnail}" alt="" class="tt-list-img" loading="lazy" />
+                  ${g?`<div class="tt-duration">${x.duration}</div>`:""}
                 </div>
                 <div class="tt-list-info">
-                  ${z?`<p class="tt-list-caption">${b.caption}</p>`:""}
+                  ${z?`<p class="tt-list-caption">${x.caption}</p>`:""}
                   <div class="tt-list-stats">
-                    ${d?`<span class="tt-stat">\u{1F441} ${o(b.views)}</span>`:""}
-                    ${M?`<span class="tt-stat">\u2665 ${o(b.likes)}</span>`:""}
+                    ${d?`<span class="tt-stat">\u{1F441} ${o(x.views)}</span>`:""}
+                    ${M?`<span class="tt-stat">\u2665 ${o(x.likes)}</span>`:""}
                   </div>
                 </div>
               </a>
-            `;let c=p?"36px":"6px";return`
+            `;let c=g?"36px":"6px";return`
             <a class="tt-card" href="${k}" target="_blank" rel="noopener noreferrer">
               <div class="tt-thumb-wrap">
-                <img src="${b.thumbnail}" alt="" class="tt-thumb" loading="lazy" />
+                <img src="${x.thumbnail}" alt="" class="tt-thumb" loading="lazy" />
                 <div class="tt-play-icon">\u25B6</div>
-                ${p?`<div class="tt-duration">${b.duration}</div>`:""}
-                ${d?`<div class="tt-views" style="bottom:${c}">\u{1F441} ${o(b.views)}</div>`:""}
+                ${g?`<div class="tt-duration">${x.duration}</div>`:""}
+                ${d?`<div class="tt-views" style="bottom:${c}">\u{1F441} ${o(x.views)}</div>`:""}
               </div>
-              ${M?`<div class="tt-card-footer"><span class="tt-likes">\u2665 ${o(b.likes)}</span></div>`:""}
-              ${z?`<p class="tt-caption">${b.caption}</p>`:""}
+              ${M?`<div class="tt-card-footer"><span class="tt-likes">\u2665 ${o(x.likes)}</span></div>`:""}
+              ${z?`<p class="tt-caption">${x.caption}</p>`:""}
             </a>
-          `}).join(""),T=$==="grid"?`display: grid; grid-template-columns: repeat(${f}, 1fr); gap: ${v};`:$==="carousel"?`display: flex; gap: ${v}; overflow-x: auto; scrollbar-width: none;`:`display: flex; flex-direction: column; gap: ${v};`;e.innerHTML=`
+          `}).join(""),L=$==="grid"?`display: grid; grid-template-columns: repeat(${m}, 1fr); gap: ${v};`:$==="carousel"?`display: flex; gap: ${v}; overflow-x: auto; scrollbar-width: none;`:`display: flex; flex-direction: column; gap: ${v};`;t.innerHTML=`
           <style>
             * { box-sizing: border-box; margin: 0; padding: 0; }
             .tt-wrap {
               font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-              background: ${r};
+              background: ${l};
               padding: 20px;
             }
             .tt-header {
@@ -1347,26 +1336,26 @@
               gap: 12px;
               padding-bottom: 16px;
               margin-bottom: 16px;
-              border-bottom: 1px solid ${x==="dark"?"#333":"#eee"};
+              border-bottom: 1px solid ${p==="dark"?"#333":"#eee"};
             }
             .tt-avatar { width: 48px; height: 48px; border-radius: 50%; object-fit: cover; }
-            .tt-display-name { font-size: 15px; font-weight: 600; color: ${l}; }
+            .tt-display-name { font-size: 15px; font-weight: 600; color: ${s}; }
             .tt-handle { font-size: 12px; color: ${a}; margin-top: 2px; }
             .tt-header-stats { margin-left: auto; display: flex; gap: 20px; }
             .tt-hstat { text-align: center; }
-            .tt-hstat-num { font-size: 14px; font-weight: 700; color: ${l}; }
+            .tt-hstat-num { font-size: 14px; font-weight: 700; color: ${s}; }
             .tt-hstat-label { font-size: 11px; color: ${a}; }
-            .tt-grid { ${T} }
+            .tt-grid { ${L} }
             .tt-grid::-webkit-scrollbar { display: none; }
             .tt-card {
               text-decoration: none;
-              color: ${l};
+              color: ${s};
               display: block;
-              border-radius: ${u};
+              border-radius: ${f};
               overflow: hidden;
               background: ${y};
               transition: transform 0.2s;
-              ${$==="carousel"?`flex: 0 0 ${Math.floor(280/f)}px;`:""}
+              ${$==="carousel"?`flex: 0 0 ${Math.floor(280/m)}px;`:""}
             }
             .tt-card:hover { transform: scale(1.02); }
             .tt-thumb-wrap {
@@ -1426,9 +1415,9 @@
               display: flex;
               gap: 12px;
               text-decoration: none;
-              color: ${l};
+              color: ${s};
               padding: 10px;
-              border-radius: ${u};
+              border-radius: ${f};
               background: ${y};
               transition: opacity 0.2s;
               align-items: flex-start;
@@ -1451,7 +1440,7 @@
             }
             .tt-list-caption {
               font-size: 13px;
-              color: ${l};
+              color: ${s};
               line-height: 1.4;
               display: -webkit-box;
               -webkit-line-clamp: 3;
@@ -1482,102 +1471,17 @@
               </div>
             </div>
             <div class="tt-grid">${_}</div>
-            ${h?`
+            ${b?`
               <div class="tt-footer">
-                <a href="${s}" target="_blank" rel="noopener noreferrer">Powered by Devixus Widgets</a>
+                <a href="${r}" target="_blank" rel="noopener noreferrer">Powered by Devixus Widgets</a>
               </div>`:""}
           </div>
-        `}).catch(()=>{let n=e.querySelector(".tt-loading");n&&(n.textContent="Failed to load TikTok videos")})}function FA(e,t,h,o){
-  var dk=t.theme==="dark",bg=dk?"#0f172a":"#ffffff",cb=dk?"#1e293b":"#f8faff",
-      tx=dk?"#f1f5f9":"#1f2937",mu=dk?"#94a3b8":"#6b7280",bd=dk?"#334155":"#e5e7eb",
-      ac=t.accent_color||"#6366f1",ra=(t.border_radius!==undefined?t.border_radius:8)+"px",
-      si=t.show_icon!==false,qs=t.questions||[],ti=t.title||"",de=t.description||"",
-      am=!!t.allow_multiple;
-  var items=qs.map(function(q,i){
-    var op=i===0&&t.open_first!==false;
-    return '<div style="border:1px solid '+bd+';border-radius:'+ra+';overflow:hidden;margin-bottom:6px;">'
-      +'<button data-fqi="'+i+'" style="width:100%;display:flex;align-items:center;justify-content:space-between;padding:14px 16px;background:'+cb+';border:none;cursor:pointer;text-align:left;font-family:inherit;">'
-      +'<span style="font-size:14px;font-weight:600;color:'+tx+';">'+( q.q||"")+'</span>'
-      +(si?'<span class="dvx-fq-ico" style="font-size:18px;color:'+ac+';flex-shrink:0;margin-left:12px;line-height:1;">'+( op?"\u2212":"+")+'</span>':"")
-      +'</button>'
-      +'<div id="dvx-faq-'+i+'" class="dvx-fq-ans" style="display:'+( op?"block":"none")+';padding:12px 16px;font-size:13px;color:'+mu+';line-height:1.6;background:'+cb+';border-top:1px solid '+bd+';">'+( q.a||"")+'</div>'
-      +'</div>';
-  }).join("");
-  e.innerHTML="<style>*{box-sizing:border-box;margin:0;padding:0}.dvx-fq-wrap button:hover{opacity:.9}</style>"
-    +"<div class=\"dvx-fq-wrap\" style=\"padding:16px;background:"+bg+";font-family:-apple-system,BlinkMacSystemFont,Segoe UI,sans-serif;\">"
-    +(ti?"<div style=\"font-size:18px;font-weight:700;color:"+tx+";margin-bottom:"+(de?"6px":"16px")+";\">" +ti+"</div>":"")
-    +(de?"<div style=\"font-size:13px;color:"+mu+";margin-bottom:16px;\">"+de+"</div>":"")
-    +(items||"<div style=\"padding:40px;text-align:center;color:"+mu+";font-size:13px;\">No questions added yet.</div>")
-    +(h?"<div style=\"margin-top:12px;text-align:center;font-size:10px;\"><a href=\""+o+"\" target=\"_blank\" rel=\"noopener noreferrer\" style=\"color:"+mu+";opacity:.5;text-decoration:none;\">Powered by Devixus Widgets</a></div>":"")
-    +"</div>";
-  e.querySelectorAll("[data-fqi]").forEach(function(btn){
-    btn.addEventListener("click",function(){
-      var idx=parseInt(btn.dataset.fqi),ans=e.getElementById("dvx-faq-"+idx),open=ans&&ans.style.display!=="block";
-      if(!am){
-        e.querySelectorAll(".dvx-fq-ans").forEach(function(x){x.style.display="none";});
-        e.querySelectorAll(".dvx-fq-ico").forEach(function(x){x.textContent="+";});
-      }
-      if(ans)ans.style.display=open?"block":"none";
-      var ico=btn.querySelector(".dvx-fq-ico");
-      if(ico)ico.textContent=open?"\u2212":"+";
-    });
-  });
-}function NC(e,t,h,o){
-  var dk=t.theme==='dark',bg=dk?'#0f172a':'#ffffff',cb=dk?'#1e293b':'#f8faff',
-      tx=dk?'#f1f5f9':'#1f2937',mu=dk?'#94a3b8':'#6b7280',
-      ac=t.accent_color||'#6366f1',cols=t.columns||3,stats=t.stats||[],
-      ti=t.title||'',de=t.description||'',an=t.animate!==false;
-  var gc=Math.min(cols,stats.length||1);
-  var cards=stats.map(function(st,idx){
-    return '<div style="background:'+cb+';border-radius:12px;padding:20px;text-align:center;box-shadow:0 2px 8px rgba(0,0,0,'+(dk?'.2':'.06')+')">'
-      +'<div class="dvx-nc-num" data-idx="'+idx+'" style="font-size:32px;font-weight:800;color:'+ac+';line-height:1.1;margin-bottom:6px;">'+(st.prefix||'')+st.value+(st.suffix||'')+'</div>'
-      +'<div style="font-size:11px;font-weight:500;color:'+mu+';text-transform:uppercase;letter-spacing:.04em;">'+st.label+'</div>'
-      +'</div>';
-  }).join('');
-  e.innerHTML='<style>*{box-sizing:border-box;margin:0;padding:0}</style>'
-    +'<div style="padding:24px;background:'+bg+';font-family:-apple-system,BlinkMacSystemFont,Segoe UI,sans-serif;">'
-    +(ti?'<div style="font-size:18px;font-weight:700;color:'+tx+';margin-bottom:'+(de?'6px':'20px')+';text-align:center;">'+ti+'</div>':'')
-    +(de?'<div style="font-size:13px;color:'+mu+';margin-bottom:20px;text-align:center;">'+de+'</div>':'')
-    +'<div style="display:grid;grid-template-columns:repeat('+gc+',1fr);gap:16px;">'
-    +(cards||'<div style="padding:40px;text-align:center;color:'+mu+';font-size:13px;grid-column:1/-1;">Add stats to show</div>')
-    +'</div>'
-    +(h?'<div style="margin-top:16px;text-align:center;font-size:10px;"><a href="'+o+'" target="_blank" rel="noopener noreferrer" style="color:'+mu+';opacity:.5;text-decoration:none;">Powered by Devixus Widgets</a></div>':'')
-    +'</div>';
-  if(an&&stats.length>0){
-    var nums=e.querySelectorAll('.dvx-nc-num');
-    var obs=new IntersectionObserver(function(entries){
-      entries.forEach(function(en){
-        if(!en.isIntersecting)return;
-        var el=en.target,idx=parseInt(el.dataset.idx),st=stats[idx];
-        if(!st)return;
-        var raw=st.value,num=parseFloat(raw.replace(/[^0-9.]/g,''));
-        if(!isNaN(num)&&num>0){
-          var pre=st.prefix||'',suf=st.suffix||'',start=Date.now(),dur=1500;
-          (function tick(){
-            var prog=Math.min((Date.now()-start)/dur,1),ease=1-Math.pow(1-prog,3),cur=Math.round(num*ease);
-            el.textContent=pre+cur.toLocaleString()+suf;
-            prog<1?requestAnimationFrame(tick):el.textContent=pre+raw+suf;
-          })();
-        }
-        obs.unobserve(el);
-      });
-    },{threshold:.2});
-    nums.forEach(function(n){obs.observe(n);});
-  }
-}function GM(e,t,h,o){
-  var url=t.embed_url||'',ht=(t.height||400)+'px',ra=(t.border_radius!==undefined?t.border_radius:12)+'px',ti=t.title||'';
-  var inner=url
-    ?'<div style="border-radius:'+ra+';overflow:hidden;box-shadow:0 4px 16px rgba(0,0,0,.08);">'
-      +'<iframe src="'+url+'" width="100%" height="'+ht+'" style="border:0;display:block;" allowfullscreen loading="lazy" referrerpolicy="no-referrer-when-downgrade" title="'+(ti||'Map')+'"></iframe>'
-      +'</div>'
-    :'<div style="border-radius:'+ra+';overflow:hidden;height:'+ht+';background:#e8f0fe;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;">'
-      +'<svg width="48" height="48" viewBox="0 0 24 24" fill="none"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z" fill="#4285f4"/><circle cx="12" cy="9" r="2.5" fill="white"/></svg>'
-      +'<div style="text-align:center"><div style="font-size:14px;font-weight:600;color:#1f2937;">Add your embed URL</div><div style="font-size:12px;color:#6b7280;margin-top:4px;">Google Maps → Share → Embed a map</div></div>'
-      +'</div>';
-  e.innerHTML='<style>*{box-sizing:border-box;margin:0;padding:0}</style>'
-    +'<div style="padding:16px;background:#fff;font-family:-apple-system,BlinkMacSystemFont,Segoe UI,sans-serif;">'
-    +(ti?'<div style="font-size:15px;font-weight:700;color:#1f2937;margin-bottom:10px;">'+ti+'</div>':'')
-    +inner
-    +(h?'<div style="margin-top:10px;text-align:center;font-size:10px;"><a href="'+o+'" target="_blank" rel="noopener noreferrer" style="color:#6b7280;opacity:.5;text-decoration:none;">Powered by Devixus Widgets</a></div>':'')
-    +'</div>';
-}function tt(e,t,h){switch(t.type){case"whatsapp":P(e,t.config,t.show_branding);break;case"testimonials":W(e,t.config,t.show_branding);break;case"youtube_feed":N(e,t.config,t.show_branding,C);break;case"google_reviews":Y(e,t.config,t.show_branding,C);break;case"countdown_timer":G(e,t.config,t.show_branding,C);break;case"announcement_bar":O(e,t.config,t.show_branding,C);break;case"contact_form":J(e,t.config,t.show_branding,C,h);break;case"social_follow":X(e,t.config,t.show_branding,C);break;case"instagram_feed":Q(e,t.config,t.show_branding,C);break;case"tiktok_feed":Z(e,t.config,t.show_branding,C);break;case"faq_accordion":FA(e,t.config,t.show_branding,C);break;case"number_counter":NC(e,t.config,t.show_branding,C);break;case"google_maps":GM(e,t.config,t.show_branding,C);break;default:console.warn(`[Devixus] Unknown widget type: ${t.type}`)}}async function H(){var h;if(!I)return;let e=I.getAttribute("data-widget-id");if(!e){console.warn("[Devixus] Missing data-widget-id attribute on script tag");return}let t=I.getAttribute("data-mount")||null;try{let s=await A(e),x=t&&document.querySelector(t)||document.body;if(s.limit_reached){let r=B(x);V(r,s,C);return}let i=B(x);if(tt(i,s,e),(h=s.config)!=null&&h.custom_css){let r=document.createElement("style");r.textContent=s.config.custom_css,setTimeout(()=>i.appendChild(r),100)}K(e,C)}catch(s){console.warn("[Devixus] Widget failed to load:",s)}}document.readyState==="loading"?document.addEventListener("DOMContentLoaded",H):H()})();})();
+        `}).catch(()=>{let n=t.querySelector(".tt-loading");n&&(n.textContent="Failed to load TikTok videos")})}function ee(t,e,b){switch(e.type){case"whatsapp":P(t,e.config,e.show_branding);break;case"testimonials":W(t,e.config,e.show_branding);break;case"youtube_feed":N(t,e.config,e.show_branding,T);break;case"google_reviews":O(t,e.config,e.show_branding,T);break;case"countdown_timer":Y(t,e.config,e.show_branding,T);break;case"announcement_bar":G(t,e.config,e.show_branding,T);break;case"contact_form":J(t,e.config,e.show_branding,T,b);break;case"social_follow":X(t,e.config,e.show_branding,T);break;case"instagram_feed":Q(t,e.config,e.show_branding,T);break;case"tiktok_feed":Z(t,e.config,e.show_branding,T);break;default:console.warn(`[Devixus] Unknown widget type: ${e.type}`)}}function te(t){var r,p;let e=document.createElement("div");e.style.cssText=['position:relative;z-index:9999;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;',"background:#0f172a;color:#f1f5f9;display:flex;align-items:center;gap:12px;","padding:8px 14px;font-size:12px;border-radius:8px 8px 0 0;"].join("");let b=`${T}/dashboard/widgets/${t}`;return e.innerHTML=`
+      <span style="color:#64748b;font-size:11px;white-space:nowrap;">Panel only seen by widget owner</span>
+      <a href="${b}" target="_blank" rel="noopener noreferrer"
+         style="display:inline-flex;align-items:center;gap:5px;background:#3b82f6;color:white;text-decoration:none;
+                padding:4px 10px;border-radius:6px;font-size:11px;font-weight:600;white-space:nowrap;
+                transition:background 0.15s;">
+        \u270F Edit widget
+      </a>
+    `,(r=e.querySelector("a"))==null||r.addEventListener("mouseenter",i=>{i.currentTarget.style.background="#2563eb"}),(p=e.querySelector("a"))==null||p.addEventListener("mouseleave",i=>{i.currentTarget.style.background="#3b82f6"}),e}async function oe(t){try{let e=await fetch(`${T}/api/widgets/${t}/owner-check`,{credentials:"include",signal:AbortSignal.timeout(3e3)});return e.ok?(await e.json()).isOwner===!0:!1}catch(e){return!1}}async function H(){var b;if(!I)return;let t=I.getAttribute("data-widget-id");if(!t){console.warn("[Devixus] Missing data-widget-id attribute on script tag");return}let e=I.getAttribute("data-mount")||null;try{let r=await A(t),p=e&&document.querySelector(e)||document.body;if(r.limit_reached){let s=B(p);V(s,r,T);return}let[i]=await Promise.all([oe(t),Promise.resolve()]),l=B(p);if(i){let s=te(t);l.host.before(s)}if(ee(l,r,t),(b=r.config)!=null&&b.custom_css){let s=document.createElement("style");s.textContent=r.config.custom_css,setTimeout(()=>l.appendChild(s),100)}K(t,T)}catch(r){console.warn("[Devixus] Widget failed to load:",r)}}document.readyState==="loading"?document.addEventListener("DOMContentLoaded",H):H()})();})();
