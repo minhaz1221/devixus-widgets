@@ -73,7 +73,6 @@ export async function GET(request: NextRequest) {
       throw new Error('Places API request failed')
     }
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const data = await res.json() as any
 
     if (data.status !== 'OK') {
@@ -93,7 +92,6 @@ export async function GET(request: NextRequest) {
       google_url: (result.url ?? '') as string,
     }
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const allReviews = ((result.reviews ?? []) as any[])
       .filter((r) => r.rating >= minRating)
       .slice(0, maxReviews)

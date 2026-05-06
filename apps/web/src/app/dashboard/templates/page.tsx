@@ -852,7 +852,7 @@ export default function TemplatesPage() {
     t => activeCategory === 'all' || t.category === activeCategory
   )
 
-  async function useTemplate(template: Template) {
+  async function applyTemplate(template: Template) {
     if (creating) return
     setCreating(template.id)
     setError(null)
@@ -945,7 +945,7 @@ export default function TemplatesPage() {
             <div
               key={template.id}
               className="bg-white rounded-2xl border border-gray-200 overflow-hidden hover:shadow-xl hover:border-indigo-200 hover:-translate-y-0.5 transition-all duration-200 flex flex-col group cursor-pointer"
-              onClick={() => !creating && !isDone && useTemplate(template)}
+              onClick={() => !creating && !isDone && applyTemplate(template)}
             >
               {/* Thumbnail */}
               <div className="relative">
@@ -1013,7 +1013,7 @@ export default function TemplatesPage() {
                 {/* CTA button */}
                 <button
                   type="button"
-                  onClick={e => { e.stopPropagation(); if (!creating && !isDone) useTemplate(template) }}
+                  onClick={e => { e.stopPropagation(); if (!creating && !isDone) applyTemplate(template) }}
                   disabled={!!creating || isDone}
                   className={[
                     'inline-flex items-center justify-center gap-1.5 px-3 py-2 text-xs font-bold rounded-lg transition-all duration-150 w-full mt-auto',

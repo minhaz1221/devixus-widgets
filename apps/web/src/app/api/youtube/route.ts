@@ -113,7 +113,6 @@ export async function GET(request: NextRequest) {
       )
       const channelData = await channelRes.json()
       if (!channelData.error && channelData.items?.[0]) {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const item = channelData.items[0] as any
         channel = {
           id: item.id as string,
@@ -128,7 +127,6 @@ export async function GET(request: NextRequest) {
     }
 
     // playlistItems returns resourceId.videoId (not id.videoId like search does)
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const videos = ((videosData.items ?? []) as any[]).map(item => {
       const videoId = (item.snippet?.resourceId?.videoId ?? '') as string
       return {

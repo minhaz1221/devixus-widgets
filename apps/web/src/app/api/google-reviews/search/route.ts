@@ -32,14 +32,12 @@ export async function GET(request: NextRequest) {
       throw new Error('Places text search failed')
     }
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const data = await res.json() as any
 
     if (data.status !== 'OK' && data.status !== 'ZERO_RESULTS') {
       return NextResponse.json({ results: MOCK_RESULTS, is_mock: true, api_error: data.error_message ?? `Places API error: ${data.status}` })
     }
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const results = ((data.results ?? []) as any[]).slice(0, 5).map((r) => ({
       place_id: (r.place_id ?? '') as string,
       name: (r.name ?? '') as string,

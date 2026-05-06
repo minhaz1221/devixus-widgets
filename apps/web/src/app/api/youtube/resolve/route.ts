@@ -13,7 +13,6 @@ const YT_HEADERS = {
 }
 
 function isBlocked(data: Record<string, unknown>): boolean {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const errors = (data.error as any)?.errors as Array<{ reason: string }> | undefined
   return errors?.some(e => e.reason === 'ipRefererBlocked') ?? false
 }
@@ -25,8 +24,7 @@ async function resolveViaHandle(handle: string, apiKey: string) {
       `${YT_BASE}/channels?part=id,snippet&forHandle=${encodeURIComponent(handle)}&key=${apiKey}`,
       { headers: YT_HEADERS }
     )
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const data = await res.json() as any
+      const data = await res.json() as any
     if (!data.error && data.items?.length) {
       return { id: data.items[0].id as string, name: (data.items[0].snippet?.title ?? '') as string }
     }
@@ -41,8 +39,7 @@ async function resolveViaUsername(username: string, apiKey: string) {
       `${YT_BASE}/channels?part=id,snippet&forUsername=${encodeURIComponent(username)}&key=${apiKey}`,
       { headers: YT_HEADERS }
     )
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const data = await res.json() as any
+      const data = await res.json() as any
     if (!data.error && data.items?.length) {
       return { id: data.items[0].id as string, name: (data.items[0].snippet?.title ?? '') as string }
     }
@@ -57,13 +54,11 @@ async function resolveViaSearch(handle: string, apiKey: string) {
       `${YT_BASE}/search?part=snippet&type=channel&q=${encodeURIComponent(handle)}&maxResults=5&key=${apiKey}`,
       { headers: YT_HEADERS }
     )
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const data = await res.json() as any
+      const data = await res.json() as any
     if (!data.error && data.items?.length) {
       // Prefer an exact handle match, otherwise take first result
       const exact = data.items.find(
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        (it: any) => (it.snippet?.customUrl ?? '').toLowerCase() === `@${handle.toLowerCase()}`
+              (it: any) => (it.snippet?.customUrl ?? '').toLowerCase() === `@${handle.toLowerCase()}`
       ) ?? data.items[0]
       return {
         id: (exact.id?.channelId ?? exact.id) as string,
