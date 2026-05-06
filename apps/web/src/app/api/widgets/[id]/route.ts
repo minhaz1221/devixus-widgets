@@ -64,7 +64,7 @@ export async function PATCH(
     const body = await request.json()
 
     // Only allow these fields to be updated
-    const allowed = ['name', 'config', 'is_active', 'show_branding'] as const
+    const allowed = ['name', 'config', 'is_active', 'show_branding', 'thumbnail_html'] as const
     const updates: Record<string, unknown> = {}
     for (const key of allowed) {
       if (key in body) updates[key] = body[key]
